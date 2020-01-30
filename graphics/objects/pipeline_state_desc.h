@@ -5,22 +5,22 @@
 #include "../enum/graphics_enums.h"
 #include "../../utils/types/types.h"
 
-struct AttachmentBlendDesc { //Attachment == RenderTarget in DX
+struct SAttachmentBlendDesc { //Attachment == RenderTarget in DX
 	bool blendEnable = false;
 	bool logicOperationEnable = false;
 
-	BlendFactor srcBlend = BlendFactor::SrcAlpha;
-	BlendFactor dstBlend = BlendFactor::OneMinusSrcAlpha;
-	BlendOperation blendOp = BlendOperation::Add;
-	BlendFactor srcBlendAlpha = BlendFactor::One;
-	BlendFactor dstBlendAlpha = BlendFactor::OneMinusSrcAlpha;
-	BlendOperation blendOpAlpha = BlendOperation::Add;
+	EBlendFactor srcBlend = EBlendFactor::SrcAlpha;
+	EBlendFactor dstBlend = EBlendFactor::OneMinusSrcAlpha;
+	EBlendOperation blendOp = EBlendOperation::Add;
+	EBlendFactor srcBlendAlpha = EBlendFactor::One;
+	EBlendFactor dstBlendAlpha = EBlendFactor::OneMinusSrcAlpha;
+	EBlendOperation blendOpAlpha = EBlendOperation::Add;
 
-	LogicOperation logicOp = LogicOperation::NoOp;
+	ELogicOperation logicOp = ELogicOperation::NoOp;
 
 	uint8 attachmentWriteMask = 0xff;
 
-	bool operator ==(const AttachmentBlendDesc& other) const {
+	bool operator ==(const SAttachmentBlendDesc& other) const {
 		return blendEnable == other.blendEnable &&
 			logicOperationEnable == other.logicOperationEnable &&
 			srcBlend == other.srcBlend &&
@@ -31,11 +31,11 @@ struct AttachmentBlendDesc { //Attachment == RenderTarget in DX
 			blendOpAlpha == other.blendOpAlpha &&
 			attachmentWriteMask == other.attachmentWriteMask;
 	}
-	bool operator != (const AttachmentBlendDesc& other) const {
+	bool operator != (const SAttachmentBlendDesc& other) const {
 		return !(*this == other);
 	}
 
-	AttachmentBlendDesc& operator = (const AttachmentBlendDesc& other) {
+	SAttachmentBlendDesc& operator = (const SAttachmentBlendDesc& other) {
 		blendEnable = other.blendEnable;
 		logicOperationEnable = other.logicOperationEnable;
 		srcBlend = other.srcBlend;
@@ -50,14 +50,14 @@ struct AttachmentBlendDesc { //Attachment == RenderTarget in DX
 		return *this;
 	}
 
-	AttachmentBlendDesc() = default;
+	SAttachmentBlendDesc() = default;
 
-	AttachmentBlendDesc(bool enableBlend, bool enableLogicOp,
-		BlendFactor src, BlendFactor dst,
-		BlendOperation op,
-		BlendFactor srcA, BlendFactor dstA,
-		BlendOperation opA,
-		LogicOperation logOp,
+	SAttachmentBlendDesc(bool enableBlend, bool enableLogicOp,
+		EBlendFactor src, EBlendFactor dst,
+		EBlendOperation op,
+		EBlendFactor srcA, EBlendFactor dstA,
+		EBlendOperation opA,
+		ELogicOperation logOp,
 		uint8 writeMask) :
 		blendEnable(enableBlend), logicOperationEnable(enableLogicOp),
 		srcBlend(src), dstBlend(dst), blendOp(op), srcBlendAlpha(srcA), dstBlendAlpha(dstA), blendOpAlpha(opA),
@@ -66,13 +66,13 @@ struct AttachmentBlendDesc { //Attachment == RenderTarget in DX
 };
 
 
-struct BlendStateDesc {
+struct SBlendStateDesc {
 	bool alphaToCoverageEnable = false;
 	bool independentBlendEnable = false;
 
-	AttachmentBlendDesc attachmentBlends[RD_MAX_RENDER_ATTACHMENTS];
+	SAttachmentBlendDesc attachmentBlends[RD_MAX_RENDER_ATTACHMENTS];
 
-	bool operator == (const BlendStateDesc& other) const {
+	bool operator == (const SBlendStateDesc& other) const {
 		if (independentBlendEnable == true) {
 			bool attSame = true;
 			for (int i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i)
@@ -88,11 +88,11 @@ struct BlendStateDesc {
 				attachmentBlends[0] == other.attachmentBlends[0];
 		}
 	}
-	bool operator != (const BlendStateDesc& other) const {
+	bool operator != (const SBlendStateDesc& other) const {
 		return !(*this == other);
 	}
 
-	BlendStateDesc& operator = (const BlendStateDesc& other) {
+	SBlendStateDesc& operator = (const SBlendStateDesc& other) {
 		alphaToCoverageEnable = other.alphaToCoverageEnable;
 		independentBlendEnable = other.independentBlendEnable;
 		for (int i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i)
@@ -102,17 +102,17 @@ struct BlendStateDesc {
 	}
 };
 
-struct RasterizerStateDesc {
-	FillMode fillMode = FillMode::Solid;
-	CullMode cullMode = CullMode::BackFaces;
-	FrontFace frontFace = FrontFace::CounterClockwise;
+struct SRasterizerStateDesc {
+	EFillMode fillMode = EFillMode::Solid;
+	ECullMode cullMode = ECullMode::BackFaces;
+	EFrontFace frontFace = EFrontFace::CounterClockwise;
 	bool depthClipEnable = false;
 	bool antialiasedLineEnable = false;
 	int32 depthBias = 0;
 	float depthBiasClamp = 0.0f;
 	float slopeScaledDepthBias = 0.0f;
 
-	bool operator == (const RasterizerStateDesc& other) const {
+	bool operator == (const SRasterizerStateDesc& other) const {
 		return fillMode == other.fillMode &&
 			cullMode == other.cullMode &&
 			frontFace == other.frontFace &&
@@ -122,11 +122,11 @@ struct RasterizerStateDesc {
 			depthBiasClamp == other.depthBiasClamp &&
 			slopeScaledDepthBias == other.slopeScaledDepthBias;
 	}
-	bool operator != (const RasterizerStateDesc& other) const {
+	bool operator != (const SRasterizerStateDesc& other) const {
 		return !(*this == other);
 	}
 
-	RasterizerStateDesc& operator = (const RasterizerStateDesc& other) {
+	SRasterizerStateDesc& operator = (const SRasterizerStateDesc& other) {
 		fillMode = other.fillMode;
 		cullMode = other.cullMode;
 		frontFace = other.frontFace;
@@ -140,16 +140,16 @@ struct RasterizerStateDesc {
 	}
 };
 
-struct StencilOpDesc {
-	StencilOp stencilFailOp = StencilOp::Keep;
-	StencilOp stencilDepthFailOp = StencilOp::Keep;
-	StencilOp stencilPassOp = StencilOp::Keep;
-	ComparisonOp stencilFunc = ComparisonOp::Always;
+struct SStencilOpDesc {
+	EStencilOp stencilFailOp = EStencilOp::Keep;
+	EStencilOp stencilDepthFailOp = EStencilOp::Keep;
+	EStencilOp stencilPassOp = EStencilOp::Keep;
+	EComparisonOp stencilFunc = EComparisonOp::Always;
 	int32 referenceValue = 0x0;
 	uint32 ANDMask = 0xffffffff;
 	uint32 writeMask = 0xffffffff;
 
-	bool operator == (const StencilOpDesc& other) const {
+	bool operator == (const SStencilOpDesc& other) const {
 		return stencilFailOp == other.stencilFailOp &&
 			stencilDepthFailOp == other.stencilDepthFailOp &&
 			stencilPassOp == other.stencilPassOp &&
@@ -157,11 +157,11 @@ struct StencilOpDesc {
 			referenceValue == other.referenceValue &&
 			ANDMask == other.ANDMask;
 	}
-	bool operator != (const StencilOpDesc& other) const {
+	bool operator != (const SStencilOpDesc& other) const {
 		return !(*this == other);
 	}
 
-	StencilOpDesc& operator = (const StencilOpDesc& other) {
+	SStencilOpDesc& operator = (const SStencilOpDesc& other) {
 		stencilFailOp = other.stencilFailOp;
 		stencilDepthFailOp = other.stencilDepthFailOp;
 		stencilPassOp = other.stencilPassOp;
@@ -173,25 +173,25 @@ struct StencilOpDesc {
 	}
 };
 
-struct StencilStateDesc {
+struct SStencilStateDesc {
 	bool enable = false;
 	uint8 stencilReadMask = 0xff;
 	uint8 stencilWriteMask = 0xff;
-	StencilOpDesc frontFace;
-	StencilOpDesc backFace;
+	SStencilOpDesc frontFace;
+	SStencilOpDesc backFace;
 
-	bool operator == (const StencilStateDesc& other) const {
+	bool operator == (const SStencilStateDesc& other) const {
 		return enable == other.enable &&
 			stencilReadMask == other.stencilReadMask &&
 			stencilWriteMask == other.stencilWriteMask &&
 			frontFace == other.frontFace &&
 			backFace == other.backFace;
 	}
-	bool operator != (const StencilStateDesc& other) const {
+	bool operator != (const SStencilStateDesc& other) const {
 		return !(*this == other);
 	}
 
-	StencilStateDesc& operator = (const StencilStateDesc& other) {
+	SStencilStateDesc& operator = (const SStencilStateDesc& other) {
 		enable = other.enable;
 		stencilReadMask = other.stencilReadMask;
 		stencilWriteMask = other.stencilWriteMask;
@@ -202,21 +202,21 @@ struct StencilStateDesc {
 	}
 };
 
-struct DepthStateDesc {
+struct SDepthStateDesc {
 	bool enable = false;
 	bool depthWriteEnable = false;
-	ComparisonOp depthFunc = ComparisonOp::Less;
+	EComparisonOp depthFunc = EComparisonOp::Less;
 
-	bool operator == (const DepthStateDesc& other) const {
+	bool operator == (const SDepthStateDesc& other) const {
 		return enable == other.enable &&
 			depthWriteEnable == other.depthWriteEnable &&
 			depthFunc == other.depthFunc;
 	}
-	bool operator != (const DepthStateDesc& other) const {
+	bool operator != (const SDepthStateDesc& other) const {
 		return !(*this == other);
 	}
 
-	DepthStateDesc& operator = (const DepthStateDesc& other) {
+	SDepthStateDesc& operator = (const SDepthStateDesc& other) {
 		enable = other.enable;
 		depthWriteEnable = other.depthWriteEnable;
 		depthFunc = other.depthFunc;
@@ -225,34 +225,34 @@ struct DepthStateDesc {
 	}
 };
 
-struct SampleDesc {
+struct SSampleDesc {
 	uint32 sampleMask = 0xffffffff;
 	uint8 count = 1;
 	//uint8 quality = 0;
 
-	bool operator == (const SampleDesc& other) const { return count == other.count && sampleMask == other.sampleMask; }
-	bool operator != (const SampleDesc& other) const {
+	bool operator == (const SSampleDesc& other) const { return count == other.count && sampleMask == other.sampleMask; }
+	bool operator != (const SSampleDesc& other) const {
 		return !(*this == other);
 	}
 
-	SampleDesc& operator = (const SampleDesc& other) {
+	SSampleDesc& operator = (const SSampleDesc& other) {
 		count = other.count;
 		sampleMask = other.sampleMask;
 		return *this;
 	}
 };
 
-struct Viewport {
+struct SViewport {
 	float x = 0.0f, y = 0.0f, width = 0.0f, height = 0.0f;
 
-	bool operator == (const Viewport& other) const {
+	bool operator == (const SViewport& other) const {
 		return (x == other.x) && (y == other.y) && (width == other.width) && (height == other.height);
 	}
-	bool operator != (const Viewport& other) const {
+	bool operator != (const SViewport& other) const {
 		return !(*this == other);
 	}
 
-	Viewport& operator = (const Viewport& other) {
+	SViewport& operator = (const SViewport& other) {
 		x = other.x;
 		y = other.y;
 		width = other.width;
@@ -262,20 +262,20 @@ struct Viewport {
 	}
 };
 
-struct ScissorTest {
+struct SScissorTest {
 	bool enable = false;
 	float x = 0.0f, y = 0.0f, width = 0.0f, height = 0.0f;
 
-	bool operator == (const ScissorTest& other) const {
+	bool operator == (const SScissorTest& other) const {
 		if (enable != other.enable) return false;
 		if (enable == false) return true;
 		return (x == other.x) && (y == other.y) && (width == other.width) && (height == other.height);
 	}
-	bool operator != (const ScissorTest& other) const {
+	bool operator != (const SScissorTest& other) const {
 		return !(*this == other);
 	}
 
-	ScissorTest& operator = (const ScissorTest& other) {
+	SScissorTest& operator = (const SScissorTest& other) {
 		enable = other.enable;
 		x = other.x;
 		y = other.y;
@@ -286,12 +286,12 @@ struct ScissorTest {
 	}
 };
 
-struct Viewports {
+struct SViewports {
 	uint8 numViewports = 1;
-	Viewport viewports[RD_MAX_VIEWPORTS];
-	ScissorTest scissorTest[RD_MAX_VIEWPORTS];
+	SViewport viewports[RD_MAX_VIEWPORTS];
+	SScissorTest scissorTest[RD_MAX_VIEWPORTS];
 
-	bool operator == (const Viewports& other) const {
+	bool operator == (const SViewports& other) const {
 		if (numViewports != other.numViewports) return false;
 		for (int i = 0; i < numViewports; ++i)
 			if (viewports[i] != other.viewports[i]) return false;
@@ -299,11 +299,11 @@ struct Viewports {
 			if (scissorTest[i] != other.scissorTest[i]) return false;
 		return true;
 	}
-	bool operator != (const Viewports& other) const {
+	bool operator != (const SViewports& other) const {
 		return !(*this == other);
 	}
 
-	Viewports& operator = (const Viewports& other) {
+	SViewports& operator = (const SViewports& other) {
 		numViewports = other.numViewports;
 		for (int i = 0; i < numViewports; ++i) {
 			viewports[i] = other.viewports[i];
@@ -314,21 +314,21 @@ struct Viewports {
 	}
 };
 
-class ShaderProgram;
-class RenderPass;
+class CShaderProgram;
+class CRenderPass;
 
-struct PipelineStateDesc {
-	SharedPtr<ShaderProgram> shader = nullptr;
-	SharedPtr<RenderPass> renderPass = nullptr;
-	BlendStateDesc blendDesc;
-	RasterizerStateDesc rasterizerDesc;
-	DepthStateDesc depthDesc;
-	StencilStateDesc stencilDesc;
-	PrimitiveTopology primitiveTopology;
-	SampleDesc samplingDesc;
-	Viewports viewports;
+struct SPipelineStateDesc {
+	SharedPtr<CShaderProgram> shader = nullptr;
+	SharedPtr<CRenderPass> renderPass = nullptr;
+	SBlendStateDesc blendDesc;
+	SRasterizerStateDesc rasterizerDesc;
+	SDepthStateDesc depthDesc;
+	SStencilStateDesc stencilDesc;
+	EPrimitiveTopology primitiveTopology;
+	SSampleDesc samplingDesc;
+	SViewports viewports;
 
-	bool operator == (const PipelineStateDesc& other) const {
+	bool operator == (const SPipelineStateDesc& other) const {
 		return shader == other.shader && //TODO: change pointer (address) comparison to actual object's operator ==
 			renderPass == other.renderPass && //TODO: same as in line above
 			blendDesc == other.blendDesc &&
@@ -339,11 +339,11 @@ struct PipelineStateDesc {
 			samplingDesc == other.samplingDesc &&
 			viewports == other.viewports;
 	}
-	bool operator != (const PipelineStateDesc& other) const {
+	bool operator != (const SPipelineStateDesc& other) const {
 		return !(*this == other);
 	}
 
-	PipelineStateDesc& operator = (const PipelineStateDesc& other) {
+	SPipelineStateDesc& operator = (const SPipelineStateDesc& other) {
 		shader = other.shader;
 		renderPass = other.renderPass;
 		blendDesc = other.blendDesc;
@@ -361,68 +361,68 @@ struct PipelineStateDesc {
 
 namespace BlendMode {
 
-	const AttachmentBlendDesc None = AttachmentBlendDesc(
+	const SAttachmentBlendDesc None = SAttachmentBlendDesc(
 		false,
 		false,
-		BlendFactor::SrcAlpha,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		BlendFactor::One,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		LogicOperation::NoOp,
+		EBlendFactor::SrcAlpha,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		EBlendFactor::One,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		ELogicOperation::NoOp,
 		0xff
 	);
 
-	const AttachmentBlendDesc AlphaBlend = AttachmentBlendDesc(
+	const SAttachmentBlendDesc AlphaBlend = SAttachmentBlendDesc(
 		true,
 		false,
-		BlendFactor::SrcAlpha,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		BlendFactor::One,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		LogicOperation::NoOp,
+		EBlendFactor::SrcAlpha,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		EBlendFactor::One,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		ELogicOperation::NoOp,
 		0xff
 	);
 
-	const AttachmentBlendDesc PremulBlend = AttachmentBlendDesc(
+	const SAttachmentBlendDesc PremulBlend = SAttachmentBlendDesc(
 		true,
 		false,
-		BlendFactor::One,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		BlendFactor::One,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		LogicOperation::NoOp,
+		EBlendFactor::One,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		EBlendFactor::One,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		ELogicOperation::NoOp,
 		0xff
 	);
 
-	const AttachmentBlendDesc StoreAlphaBlend = AttachmentBlendDesc(
+	const SAttachmentBlendDesc StoreAlphaBlend = SAttachmentBlendDesc(
 		true,
 		false,
-		BlendFactor::SrcAlpha,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		BlendFactor::One,
-		BlendFactor::OneMinusSrcAlpha,
-		BlendOperation::Add,
-		LogicOperation::NoOp,
+		EBlendFactor::SrcAlpha,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		EBlendFactor::One,
+		EBlendFactor::OneMinusSrcAlpha,
+		EBlendOperation::Add,
+		ELogicOperation::NoOp,
 		0xff
 	);
 
-	const AttachmentBlendDesc AdditiveBlend = AttachmentBlendDesc(
+	const SAttachmentBlendDesc AdditiveBlend = SAttachmentBlendDesc(
 		true,
 		false,
-		BlendFactor::One,
-		BlendFactor::One,
-		BlendOperation::Add,
-		BlendFactor::One,
-		BlendFactor::One,
-		BlendOperation::Add,
-		LogicOperation::NoOp,
+		EBlendFactor::One,
+		EBlendFactor::One,
+		EBlendOperation::Add,
+		EBlendFactor::One,
+		EBlendFactor::One,
+		EBlendOperation::Add,
+		ELogicOperation::NoOp,
 		0xff
 	);
 

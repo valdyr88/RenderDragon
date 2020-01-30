@@ -4,13 +4,13 @@
 #define RD_MAX_RENDER_ATTACHMENTS 8
 #define RD_MAX_VIEWPORTS RD_MAX_RENDER_ATTACHMENTS
 
-enum class PrimitiveType {
+enum class EPrimitiveType {
 	Points,
 	Lines,
 	Triangles
 };
 
-enum class PrimitiveTopology {
+enum class EPrimitiveTopology {
 	PointList,
 	LineList,
 	LineStrip,
@@ -24,7 +24,7 @@ enum class PrimitiveTopology {
 	TriangleStripAdjacency
 };
 
-enum class BlendFactor {
+enum class EBlendFactor {
 	Zero,
 	One,
 	SrcColor,
@@ -42,7 +42,7 @@ enum class BlendFactor {
 	SrcAlphaSaturate
 };
 
-enum class BlendOperation {
+enum class EBlendOperation {
 	Add,
 	Subtract,
 	ReverseSubtract,
@@ -51,11 +51,11 @@ enum class BlendOperation {
 };
 
 //TODO: implement this
-enum class LogicOperation { //not available in GLES2
+enum class ELogicOperation { //not available in GLES2
 	NoOp
 };
 
-enum class DepthTestMode {
+enum class EDepthTestMode {
 	None,
 	Less,
 	LessEqual,
@@ -63,24 +63,24 @@ enum class DepthTestMode {
 	GreaterEqual,
 };
 
-enum class CullMode {
+enum class ECullMode {
 	None,
 	FrontFaces,
 	BackFaces,
 	Both
 };
 
-enum class FrontFace {
+enum class EFrontFace {
 	Clockwise,
 	CounterClockwise,
 };
 
-enum class FillMode {
+enum class EFillMode {
 	Wireframe,
 	Solid
 };
 
-enum class ComparisonOp {
+enum class EComparisonOp {
 	Never,
 	Less,
 	Equal,
@@ -91,7 +91,7 @@ enum class ComparisonOp {
 	Always
 };
 
-enum class StencilOp {
+enum class EStencilOp {
 	Keep,
 	Zero,
 	Replace,
@@ -102,47 +102,47 @@ enum class StencilOp {
 	DecWrap
 };
 
-enum class TextureFormat {
+enum class ETextureFormat {
 	R,
 	RG,
 	RGB,
 	RGBA
 };
 
-enum class TextureUsage{
-	ShaderResource,
-	ColorAttachment,
-	DepthStencilAttachment,
-	InputAttachment
+enum ETextureUsage{
+	ShaderResource = 1 << 0,
+	ColorAttachment = 1 << 1,
+	DepthStencilAttachment = 1 << 2,
+	InputAttachment = 1 << 3
 };
 
-enum class TextureWrapping{
+enum class ETextureWrapping{
 	Clamp,
 	Wrap,
 	Mirror
 };
 
-enum class TextureFiltering{
+enum class ETextureFiltering{
 	Nearest,
 	Linear,
 	Anisotropic
 };
 
-enum class LoadStoreOp {
+enum class ELoadStoreOp {
 	Load,
 	Clear,
 	Store,
 	DontCare
 };
 
-enum class BufferType{
+enum class EBufferType{
 	Vertex,
 	Index,
 	Uniform,
 	Staging
 };
 
-enum ShaderStage{
+enum EShaderStage{
 	VertexShader = 1 << 0,
 	FragmentShader = 1 << 1,
 	TessControlShader = 1 << 2,
@@ -158,20 +158,27 @@ enum ShaderStage{
 	RayAnyHitShader = 1 << 10,
 
 	TaskShader = 1 << 11,
-	MeshShader = 1 << 12
+	MeshShader = 1 << 12,
+
+	NumStages = 12
 };
 
-enum class ShaderResourceType{
+enum class EShaderResourceType{
 	Texture,
 	Sampler,
 	CombinedTexSampler,
 	UniformBuffer
 };
 
-enum class ShaderResourceUpdateType{
+enum class EShaderResourceUpdateType{
 	Static,
 	Mutable,
 	Dynamic
+};
+
+enum class EAttributeLayout{
+	Interleaved,
+	Contiguous
 };
 
 #endif //GRAPHICS_ENUMS_H

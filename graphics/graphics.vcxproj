@@ -128,6 +128,7 @@
     <ClInclude Include="..\utils\types\vectypes.h" />
     <ClInclude Include="device.h" />
     <ClInclude Include="enum\graphics_enums.h" />
+    <ClInclude Include="objects\buffer.h" />
     <ClInclude Include="objects\framebuffer.h" />
     <ClInclude Include="objects\graphic_object.h" />
     <ClInclude Include="objects\pipeline_state.h" />
@@ -136,10 +137,13 @@
     <ClInclude Include="objects\render_pass_desc.h" />
     <ClInclude Include="objects\shader.h" />
     <ClInclude Include="objects\shader_desc.h" />
+    <ClInclude Include="objects\texture.h" />
     <ClInclude Include="objects\uniform_buffer.h" />
+    <ClInclude Include="objects\vertex_buffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="objects\shader.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

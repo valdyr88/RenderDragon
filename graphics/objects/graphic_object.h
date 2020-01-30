@@ -3,17 +3,17 @@
 
 #include "../../utils/pointers.h"
 
-class Device;
+class IDevice;
 
-class GraphicObject {
+class CGraphicObject {
 protected:
-	WeakPtr<Device> device;
+	WeakPtr<IDevice> device;
 
-	GraphicObject() = delete;
-	GraphicObject(WeakPtr<Device>& dev) : device(dev) {}
+	CGraphicObject() = delete;
+	CGraphicObject(WeakPtr<IDevice>& dev) : device(dev) {}
 
 public:
-	virtual ~GraphicObject() = default;
+	virtual ~CGraphicObject() = default;
 };
 
 #endif //GRAPHIC_OBJECT_H

@@ -6,16 +6,16 @@
 #include "../../utils/types/vectypes.h"
 #include "../enum/graphics_enums.h"
 
-struct AttachmentDesc {
-	TextureFormat format = TextureFormat::RGBA;
-	ValueType dataType = ValueType::uint8;
+struct SAttachmentDesc {
+	ETextureFormat format = ETextureFormat::RGBA;
+	EValueType dataType = EValueType::uint8;
 	uint8 sampleCount = 1;
-	LoadStoreOp loadOp = LoadStoreOp::Clear;
-	LoadStoreOp storeOp = LoadStoreOp::Store;
-	LoadStoreOp stencilLoadOp = LoadStoreOp::Clear;
-	LoadStoreOp stencilStoreOp = LoadStoreOp::Store;
+	ELoadStoreOp loadOp = ELoadStoreOp::Clear;
+	ELoadStoreOp storeOp = ELoadStoreOp::Store;
+	ELoadStoreOp stencilLoadOp = ELoadStoreOp::Clear;
+	ELoadStoreOp stencilStoreOp = ELoadStoreOp::Store;
 
-	bool operator == (const AttachmentDesc& other){
+	bool operator == (const SAttachmentDesc& other){
 		return format == other.format &&
 				dataType == other.dataType &&
 				sampleCount == other.sampleCount &&
@@ -24,9 +24,9 @@ struct AttachmentDesc {
 				stencilLoadOp == other.stencilLoadOp &&
 				stencilStoreOp == other.stencilStoreOp;
 	}
-	bool operator != (const AttachmentDesc& other){ return !(*this == other); }
+	bool operator != (const SAttachmentDesc& other){ return !(*this == other); }
 
-	AttachmentDesc& operator = (const AttachmentDesc& other) {
+	SAttachmentDesc& operator = (const SAttachmentDesc& other) {
 		format = other.format;
 		dataType = other.dataType;
 		sampleCount = other.sampleCount;
@@ -39,11 +39,11 @@ struct AttachmentDesc {
 	}
 };
 
-struct RenderPassDesc {
+struct SRenderPassDesc {
 	uint32 NofAttachments = 0;
-	AttachmentDesc Attachments[RD_MAX_RENDER_ATTACHMENTS];
+	SAttachmentDesc Attachments[RD_MAX_RENDER_ATTACHMENTS];
 
-	bool operator == (const RenderPassDesc& other){
+	bool operator == (const SRenderPassDesc& other){
 		if(NofAttachments != other.NofAttachments) return false;
 		for(uint i = 0; i < NofAttachments; ++i){
 			auto& thisAtt = Attachments[i];
@@ -52,9 +52,9 @@ struct RenderPassDesc {
 		}
 		return true;
 	}
-	bool operator != (const RenderPassDesc& other){ return !(*this == other); }
+	bool operator != (const SRenderPassDesc& other){ return !(*this == other); }
 
-	RenderPassDesc& operator = (const RenderPassDesc& other){
+	SRenderPassDesc& operator = (const SRenderPassDesc& other){
 		NofAttachments = other.NofAttachments;
 		for(uint i = 0; i < NofAttachments; ++i)
 			Attachments[i] = other.Attachments[i];
@@ -63,12 +63,12 @@ struct RenderPassDesc {
 	}
 };
 
-struct ClearColorValues{
+struct SClearColorValues{
 	vec4 color[RD_MAX_RENDER_ATTACHMENTS];
 	float depth = 1.0f;
 	uint32 stencil = 0x00000000;
 
-	ClearColorValues(std::vector<vec4> colors, float d = 1.0f, uint s = 0x00000000){
+	SClearColorValues(std::vector<vec4> colors, float d = 1.0f, uint s = 0x00000000){
 		for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){
 			if(i < colors.size())
 				color[i] = colors[i];
@@ -78,12 +78,12 @@ struct ClearColorValues{
 		depth = d;
 		stencil = s;
 	}
-	ClearColorValues(vec4 c, float d = 1.0f, uint s = 0x00000000){
+	SClearColorValues(vec4 c, float d = 1.0f, uint s = 0x00000000){
 		for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i)
 			color[i] = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 		color[0] = c; depth = d; stencil = s;
 	}
-	ClearColorValues(float d = 1.0f, uint s = 0x00000000){
+	SClearColorValues(float d = 1.0f, uint s = 0x00000000){
 		for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i)
 			color[i] = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 		depth = d; stencil = s;

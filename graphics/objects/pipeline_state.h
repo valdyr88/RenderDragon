@@ -5,27 +5,27 @@
 #include "graphic_object.h"
 #include "pipeline_state_desc.h"
 
-class Device;
+class IDevice;
 
-class PipelineState : public GraphicObject {
+class CPipelineState : public CGraphicObject {
 protected:
-	PipelineStateDesc descriptor;
+	SPipelineStateDesc descriptor;
 
 public:
 
-	PipelineState(WeakPtr<Device>& dev, const PipelineStateDesc& desc)
-		: GraphicObject(dev), descriptor(desc) {
+	CPipelineState(WeakPtr<IDevice>& dev, const SPipelineStateDesc& desc)
+		: CGraphicObject(dev), descriptor(desc) {
 	}
 
-	const PipelineStateDesc& getDescriptor() { return descriptor; }
-	bool operator == (PipelineState& other) { return descriptor == other.descriptor; }
-	bool operator == (PipelineStateDesc& desc) { return descriptor == desc; }
+	const SPipelineStateDesc& getDescriptor() { return descriptor; }
+	bool operator == (CPipelineState& other) { return descriptor == other.descriptor; }
+	bool operator == (SPipelineStateDesc& desc) { return descriptor == desc; }
 
 	virtual bool bind() = 0;
 
-	virtual ~PipelineState() = default;
+	virtual ~CPipelineState() = default;
 
-	ShaderProgram* getShaderProgram() { return descriptor.shader.get(); }
+	CShaderProgram* getShaderProgram() { return descriptor.shader.get(); }
 };
 
 

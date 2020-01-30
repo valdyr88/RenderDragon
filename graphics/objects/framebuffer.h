@@ -8,26 +8,26 @@
 #include "render_pass_desc.h"
 #include "render_pass.h"
 
-class Device;
-class Texture;
+class IDevice;
+class CTexture;
 
-class Framebuffer : public GraphicObject{
+class CFramebuffer : public CGraphicObject{
 protected:
-	RenderPassDesc descriptor;
-	SharedPtr<Texture> Attachments[RD_MAX_RENDER_ATTACHMENTS];
-	SharedPtr<Texture> DepthStencil;
+	SRenderPassDesc descriptor;
+	SharedPtr<CTexture> Attachments[RD_MAX_RENDER_ATTACHMENTS];
+	SharedPtr<CTexture> DepthStencil;
 	
 public:
-	Framebuffer(WeakPtr<Device>& dev, const RenderPassDesc desc, std::vector<SharedPtr<Texture>> textures, SharedPtr<Texture> depthStencilTextures = nullptr) :
-		GraphicObject(dev), descriptor(desc) {
+	CFramebuffer(WeakPtr<IDevice>& dev, const SRenderPassDesc desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr) :
+		CGraphicObject(dev), descriptor(desc) {
 		for(uint i = 0; i < textures.size() && i < RD_MAX_RENDER_ATTACHMENTS; ++i){
 			this->Attachments[i] = textures[i];
 		}
 		DepthStencil = depthStencilTextures;
 	}
 
-	bool isCompatibleWith(RenderPassDesc& rpdesc){ return this->descriptor == rpdesc; }
-	bool isCompatibleWith(RenderPass& rp){ return rp.isCompatibleWith(this->descriptor); }
+	bool isCompatibleWith(SRenderPassDesc& rpdesc){ return this->descriptor == rpdesc; }
+	bool isCompatibleWith(CRenderPass& rp){ return rp.isCompatibleWith(this->descriptor); }
 };
 
 #endif //FRAMEBUFFER_H

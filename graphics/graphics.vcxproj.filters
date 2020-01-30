@@ -72,6 +72,15 @@
     <ClInclude Include="objects\uniform_buffer.h">
       <Filter>Header Files\objects</Filter>
     </ClInclude>
+    <ClInclude Include="objects\buffer.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\vertex_buffer.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\texture.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="objects\uniform_buffer.cpp">
@@ -79,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\shader.cpp">
+      <Filter>Source Files\objects</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

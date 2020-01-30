@@ -8,68 +8,69 @@
 #include "../enum/graphics_enums.h"
 #include "graphic_object.h"
 
-class Device;
+class IDevice;
 
-struct ShaderResourceDesc{
-	ShaderResourceType type;
-	ShaderResourceUpdateType updateType = ShaderResourceUpdateType::Static;
-	uint stages = 0x00000000; //bitflag of ShaderStage
+struct SShaderResourceDesc{
+	EShaderResourceType type;
+	EShaderResourceUpdateType updateType = EShaderResourceUpdateType::Static;
+	uint stages = 0x00000000; //bitflag of EShaderStage
 
-	uint operator |= (ShaderStage& stage){ stages |= stage; return stages; }
-	uint operator | (ShaderStage& stage){ return stages | stage; }
+	uint operator |= (EShaderStage& stage){ stages |= stage; return stages; }
+	uint operator | (EShaderStage& stage){ return stages | stage; }
 	uint operator |= (uint stage){ stages |= stage; return stages; }
 	uint operator | (uint stage){ return stages | stage; }
 
-	ShaderResourceDesc(const ShaderResourceDesc& other) :
+	SShaderResourceDesc(const SShaderResourceDesc& other) :
 		type(other.type), updateType(other.updateType), stages(other.stages){}
-	ShaderResourceDesc(ShaderResourceType t, ShaderResourceUpdateType u, uint s) : 
+	SShaderResourceDesc(EShaderResourceType t, EShaderResourceUpdateType u, uint s) : 
 		type(t), updateType(u), stages(s){}
 };
 
-class ShaderResource : public GraphicObject{
+class CShaderResource : public CGraphicObject{
 protected:
-	ShaderResourceDesc resourceDescriptor;
+	SShaderResourceDesc resourceDescriptor;
 public:
-	ShaderResource(WeakPtr<Device>& dev, const ShaderResourceDesc& desc) : 
-		GraphicObject(dev), resourceDescriptor(desc){}
+	CShaderResource(WeakPtr<IDevice>& dev, const SShaderResourceDesc& desc) : 
+		CGraphicObject(dev), resourceDescriptor(desc){}
+	const SShaderResourceDesc getDescriptor(){ return resourceDescriptor; }
 };
 
 
-struct SamplerDesc{
-	TextureWrapping uWrapping = TextureWrapping::Wrap;
-	TextureWrapping vWrapping = TextureWrapping::Wrap;
-	TextureWrapping wWrapping = TextureWrapping::Wrap;
-	TextureFiltering minFilter = TextureFiltering::Linear;
-	TextureFiltering magFilter = TextureFiltering::Linear;
-	TextureFiltering mipFilter = TextureFiltering::Linear;
+struct SSamplerDesc{
+	ETextureWrapping uWrapping = ETextureWrapping::Wrap;
+	ETextureWrapping vWrapping = ETextureWrapping::Wrap;
+	ETextureWrapping wWrapping = ETextureWrapping::Wrap;
+	ETextureFiltering minFilter = ETextureFiltering::Linear;
+	ETextureFiltering magFilter = ETextureFiltering::Linear;
+	ETextureFiltering mipFilter = ETextureFiltering::Linear;
 };
 
-class Sampler : public ShaderResource{
+class CSampler : public CShaderResource{
 protected:
-	SamplerDesc descriptor;
+	SSamplerDesc descriptor;
 public:
-	Sampler(WeakPtr<Device>& dev, const ShaderResourceDesc& sr, const SamplerDesc& desc) :
-		ShaderResource(dev, sr), descriptor(desc){}
+	CSampler(WeakPtr<IDevice>& dev, const SShaderResourceDesc& sr, const SSamplerDesc& desc) :
+		CShaderResource(dev, sr), descriptor(desc){}
 };
 
 
-class Texture;
-class TextureView : public ShaderResource{
+class CTexture;
+class CTextureView : public CShaderResource{
 protected:
-	SharedPtr<Texture> texture;
-	SharedPtr<Sampler> sampler;
+	SharedPtr<CTexture> texture;
+	SharedPtr<CSampler> sampler;
 public:
-	TextureView(WeakPtr<Device>& dev, const ShaderResourceDesc& sr, SharedPtr<Texture>& tx) :
-		ShaderResource(dev, sr), texture(tx), sampler(nullptr){}
+	CTextureView(WeakPtr<IDevice>& dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx) :
+		CShaderResource(dev, sr), texture(tx), sampler(nullptr){}
 
-	TextureView(WeakPtr<Device>& dev, const ShaderResourceDesc& sr, SharedPtr<Texture>& tx, SharedPtr<Sampler>& s) :
-		ShaderResource(dev, sr), texture(tx), sampler(s){}
+	CTextureView(WeakPtr<IDevice>& dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
+		CShaderResource(dev, sr), texture(tx), sampler(s){}
 };
 
-class IUniformBuffer : public ShaderResource{
+class IUniformBuffer : public CShaderResource{
 protected:
 public:
-	IUniformBuffer(WeakPtr<Device>& dev, const ShaderResourceDesc& sr) : ShaderResource(dev, sr){}
+	IUniformBuffer(WeakPtr<IDevice>& dev, const SShaderResourceDesc& sr) : CShaderResource(dev, sr){}
 
 	virtual bool setUniform(const char* name, float value){ LOG_ERR("not implemented!"); return false; }
 	virtual bool setUniform(const char* name, vec2 value){ LOG_ERR("not implemented!"); return false; }
@@ -113,7 +114,7 @@ public:
 	virtual bool setUniform(const char* name, uint count, ivec3* value){ LOG_ERR("not implemented!"); return false; }
 	virtual bool setUniform(const char* name, uint count, ivec4* value){ LOG_ERR("not implemented!"); return false; }
 	
-	virtual void upload() = 0;
+	virtual void Upload() = 0;
 	virtual bool isShared() = 0;
 };
 

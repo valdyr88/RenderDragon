@@ -9,28 +9,28 @@ int main(){
 		float intensity;
 	};
 
-	SharedPtr<Device> dev = std::make_shared<Device>();
-	WeakPtr<Device> wdev = dev;
+	SharedPtr<IDevice> dev = std::make_shared<TestDevice>();
+	WeakPtr<IDevice> wdev = dev;
 
-	ShaderResourceDesc desc = {
-		ShaderResourceType::UniformBuffer,
-		ShaderResourceUpdateType::Dynamic,
+	SShaderResourceDesc desc = {
+		EShaderResourceType::UniformBuffer,
+		EShaderResourceUpdateType::Dynamic,
 		0x00000000
 	};
 
-	UniformMap m = { ValueType::float32, ValueSize::scalar, 1, "time" };
-	std::vector<UniformMap> v =
+	SUniformMap m = { EValueType::float32, EValueSize::scalar, 1, "time" };
+	std::vector<SUniformMap> v =
 	{
-		{ ValueType::float32, ValueSize::vec4, 1, "color"},
-		{ ValueType::float32, ValueSize::scalar, 1, "time"},
-		{ ValueType::float32, ValueSize::scalar, 1, "intensity"}
+		{ EValueType::float32, EValueSize::vec4, 1, "color"},
+		{ EValueType::float32, EValueSize::scalar, 1, "time"},
+		{ EValueType::float32, EValueSize::scalar, 1, "intensity"}
 	};
 
-	auto ub = UniformBuffer<UBStruct>(wdev, desc, "UBStruct",
+	auto ub = CUniformBuffer<UBStruct>(wdev, desc, "UBStruct",
 				{
-					{ ValueType::float32, ValueSize::vec4, 1, "color"},
-					{ ValueType::float32, ValueSize::scalar, 1, "time"},
-					{ ValueType::float32, ValueSize::scalar, 1, "intensity"}
+					{ EValueType::float32, EValueSize::vec4, 1, "color"},
+					{ EValueType::float32, EValueSize::scalar, 1, "time"},
+					{ EValueType::float32, EValueSize::scalar, 1, "intensity"}
 				});
 
 	ub->color = vec4(1.0f, 0.0f, 1.0f, 1.0f);

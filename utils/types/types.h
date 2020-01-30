@@ -19,7 +19,7 @@ typedef double float64;
 typedef unsigned int uint;
 typedef uint8_t byte;
 
-enum class ValueType {
+enum class EValueType {
 	int8,
 	int16,
 	int32,
@@ -31,23 +31,23 @@ enum class ValueType {
 	float64
 };
 
-inline uint sizeInBytes(ValueType t){
+inline uint sizeInBytes(EValueType t){
 	switch(t)
 	{
-		case ValueType::int8: return 1;
-		case ValueType::int16: return 2;
-		case ValueType::int32: return 4;
-		case ValueType::uint8: return 1;
-		case ValueType::uint16: return 2;
-		case ValueType::uint32: return 4;
-		case ValueType::float16: return 2;
-		case ValueType::float32: return 4;
-		case ValueType::float64: return 8;
+		case EValueType::int8: return 1;
+		case EValueType::int16: return 2;
+		case EValueType::int32: return 4;
+		case EValueType::uint8: return 1;
+		case EValueType::uint16: return 2;
+		case EValueType::uint32: return 4;
+		case EValueType::float16: return 2;
+		case EValueType::float32: return 4;
+		case EValueType::float64: return 8;
 	}
 	return 0;
 }
 
-enum class ValueSize {
+enum class EValueSize {
 	scalar,
 	vec2,
 	vec3,
@@ -63,22 +63,22 @@ enum class ValueSize {
 	mat2x4
 };
 
-inline uint count(ValueSize s){
+inline uint count(EValueSize s){
 	switch(s)
 	{
-		case ValueSize::scalar:return 1;
-		case ValueSize::vec2:return 2;
-		case ValueSize::vec3:return 3;
-		case ValueSize::vec4:return 4;
-		case ValueSize::mat2x2:return 4;
-		case ValueSize::mat3x3:return 9;
-		case ValueSize::mat4x4:return 16;
-		case ValueSize::mat3x2:return 6;
-		case ValueSize::mat2x3:return 6;
-		case ValueSize::mat4x3:return 12;
-		case ValueSize::mat3x4:return 12;
-		case ValueSize::mat4x2:return 8;
-		case ValueSize::mat2x4:return 8;
+		case EValueSize::scalar:return 1;
+		case EValueSize::vec2:return 2;
+		case EValueSize::vec3:return 3;
+		case EValueSize::vec4:return 4;
+		case EValueSize::mat2x2:return 4;
+		case EValueSize::mat3x3:return 9;
+		case EValueSize::mat4x4:return 16;
+		case EValueSize::mat3x2:return 6;
+		case EValueSize::mat2x3:return 6;
+		case EValueSize::mat4x3:return 12;
+		case EValueSize::mat3x4:return 12;
+		case EValueSize::mat4x2:return 8;
+		case EValueSize::mat2x4:return 8;
 	}
 	return 0;
 }
