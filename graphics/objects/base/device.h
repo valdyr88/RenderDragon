@@ -1,16 +1,16 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#include "../utils/types/types.h"
-#include "enum/graphics_enums.h"
-#include "objects/graphic_object.h"
-#include "objects/pipeline_state.h"
-#include "objects/buffer.h"
-#include "objects/framebuffer.h"
-#include "objects/render_pass.h"
-#include "objects/shader.h"
-#include "objects/uniform_buffer.h"
-#include "objects/vertex_buffer.h"
+#include "../../utils/types/types.h"
+#include "../../descriptors/graphics_enums.h"
+#include "../../descriptors/graphic_object.h"
+#include "pipeline_state.h"
+#include "buffer.h"
+#include "framebuffer.h"
+#include "render_pass.h"
+#include "shader.h"
+#include "uniform_buffer.h"
+#include "vertex_buffer.h"
 
 class IDevice {
 protected:

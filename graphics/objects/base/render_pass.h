@@ -3,9 +3,9 @@
 
 #include "../../utils/pointers.h"
 #include "../../utils/types/types.h"
-#include "../enum/graphics_enums.h"
-#include "graphic_object.h"
-#include "render_pass_desc.h"
+#include "../../descriptors/graphics_enums.h"
+#include "../../descriptors/graphic_object.h"
+#include "../../descriptors/render_pass_desc.h"
 
 class IDevice;
 class CFramebuffer;

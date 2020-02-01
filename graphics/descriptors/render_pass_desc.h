@@ -2,9 +2,9 @@
 #define RENDERPASS_DESC_H
 
 #include <vector>
-#include "../../utils/types/types.h"
-#include "../../utils/types/vectypes.h"
-#include "../enum/graphics_enums.h"
+#include "../utils/types/types.h"
+#include "../utils/types/vectypes.h"
+#include "graphics_enums.h"
 
 struct SAttachmentDesc {
 	ETextureFormat format = ETextureFormat::RGBA;

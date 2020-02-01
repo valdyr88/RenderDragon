@@ -1,7 +1,7 @@
 #ifndef GRAPHIC_OBJECT_H
 #define GRAPHIC_OBJECT_H
 
-#include "../../utils/pointers.h"
+#include "../utils/pointers.h"
 
 class IDevice;
 

@@ -1,0 +1,20 @@
+#ifndef TEXTURE_H
+#define TEXTURE_H
+
+#include "../../utils/log.h"
+#include "../../utils/pointers.h"
+#include "../../descriptors/texture_desc.h"
+#include "../../descriptors/graphic_object.h"
+#include "../../descriptors/shader_desc.h"
+
+class CTexture : public CGraphicObject{
+protected:
+	STextureDesc description;
+	UniquePtr<CTextureView> view;
+public:
+	CTexture(WeakPtr<IDevice>& dev, const STextureDesc& desc, const SRawData& data) :
+		CGraphicObject(dev), description(desc){
+	}
+};
+
+#endif //TEXTURE_H

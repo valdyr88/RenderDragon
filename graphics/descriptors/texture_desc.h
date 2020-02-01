@@ -1,13 +1,9 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef TEXTURE_DESC_H
+#define TEXTURE_DESC_H
 
-#include "../../utils/log.h"
-#include "../../utils/pointers.h"
-#include "../../utils/types/types.h"
-#include "../../utils/types/vectypes.h"
-#include "../enum/graphics_enums.h"
-#include "graphic_object.h"
-#include "shader_desc.h"
+#include "../utils/types/types.h"
+#include "../utils/types/vectypes.h"
+#include "graphics_enums.h"
 
 struct STextureDesc{
 	ETextureFormat format = ETextureFormat::RGBA;
@@ -37,14 +33,4 @@ struct STextureDesc{
 	}
 };
 
-class CTexture : public CGraphicObject{
-protected:
-	STextureDesc description;
-	UniquePtr<CTextureView> view;
-public:
-	CTexture(WeakPtr<IDevice>& dev, const STextureDesc& desc, const SRawData& data) :
-		CGraphicObject(dev), description(desc){
-	}
-};
-
-#endif //TEXTURE_H
+#endif //TEXTURE_DESC_H

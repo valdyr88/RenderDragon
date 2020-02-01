@@ -2,6 +2,8 @@
 
 IUniformBuffer* CShader::getUniformBuffer(uint bindPoint)
 {
+	auto& resources = descriptor.resources;
+
 	for(auto it = resources.begin(); it != resources.end(); ++it){
 		auto& resource = *it;
 		if(resource.first == bindPoint){

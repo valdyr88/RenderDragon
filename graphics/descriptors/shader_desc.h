@@ -1,11 +1,12 @@
 #ifndef SHADER_DESC_H
 #define SHADER_DESC_H
 
-#include "../../utils/log.h"
-#include "../../utils/pointers.h"
-#include "../../utils/types/types.h"
-#include "../../utils/types/vectypes.h"
-#include "../enum/graphics_enums.h"
+#include <list>
+#include "../utils/log.h"
+#include "../utils/pointers.h"
+#include "../utils/types/types.h"
+#include "../utils/types/vectypes.h"
+#include "graphics_enums.h"
 #include "graphic_object.h"
 
 class IDevice;
@@ -20,10 +21,53 @@ struct SShaderResourceDesc{
 	uint operator |= (uint stage){ stages |= stage; return stages; }
 	uint operator | (uint stage){ return stages | stage; }
 
+	SShaderResourceDesc(EShaderResourceType t, EShaderResourceUpdateType ut = EShaderResourceUpdateType::Static, uint s = 0x00000000) :
+		type(t), updateType(ut), stages(s) {}
 	SShaderResourceDesc(const SShaderResourceDesc& other) :
 		type(other.type), updateType(other.updateType), stages(other.stages){}
-	SShaderResourceDesc(EShaderResourceType t, EShaderResourceUpdateType u, uint s) : 
-		type(t), updateType(u), stages(s){}
+
+	bool operator == (const SShaderResourceDesc& other){
+		return type == other.type &&
+			updateType == other.updateType &&
+			stages == other.stages;
+	}
+	bool operator != (const SShaderResourceDesc& other){ return !(*this == other); }
+
+	SShaderResourceDesc& operator = (const SShaderResourceDesc& other){
+		type = other.type;
+		updateType = other.updateType;
+		stages = other.stages;
+		return *this;
+	}
+};
+
+struct SSamplerDesc{
+	ETextureWrapping uWrapping = ETextureWrapping::Wrap;
+	ETextureWrapping vWrapping = ETextureWrapping::Wrap;
+	ETextureWrapping wWrapping = ETextureWrapping::Wrap;
+	ETextureFiltering minFilter = ETextureFiltering::Linear;
+	ETextureFiltering magFilter = ETextureFiltering::Linear;
+	ETextureFiltering mipFilter = ETextureFiltering::Linear;
+
+	bool operator == (const SSamplerDesc& other){
+		return uWrapping == other.uWrapping &&
+			vWrapping == other.wWrapping &&
+			wWrapping == other.wWrapping &&
+			minFilter == other.minFilter &&
+			magFilter == other.magFilter &&
+			mipFilter == other.mipFilter;
+	}
+	bool operator != (const SSamplerDesc& other){ return !(*this == other); }
+
+	SSamplerDesc& operator = (const SSamplerDesc& other){
+		uWrapping = other.uWrapping;
+		vWrapping = other.vWrapping;
+		wWrapping = other.wWrapping;
+		minFilter = other.minFilter;
+		magFilter = other.magFilter;
+		mipFilter = other.mipFilter;
+		return *this;
+	}
 };
 
 class CShaderResource : public CGraphicObject{
@@ -35,15 +79,15 @@ public:
 	const SShaderResourceDesc getDescriptor(){ return resourceDescriptor; }
 };
 
-
-struct SSamplerDesc{
-	ETextureWrapping uWrapping = ETextureWrapping::Wrap;
-	ETextureWrapping vWrapping = ETextureWrapping::Wrap;
-	ETextureWrapping wWrapping = ETextureWrapping::Wrap;
-	ETextureFiltering minFilter = ETextureFiltering::Linear;
-	ETextureFiltering magFilter = ETextureFiltering::Linear;
-	ETextureFiltering mipFilter = ETextureFiltering::Linear;
+struct SShaderDesc{
+	EShaderStage stage = EShaderStage::FragmentShader;
+	std::string source = "";
+	std::list<std::pair<uint, SharedPtr<CShaderResource>>> resources;
 };
+
+//-----------------------------------------------------------------------------------
+// actual resources (api abstracted)
+//-----------------------------------------------------------------------------------
 
 class CSampler : public CShaderResource{
 protected:

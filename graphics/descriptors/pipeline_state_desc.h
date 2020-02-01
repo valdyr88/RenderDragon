@@ -1,9 +1,9 @@
 #ifndef PIPELINE_STATE_DESC_H
 #define PIPELINE_STATE_DESC_H
 
-#include "../../utils/pointers.h"
-#include "../enum/graphics_enums.h"
-#include "../../utils/types/types.h"
+#include "../utils/types/types.h"
+#include "../utils/pointers.h"
+#include "graphics_enums.h"
 
 struct SAttachmentBlendDesc { //Attachment == RenderTarget in DX
 	bool blendEnable = false;

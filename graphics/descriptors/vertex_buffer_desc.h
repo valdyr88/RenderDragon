@@ -1,14 +1,11 @@
-#ifndef VERTEX_BUFFER_H
-#define VERTEX_BUFFER_H
+#ifndef VERTEX_BUFFER_DESC_H
+#define VERTEX_BUFFER_DESC_H
 
 #include <string>
 #include <vector>
-#include "../../utils/pointers.h"
-#include "../../utils/types/types.h"
-#include "../../utils/types/vectypes.h"
-#include "../enum/graphics_enums.h"
-#include "shader_desc.h"
-#include "buffer.h"
+#include "../utils/types/types.h"
+#include "../utils/types/vectypes.h"
+#include "graphics_enums.h"
 
 struct SVertexAttribute{
 	EValueType type = EValueType::float32;
@@ -38,18 +35,4 @@ struct SVertexFormat{
 	EAttributeLayout layout = EAttributeLayout::Interleaved;
 };
 
-class CVertexBuffer : public CGraphicObject{
-protected:
-	SVertexFormat format;
-	UniquePtr<CBuffer> buffer;
-	uint32 count;
-public:
-};
-
-class CIndexBuffer : public CGraphicObject{
-protected:
-	EValueType type;
-	uint32 count;
-};
-
-#endif //VERTEX_BUFFER_H
+#endif //VERTEX_BUFFER_DESC_H

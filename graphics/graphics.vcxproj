@@ -123,28 +123,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\utils\log.h" />
-    <ClInclude Include="..\utils\types\types.h" />
-    <ClInclude Include="..\utils\types\vectypes.h" />
-    <ClInclude Include="device.h" />
-    <ClInclude Include="enum\graphics_enums.h" />
-    <ClInclude Include="objects\buffer.h" />
-    <ClInclude Include="objects\framebuffer.h" />
-    <ClInclude Include="objects\graphic_object.h" />
-    <ClInclude Include="objects\pipeline_state.h" />
-    <ClInclude Include="objects\pipeline_state_desc.h" />
-    <ClInclude Include="objects\render_pass.h" />
-    <ClInclude Include="objects\render_pass_desc.h" />
-    <ClInclude Include="objects\shader.h" />
-    <ClInclude Include="objects\shader_desc.h" />
-    <ClInclude Include="objects\texture.h" />
-    <ClInclude Include="objects\uniform_buffer.h" />
-    <ClInclude Include="objects\vertex_buffer.h" />
+    <ClInclude Include="descriptors\buffer_desc.h" />
+    <ClInclude Include="descriptors\descriptors.h" />
+    <ClInclude Include="descriptors\graphics_enums.h" />
+    <ClInclude Include="descriptors\graphic_object.h" />
+    <ClInclude Include="descriptors\pipeline_state_desc.h" />
+    <ClInclude Include="descriptors\render_pass_desc.h" />
+    <ClInclude Include="descriptors\shader_desc.h" />
+    <ClInclude Include="descriptors\texture_desc.h" />
+    <ClInclude Include="descriptors\uniform_buffer_desc.h" />
+    <ClInclude Include="descriptors\vertex_buffer_desc.h" />
+    <ClInclude Include="objects\base\buffer.h" />
+    <ClInclude Include="objects\base\device.h" />
+    <ClInclude Include="objects\base\framebuffer.h" />
+    <ClInclude Include="objects\base\pipeline_state.h" />
+    <ClInclude Include="objects\base\render_pass.h" />
+    <ClInclude Include="objects\base\shader.h" />
+    <ClInclude Include="objects\base\texture.h" />
+    <ClInclude Include="objects\base\uniform_buffer.h" />
+    <ClInclude Include="objects\base\vertex_buffer.h" />
+    <ClInclude Include="utils\log.h" />
+    <ClInclude Include="utils\pointers.h" />
+    <ClInclude Include="utils\types\types.h" />
+    <ClInclude Include="utils\types\vectypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="objects\shader.cpp" />
-    <ClCompile Include="objects\uniform_buffer.cpp" />
+    <ClCompile Include="objects\base\shader.cpp" />
+    <ClCompile Include="objects\base\uniform_buffer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

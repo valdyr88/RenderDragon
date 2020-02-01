@@ -2,8 +2,8 @@
 #define PIPELINE_STATE_H
 
 #include "../../utils/pointers.h"
-#include "graphic_object.h"
-#include "pipeline_state_desc.h"
+#include "../../descriptors/graphic_object.h"
+#include "../../descriptors/pipeline_state_desc.h"
 
 class IDevice;
 
