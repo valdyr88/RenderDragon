@@ -3,14 +3,14 @@
 
 #include "../utils/pointers.h"
 
-class IDevice;
+class GPUDevice;
 
 class CGraphicObject {
 protected:
-	WeakPtr<IDevice> device;
+	WeakPtr<GPUDevice> device;
 
 	CGraphicObject() = delete;
-	CGraphicObject(WeakPtr<IDevice>& dev) : device(dev) {}
+	CGraphicObject(WeakPtr<GPUDevice>& dev) : device(dev) {}
 
 public:
 	virtual ~CGraphicObject() = default;

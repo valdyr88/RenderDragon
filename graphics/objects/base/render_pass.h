@@ -7,7 +7,7 @@
 #include "../../descriptors/graphic_object.h"
 #include "../../descriptors/render_pass_desc.h"
 
-class IDevice;
+class GPUDevice;
 class CFramebuffer;
 
 class CRenderPass : public CGraphicObject{
@@ -17,18 +17,18 @@ protected:
 	SClearColorValues clearColor;
 
 public:
-	CRenderPass(WeakPtr<IDevice>& dev, const SRenderPassDesc& desc) :
+	CRenderPass(WeakPtr<GPUDevice>& dev, const SRenderPassDesc& desc) :
 		CGraphicObject(dev), descriptor(desc) {}
 
-	virtual bool isCompatibleWith(SRenderPassDesc& other) = 0;
-	virtual bool isCompatibleWith(CRenderPass& other){ return this->isCompatibleWith(other.descriptor); }
+	bool isCompatibleWith(SRenderPassDesc& other){ return descriptor == other; }
+	bool isCompatibleWith(CRenderPass& other){ return this->isCompatibleWith(other.descriptor); }
 
-	virtual bool begin(WeakPtr<CFramebuffer> fb, SClearColorValues clear){
+	bool begin(WeakPtr<CFramebuffer> fb, SClearColorValues clear){
 		if((boundFramebuffer = fb.lock()) == false) return false;
 		clearColor = clear;
 	}
 
-	virtual void end() = 0;
+	void end(){}
 
 	virtual ~CRenderPass() = default;
 };

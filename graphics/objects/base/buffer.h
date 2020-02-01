@@ -9,14 +9,16 @@ class CBuffer : CGraphicObject{
 protected:
 	SBufferDesc descriptor;
 public:
-	CBuffer(WeakPtr<IDevice>& dev, SBufferDesc& desc) : 
+	CBuffer(WeakPtr<GPUDevice>& dev, SBufferDesc& desc) : 
 		CGraphicObject(dev), descriptor(desc){}
 
 	EBufferType getType(){ return descriptor.type; }
 
-	virtual void Upload(byte* pData, uint32 size, uint32 offset) = 0;
-	virtual bool Map(uint32 start, uint32 size, byte** pOutMappedData) = 0;
-	virtual void Unmap() = 0;
+	void Upload(byte* pData, uint32 size, uint32 offset){};
+	bool Map(uint32 start, uint32 size, byte** pOutMappedData){ return false; };
+	void Unmap(){};
+
+	virtual ~CBuffer() = default;
 };
 
 #endif //BUFFER_H

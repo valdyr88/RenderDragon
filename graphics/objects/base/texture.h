@@ -12,9 +12,11 @@ protected:
 	STextureDesc description;
 	UniquePtr<CTextureView> view;
 public:
-	CTexture(WeakPtr<IDevice>& dev, const STextureDesc& desc, const SRawData& data) :
+	CTexture(WeakPtr<GPUDevice>& dev, const STextureDesc& desc, const SRawData& data) :
 		CGraphicObject(dev), description(desc){
 	}
+
+	virtual ~CTexture() = default;
 };
 
 #endif //TEXTURE_H

@@ -8,8 +8,8 @@ int main(){
 		float intensity;
 	};
 
-	SharedPtr<IDevice> dev = std::make_shared<TestDevice>();
-	WeakPtr<IDevice> wdev = dev;
+	SharedPtr<GPUDevice> dev = std::make_shared<GPUDevice>();
+	WeakPtr<GPUDevice> wdev = dev;
 
 	SShaderResourceDesc desc = {
 		EShaderResourceType::UniformBuffer,

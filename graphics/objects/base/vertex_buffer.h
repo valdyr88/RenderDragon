@@ -12,12 +12,17 @@ protected:
 	UniquePtr<CBuffer> buffer;
 	uint32 count;
 public:
+
+	virtual ~CVertexBuffer() = default;
 };
 
 class CIndexBuffer : public CGraphicObject{
 protected:
 	EValueType type;
 	uint32 count;
+public:
+
+	virtual ~CIndexBuffer() = default;
 };
 
 #endif //VERTEX_BUFFER_H

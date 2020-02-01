@@ -9,7 +9,7 @@
 #include "../../descriptors/shader_desc.h"
 #include "buffer.h"
 
-class IDevice;
+class GPUDevice;
 
 template <typename Type> class CUniformBuffer : public IUniformBuffer{
 protected:
@@ -24,7 +24,7 @@ protected:
 	void CreateBuffer(uint32 size);
 public:
 
-	CUniformBuffer(WeakPtr<IDevice>& dev, const SShaderResourceDesc& sr, const char* bufferName, const std::vector<SUniformMap> maps) :
+	CUniformBuffer(WeakPtr<GPUDevice>& dev, const SShaderResourceDesc& sr, const char* bufferName, const std::vector<SUniformMap> maps) :
 		IUniformBuffer(dev, sr), name(bufferName){
 		this->CreateMapping(maps);
 		this->CreateBuffer(sizeof(Type));
@@ -77,6 +77,8 @@ public:
 	virtual bool isShared() override;
 
 	Type* operator->(){ return &data; }
+
+	virtual ~CUniformBuffer() = default;
 };
 
 template<typename Type> template<typename UniformType>

@@ -5,7 +5,7 @@
 #include "../../descriptors/graphic_object.h"
 #include "../../descriptors/pipeline_state_desc.h"
 
-class IDevice;
+class GPUDevice;
 
 class CPipelineState : public CGraphicObject {
 protected:
@@ -13,7 +13,7 @@ protected:
 
 public:
 
-	CPipelineState(WeakPtr<IDevice>& dev, const SPipelineStateDesc& desc)
+	CPipelineState(WeakPtr<GPUDevice>& dev, const SPipelineStateDesc& desc)
 		: CGraphicObject(dev), descriptor(desc) {
 	}
 
@@ -21,11 +21,11 @@ public:
 	bool operator == (CPipelineState& other) { return descriptor == other.descriptor; }
 	bool operator == (SPipelineStateDesc& desc) { return descriptor == desc; }
 
-	virtual bool bind() = 0;
-
-	virtual ~CPipelineState() = default;
+	bool bind(){}
 
 	CShaderProgram* getShaderProgram() { return descriptor.shader.get(); }
+
+	virtual ~CPipelineState() = default;
 };
 
 

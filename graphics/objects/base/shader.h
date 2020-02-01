@@ -17,8 +17,10 @@ protected:
 	IUniformBuffer* getUniformBuffer(uint bindPoint);
 public:
 
-	CShader(WeakPtr<IDevice>& dev, const SShaderDesc& desc) :
+	CShader(WeakPtr<GPUDevice>& dev, const SShaderDesc& desc) :
 		CGraphicObject(dev), descriptor(desc){}
+
+	virtual ~CShader() = default;
 
 	friend class CShaderProgram;
 	friend class CPipelineState;
@@ -31,12 +33,14 @@ protected:
 	uint numStages;
 public:
 
-	CShaderProgram(WeakPtr<IDevice>& dev, std::vector<SharedPtr<CShader>> shaders) :
+	CShaderProgram(WeakPtr<GPUDevice>& dev, std::vector<SharedPtr<CShader>> shaders) :
 		CGraphicObject(dev){
+		numStages = 0;
+
 		for(auto it = shaders.begin(); it != shaders.end(); ++it){
 			auto& sh = *it;
 			if(sh->descriptor.stage < EShaderStage::NumStages){
-				shader[sh->descriptor.stage] = sh;
+				shader[sh->descriptor.stage] = sh; ++numStages;
 			}
 		}
 	}
@@ -44,6 +48,8 @@ public:
 	uint getNofStages(){ return numStages; }
 
 	IUniformBuffer* getUniformBuffer(EShaderStage stage, uint bindPoint);
+
+	virtual ~CShaderProgram() = default;
 
 	friend class CPipelineState;
 };
