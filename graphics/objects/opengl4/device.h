@@ -1,7 +1,7 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include "../../utils/types/types.h"
 #include "../../descriptors/graphics_enums.h"
@@ -39,5 +39,5 @@ UniquePtr<GPUDevice> CreateGPUDevice(const SDeviceDesc& desc){
 	return NewUnique<GPUDevice>(desc);
 }
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //DEVICE_H

@@ -1,7 +1,7 @@
 #ifndef VERTEX_BUFFER_H
 #define VERTEX_BUFFER_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include "../../utils/pointers.h"
 #include "../../descriptors/vertex_buffer_desc.h"
@@ -27,5 +27,5 @@ public:
 	virtual ~CIndexBuffer() = default;
 };
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //VERTEX_BUFFER_H

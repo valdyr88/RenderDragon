@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include "../../utils/log.h"
 #include "../../utils/pointers.h"
@@ -21,5 +21,5 @@ public:
 	virtual ~CTexture() = default;
 };
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //TEXTURE_H

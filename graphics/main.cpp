@@ -1,20 +1,23 @@
-#include "objects/base/device.h"
+#include "include.h"
 
 int main(){
 
-	struct UBStruct{
-		vec4 color;
-		float time;
-		float intensity;
-	};
+	SDeviceDesc devdesc;
+	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 
-	SharedPtr<GPUDevice> dev = std::make_shared<GPUDevice>();
+	SharedPtr<GPUDevice> dev = CreateGPUDevice(devdesc);
 	WeakPtr<GPUDevice> wdev = dev;
 
 	SShaderResourceDesc desc = {
 		EShaderResourceType::UniformBuffer,
 		EShaderResourceUpdateType::Dynamic,
 		0x00000000
+	};
+
+	struct UBStruct{
+		vec4 color;
+		float time;
+		float intensity;
 	};
 
 	SUniformMap m = { EValueType::float32, EValueSize::scalar, 1, "time" };

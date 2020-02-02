@@ -1,7 +1,7 @@
 #ifndef RENDERPASS_H
 #define RENDERPASS_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include "../../utils/pointers.h"
 #include "../../utils/types/types.h"
@@ -35,5 +35,5 @@ public:
 	virtual ~CRenderPass() = default;
 };
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif

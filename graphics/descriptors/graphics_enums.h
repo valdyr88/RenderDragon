@@ -102,11 +102,20 @@ enum class EStencilOp {
 	DecWrap
 };
 
+enum class ESwapchainBuffer{
+	SingleBuffer,
+	DoubleBuffer,
+	TripleBuffer
+};
+
 enum class ETextureFormat {
+	None,
 	R,
 	RG,
 	RGB,
-	RGBA
+	RGBA,
+	Depth,
+	DepthStencil
 };
 
 enum ETextureUsage{

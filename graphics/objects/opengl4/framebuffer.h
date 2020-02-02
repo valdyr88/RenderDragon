@@ -1,7 +1,7 @@
 #ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include "../../utils/pointers.h"
 #include "../../utils/types/types.h"
@@ -34,5 +34,5 @@ public:
 	virtual ~CFramebuffer() = default;
 };
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //FRAMEBUFFER_H

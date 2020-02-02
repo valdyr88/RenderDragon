@@ -1,7 +1,7 @@
 #ifndef UNIFORM_BUFFER_H
 #define UNIFORM_BUFFER_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include <string>
 #include <map>
@@ -186,5 +186,5 @@ template<typename Type> void CUniformBuffer<Type>::CreateBuffer(uint32 size){
 	}
 }
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //UNIFORM_BUFFER_H

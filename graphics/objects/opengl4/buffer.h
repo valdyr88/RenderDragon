@@ -1,7 +1,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include "../../utils/pointers.h"
 #include "../../descriptors/buffer_desc.h"
@@ -23,5 +23,5 @@ public:
 	virtual ~CBuffer() = default;
 };
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //BUFFER_H

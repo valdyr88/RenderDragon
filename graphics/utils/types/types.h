@@ -25,8 +25,10 @@ enum class EValueType {
 	int32,
 	uint8,
 	uint16,
+	uint24, //for depth
 	uint32,
 	float16,
+	float24, //for depth
 	float32,
 	float64
 };
@@ -39,8 +41,10 @@ inline uint sizeInBytes(EValueType t){
 		case EValueType::int32: return 4;
 		case EValueType::uint8: return 1;
 		case EValueType::uint16: return 2;
+		case EValueType::uint24: return 3;
 		case EValueType::uint32: return 4;
 		case EValueType::float16: return 2;
+		case EValueType::float24: return 3;
 		case EValueType::float32: return 4;
 		case EValueType::float64: return 8;
 	}

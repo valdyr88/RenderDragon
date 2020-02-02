@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include <vector>
 #include <string>
@@ -56,5 +56,5 @@ public:
 	friend class CPipelineState;
 };
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //SHADER_H

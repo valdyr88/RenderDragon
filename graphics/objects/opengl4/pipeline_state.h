@@ -1,7 +1,7 @@
 #ifndef PIPELINE_STATE_H
 #define PIPELINE_STATE_H
 
-#ifdef RD_API_BASE
+#ifdef RD_API_OPENGL4
 
 #include "../../utils/pointers.h"
 #include "../../descriptors/graphic_object.h"
@@ -30,5 +30,5 @@ public:
 	virtual ~CPipelineState() = default;
 };
 
-#endif //RD_API_BASE
+#endif //RD_API_OPENGL4
 #endif //PIPELINE_STATE_H

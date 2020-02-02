@@ -34,6 +34,9 @@
     <Filter Include="Header Files\descriptors">
       <UniqueIdentifier>{8fdae2bf-b6f1-4b21-a53c-21df84c766da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\objects\opengl4">
+      <UniqueIdentifier>{20f5b954-26f7-493f-a49a-182518a49ff6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\types\types.h">
@@ -105,16 +108,49 @@
     <ClInclude Include="descriptors\vertex_buffer_desc.h">
       <Filter>Header Files\descriptors</Filter>
     </ClInclude>
+    <ClInclude Include="include.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\buffer.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\device.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\framebuffer.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\pipeline_state.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\render_pass.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\shader.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\texture.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\uniform_buffer.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\vertex_buffer.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="descriptors\device_desc.h">
+      <Filter>Header Files\descriptors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="objects\base\shader.cpp">
-      <Filter>Source Files\objects\base</Filter>
+    <ClCompile Include="objects\shader.cpp">
+      <Filter>Source Files\objects</Filter>
     </ClCompile>
-    <ClCompile Include="objects\base\uniform_buffer.cpp">
-      <Filter>Source Files\objects\base</Filter>
+    <ClCompile Include="objects\uniform_buffer.cpp">
+      <Filter>Source Files\objects</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
