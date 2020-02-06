@@ -17,12 +17,12 @@
 
 class GPUDevice {
 protected:
-	SDeviceDesc descriptor;
+	SGPUDeviceDesc descriptor;
 
 	GPUDevice() = delete;
 public:
 
-	GPUDevice(const SDeviceDesc& desc) : descriptor(desc){}
+	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){}
 
 	UniquePtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc){ return nullptr; }
 	UniquePtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc){ return nullptr; }
@@ -35,7 +35,7 @@ public:
 	UniquePtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count){ return nullptr; }
 };
 
-UniquePtr<GPUDevice> CreateGPUDevice(const SDeviceDesc& desc){
+UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc){
 	return NewUnique<GPUDevice>(desc);
 }
 

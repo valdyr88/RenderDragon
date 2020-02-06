@@ -4,6 +4,14 @@
 #define RD_MAX_RENDER_ATTACHMENTS 8
 #define RD_MAX_VIEWPORTS RD_MAX_RENDER_ATTACHMENTS
 
+enum class EGraphicsAPI{
+	Base,
+	OpenGL3,
+	OpenGL4,
+	Vulkan,
+	WebGL2
+};
+
 enum class EPrimitiveType {
 	Points,
 	Lines,

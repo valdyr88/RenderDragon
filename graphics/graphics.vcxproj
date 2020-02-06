@@ -231,7 +231,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL4|x64'">
+    <LibraryPath>$(ProjectDir)objects\opengl4\gl\lib\win\x64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL4|x64'">
+    <LibraryPath>$(ProjectDir)objects\opengl4\gl\lib\win\x64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -326,6 +331,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -454,6 +460,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -473,6 +480,7 @@
     <ClInclude Include="objects\base\device.h" />
     <ClInclude Include="objects\base\framebuffer.h" />
     <ClInclude Include="objects\base\pipeline_state.h" />
+    <ClInclude Include="objects\base\platform.h" />
     <ClInclude Include="objects\base\render_pass.h" />
     <ClInclude Include="objects\base\shader.h" />
     <ClInclude Include="objects\base\texture.h" />
@@ -481,21 +489,30 @@
     <ClInclude Include="objects\opengl4\buffer.h" />
     <ClInclude Include="objects\opengl4\device.h" />
     <ClInclude Include="objects\opengl4\framebuffer.h" />
+    <ClInclude Include="objects\opengl4\gl\GL.h" />
+    <ClInclude Include="objects\opengl4\gl\glew.h" />
+    <ClInclude Include="objects\opengl4\gl\glext.h" />
+    <ClInclude Include="objects\opengl4\gl\wglext.h" />
     <ClInclude Include="objects\opengl4\pipeline_state.h" />
+    <ClInclude Include="objects\opengl4\platform.h" />
     <ClInclude Include="objects\opengl4\render_pass.h" />
     <ClInclude Include="objects\opengl4\shader.h" />
     <ClInclude Include="objects\opengl4\texture.h" />
     <ClInclude Include="objects\opengl4\uniform_buffer.h" />
     <ClInclude Include="objects\opengl4\vertex_buffer.h" />
     <ClInclude Include="utils\log.h" />
+    <ClInclude Include="utils\platform.h" />
+    <ClInclude Include="utils\platform_defines.h" />
     <ClInclude Include="utils\pointers.h" />
     <ClInclude Include="utils\types\types.h" />
     <ClInclude Include="utils\types\vectypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="objects\device.cpp" />
     <ClCompile Include="objects\shader.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />
+    <ClCompile Include="utils\platform.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

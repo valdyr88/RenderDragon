@@ -14,9 +14,12 @@ struct SSwapchainDesc{
 	EValueType depthType = EValueType::float24;
 	EValueType stencilType = EValueType::uint8;
 	ESwapchainBuffer buffering = ESwapchainBuffer::DoubleBuffer;
+	uint width = 0;
+	uint height = 0;
 };
 
-struct SDeviceDesc{
+struct SGPUDeviceDesc{
+	EGraphicsAPI	api = EGraphicsAPI::Base;
 	SSwapchainDesc swapchain;
 };
 

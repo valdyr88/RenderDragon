@@ -2,8 +2,13 @@
 
 int main(){
 
-	SDeviceDesc devdesc;
+	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
+	devdesc.swapchain.width = 1280;
+	devdesc.swapchain.height = 860;
+
+	SWindow window;
+	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
 
 	SharedPtr<GPUDevice> dev = CreateGPUDevice(devdesc);
 	WeakPtr<GPUDevice> wdev = dev;
@@ -81,5 +86,7 @@ int main(){
 
 	auto shaderProgram = CShaderProgram(wdev, { vshader,fshader });
 
+	MainPlatformLoop();
+	
 	return 0;
 }

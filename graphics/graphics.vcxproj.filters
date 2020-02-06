@@ -37,6 +37,12 @@
     <Filter Include="Header Files\objects\opengl4">
       <UniqueIdentifier>{20f5b954-26f7-493f-a49a-182518a49ff6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\objects\opengl4\gl">
+      <UniqueIdentifier>{45d694f4-5000-4247-bb90-d5e9182ff43c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{f7f49140-77d4-48a0-a783-fe9640e26fc7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\types\types.h">
@@ -141,6 +147,30 @@
     <ClInclude Include="descriptors\device_desc.h">
       <Filter>Header Files\descriptors</Filter>
     </ClInclude>
+    <ClInclude Include="objects\base\platform.h">
+      <Filter>Header Files\objects\base</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\platform_defines.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\platform.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\gl\GL.h">
+      <Filter>Header Files\objects\opengl4\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\gl\glew.h">
+      <Filter>Header Files\objects\opengl4\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\gl\glext.h">
+      <Filter>Header Files\objects\opengl4\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\gl\wglext.h">
+      <Filter>Header Files\objects\opengl4\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\platform.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -151,6 +181,12 @@
     </ClCompile>
     <ClCompile Include="objects\uniform_buffer.cpp">
       <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\device.cpp">
+      <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\platform.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -9,6 +9,7 @@
 struct SAttachmentDesc {
 	ETextureFormat format = ETextureFormat::RGBA;
 	EValueType dataType = EValueType::uint8;
+	uint32 usageFlags = 0x00000000; //ETextureUsage flags
 	uint8 sampleCount = 1;
 	ELoadStoreOp loadOp = ELoadStoreOp::Clear;
 	ELoadStoreOp storeOp = ELoadStoreOp::Store;
@@ -18,6 +19,7 @@ struct SAttachmentDesc {
 	bool operator == (const SAttachmentDesc& other){
 		return format == other.format &&
 				dataType == other.dataType &&
+				usageFlags == other.usageFlags &&
 				sampleCount == other.sampleCount &&
 				loadOp == other.loadOp &&
 				storeOp == other.storeOp &&
@@ -29,6 +31,7 @@ struct SAttachmentDesc {
 	SAttachmentDesc& operator = (const SAttachmentDesc& other) {
 		format = other.format;
 		dataType = other.dataType;
+		usageFlags = other.usageFlags;
 		sampleCount = other.sampleCount;
 		loadOp = other.loadOp;
 		storeOp = other.storeOp;
