@@ -4,6 +4,8 @@
 #ifdef RD_API_BASE
 
 #include "../../utils/types/types.h"
+#include "../../utils/platform_defines.h"
+#include "../../utils/platform.h"
 #include "../../descriptors/graphics_enums.h"
 #include "../../descriptors/graphic_object.h"
 #include "../../descriptors/device_desc.h"

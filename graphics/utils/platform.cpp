@@ -5,6 +5,9 @@ std::list<SWindow*> windows;
 
 SWindow::SWindow(){
 	windows.emplace_back(this);
+#ifdef PLATFORM_WINDOWS
+	memset(&windowClass, 0, sizeof(WNDCLASS));
+#endif
 }
 SWindow::~SWindow(){
 	windows.remove(this);
