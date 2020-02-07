@@ -3,7 +3,7 @@
 #include "../../utils/platform_defines.h"
 #include "device.h"
 
-UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc){
+UniquePtr<GPUDevice> rdCreateGPUDevice(const SGPUDeviceDesc& desc){
 	return NewUnique<GPUDevice>(desc);
 }
 
@@ -36,13 +36,13 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 			PFD_TYPE = PFD_TYPE_RGBA;
 			break;
 		default:
-			LOG("wrong swapchain format!")
-				break;
+			LOG("wrong swapchain format!");
+			break;
 	}
 
 	byte depth_buffer_bits = 0;
 	byte stencil_buffer_bits = 0;
-	switch(descriptor.swapchain.format)
+	switch(descriptor.swapchain.depthFormat)
 	{
 		case ETextureFormat::Depth:
 			stencil_buffer_bits = 0;
@@ -83,31 +83,32 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 
 	if(GPUDeviceContext.context == nullptr){
 		DWORD error = GetLastError();
-		LOG("wglCreateContext() error = 0x%08x\n", error); fflush(stdout);
+		LOG("wglCreateContext() error = 0x%08x\n", error);
 	}
 
 	if(wglMakeCurrent(window.windowDeviceContext, GPUDeviceContext.context)){
 		LOG("init OpenGL success!");
+		LOG("GL version: %s", glGetString(GL_VERSION));
 	}
 	else{
-		LOG("wglMakeCurrent() error = 0x%08x\n", error); fflush(stdout);
+		DWORD error = GetLastError();
+		LOG("wglMakeCurrent() error = 0x%08x\n", error);
 	}
 #endif //PLATFORM_WINDOWS
 
 	return GPUDeviceContext;
 }
 
-SGPUDeviceContext rdInitOpenGL_ARB(const SWindow& window, const SGPUDeviceDesc& descriptor, int GLVersion_Major, int GLVersion_Minor){
-	SGPUDeviceContext context;
+SGPUDeviceContext rdInitOpenGL_ARB(SWindow& window, const SGPUDeviceDesc& descriptor, SGPUDeviceContext& context, int GLVersion_Major, int GLVersion_Minor){
 	
-	if(glewInit() == GLEW_OK){ //to fetch OpenGL functions
-		LOG("glewInit() failed!"); fflush(stdout); }
+	if(glewInit() != GLEW_OK){ //to fetch OpenGL functions
+		LOG("glewInit() failed!"); }
 
 	auto wglChoosePixelFormatARB = ( PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
 	auto wglCreateContextAttribsARB = ( PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
 
 	if(wglChoosePixelFormatARB == NULL || wglCreateContextAttribsARB == NULL){
-		LOG("wglChoosePixelFormatARB == NULL || wglCreateContextAttribsARB == NULL!\n"); fflush(stdout); }
+		LOG("wglChoosePixelFormatARB == NULL || wglCreateContextAttribsARB == NULL!\n"); }
 
 
 	int WGL_BUFFER_TYPE = 0; int WGL_BUFFER_TYPE_BOOL = 0;
@@ -137,13 +138,13 @@ SGPUDeviceContext rdInitOpenGL_ARB(const SWindow& window, const SGPUDeviceDesc& 
 			WGL_TYPE = WGL_TYPE_RGBA_ARB;
 			break;
 		default:
-			LOG("wrong swapchain format!")
-				break;
+			LOG("wrong swapchain format!");
+			break;
 	}
 
-	byte color_bits = 8*sizeInBytes(descriptor.swapchain.type);
-	byte depth_buffer_bits = 8*sizeInBytes(descriptor.swapchain.depthType);
-	byte stencil_buffer_bits = 8*sizeInBytes(descriptor.swapchain.stencilType);
+	byte color_bits = 8*sizeInBytes(descriptor.swapchain.type)*count(descriptor.swapchain.format);
+	byte depth_buffer_bits = isDepthFormat(descriptor.swapchain.depthFormat)? 8*sizeInBytes(descriptor.swapchain.depthType) : 0;
+	byte stencil_buffer_bits = isStencilFormat(descriptor.swapchain.depthFormat)? 8*sizeInBytes(descriptor.swapchain.stencilType) : 0;
 
 	const int pixelFormatAttribList[] =
 	{
@@ -165,14 +166,50 @@ SGPUDeviceContext rdInitOpenGL_ARB(const SWindow& window, const SGPUDeviceDesc& 
 	LOG("wglChoosePixelFormatARB() PixelFormat chosen == %d\n", pixelFormat);
 	
 	//TODO: destroy current window and create new one to use new pixel format
+	DestroyWindow(window.window); window.window = nullptr;
+	window.CreateProgramWindow(window.name, window.width, window.height, window.posX, window.posY, window.flags, true);
+
+	PIXELFORMATDESCRIPTOR pfd; memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR)); pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	SetPixelFormat(window.windowDeviceContext, pixelFormat, &pfd);
+	
+	const int contextAttribList[] =
+	{
+		WGL_CONTEXT_MAJOR_VERSION_ARB, GLVersion_Major,
+		WGL_CONTEXT_MINOR_VERSION_ARB, GLVersion_Minor,
+		0,0
+	};
+
+	auto temp_hglrc = context.context;
+	context.context = nullptr;
+	
+	context.context = wglCreateContextAttribsARB(window.windowDeviceContext, NULL, contextAttribList);
+
+	if(context.context == nullptr){
+		LOG("wglCreateContextAttribsARB() == false!\n"); }
+	else
+		LOG("GL version: %s", glGetString(GL_VERSION));
+	
+	wglDeleteContext(temp_hglrc); temp_hglrc = nullptr;
+
+	if(wglMakeCurrent(window.windowDeviceContext, NULL) == false){
+		LOG("wglMakeCurrent(hdc, NULL) == false!\n"); }
+
+	if(wglMakeCurrent(window.windowDeviceContext, context.context) == false){
+		DWORD error = GetLastError();
+		LOG("wglMakeCurrent(hdc, hglrc) == false!, error == 0x%08x\n", error); }
 
 	return context;
 }
 
-SGPUDeviceContext GPUDevice::InitOpenGL(const SWindow& window){
-	auto context = rdInitOpenGL(window, this->descriptor);
-	context = rdInitOpenGL_ARB(window, this->descriptor, 4, 0);
+SGPUDeviceContext GPUDevice::InitOpenGL(SWindow& window){
+	context = rdInitOpenGL(window, this->descriptor);
+	context = rdInitOpenGL_ARB(window, this->descriptor, context, 4, 0);
 	return context;
+}
+
+bool GPUDevice::InitContextOnWindow(SWindow& window){
+	context = this->InitOpenGL(window);
+	return true;
 }
 
 #endif //RD_API_OPENGL4

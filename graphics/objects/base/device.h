@@ -26,6 +26,8 @@ public:
 
 	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){}
 
+	bool InitContextOnWindow(const SWindow& window){ return false; }
+
 	UniquePtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc){ return nullptr; }
 	UniquePtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc){ return nullptr; }
 	UniquePtr<CBuffer> CreateBuffer(const SBufferDesc& desc){ return nullptr; }
@@ -37,7 +39,7 @@ public:
 	UniquePtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count){ return nullptr; }
 };
 
-UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc){
+inline UniquePtr<GPUDevice> rdCreateGPUDevice(const SGPUDeviceDesc& desc){
 	return NewUnique<GPUDevice>(desc);
 }
 

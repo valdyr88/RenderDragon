@@ -125,6 +125,24 @@ enum class ETextureFormat {
 	Depth,
 	DepthStencil
 };
+inline bool isDepthFormat(const ETextureFormat& format){
+	return format == ETextureFormat::Depth ||
+		format == ETextureFormat::DepthStencil; }
+inline bool isStencilFormat(const ETextureFormat& format){
+	return format == ETextureFormat::DepthStencil; }
+inline uint8 count(const ETextureFormat& format){
+	switch(format)
+	{
+		case ETextureFormat::None: return 0;
+		case ETextureFormat::R: return 1;
+		case ETextureFormat::RG:return 2;
+		case ETextureFormat::RGB:return 3;
+		case ETextureFormat::RGBA:return 4;
+		case ETextureFormat::Depth:return 1;
+		case ETextureFormat::DepthStencil:return 2;
+	}
+	return 0;
+}
 
 enum ETextureUsage{
 	ShaderResource = 1 << 0,

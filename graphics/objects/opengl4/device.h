@@ -57,14 +57,17 @@ struct SGPUDeviceContext{
 class GPUDevice {
 protected:
 	SGPUDeviceDesc descriptor;
+	SGPUDeviceContext context;
 
 	GPUDevice() = delete;
 
-	SGPUDeviceContext InitOpenGL(const SWindow& window);
+	SGPUDeviceContext InitOpenGL(SWindow& window);
 public:
 
 	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){ 
 		descriptor.api = EGraphicsAPI::OpenGL4; }
+
+	bool InitContextOnWindow(SWindow& window);
 
 	UniquePtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc){ return nullptr; }
 	UniquePtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc){ return nullptr; }
@@ -77,7 +80,7 @@ public:
 	UniquePtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count){ return nullptr; }
 };
 
-UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
+UniquePtr<GPUDevice> rdCreateGPUDevice(const SGPUDeviceDesc& desc);
 
 
 #endif //RD_API_OPENGL4

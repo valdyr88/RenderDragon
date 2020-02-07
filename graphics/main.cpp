@@ -10,9 +10,11 @@ int main(){
 	SWindow window;
 	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
 
-	SharedPtr<GPUDevice> dev = CreateGPUDevice(devdesc);
+	SharedPtr<GPUDevice> dev = rdCreateGPUDevice(devdesc);
 	WeakPtr<GPUDevice> wdev = dev;
 
+	dev->InitContextOnWindow(window);
+	
 	SShaderResourceDesc desc = {
 		EShaderResourceType::UniformBuffer,
 		EShaderResourceUpdateType::Dynamic,
