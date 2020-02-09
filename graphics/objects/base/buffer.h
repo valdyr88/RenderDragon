@@ -11,7 +11,7 @@ class CBuffer : CGraphicObject{
 protected:
 	SBufferDesc descriptor;
 public:
-	CBuffer(WeakPtr<GPUDevice>& dev, SBufferDesc& desc) : 
+	CBuffer(GPUDevice* dev, const SBufferDesc& desc) :
 		CGraphicObject(dev), descriptor(desc){}
 
 	EBufferType getType(){ return descriptor.type; }

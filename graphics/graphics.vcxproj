@@ -492,6 +492,7 @@
     <ClInclude Include="objects\opengl4\gl\GL.h" />
     <ClInclude Include="objects\opengl4\gl\glew.h" />
     <ClInclude Include="objects\opengl4\gl\glext.h" />
+    <ClInclude Include="objects\opengl4\gl\GLState.h" />
     <ClInclude Include="objects\opengl4\gl\wglext.h" />
     <ClInclude Include="objects\opengl4\pipeline_state.h" />
     <ClInclude Include="objects\opengl4\platform.h" />
@@ -510,6 +511,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="objects\device.cpp" />
+    <ClCompile Include="objects\opengl4\gl\GLState.cpp" />
     <ClCompile Include="objects\shader.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />
     <ClCompile Include="utils\platform.cpp" />

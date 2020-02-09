@@ -14,7 +14,7 @@ protected:
 	STextureDesc description;
 	UniquePtr<CTextureView> view;
 public:
-	CTexture(WeakPtr<GPUDevice>& dev, const STextureDesc& desc, const SRawData& data) :
+	CTexture(GPUDevice* dev, const STextureDesc& desc, const SRawData& data) :
 		CGraphicObject(dev), description(desc){
 	}
 

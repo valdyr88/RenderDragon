@@ -19,7 +19,7 @@ protected:
 	IUniformBuffer* getUniformBuffer(uint bindPoint);
 public:
 
-	CShader(WeakPtr<GPUDevice>& dev, const SShaderDesc& desc) :
+	CShader(GPUDevice* dev, const SShaderDesc& desc) :
 		CGraphicObject(dev), descriptor(desc){}
 
 	virtual ~CShader() = default;
@@ -35,7 +35,7 @@ protected:
 	uint numStages;
 public:
 
-	CShaderProgram(WeakPtr<GPUDevice>& dev, std::vector<SharedPtr<CShader>> shaders) :
+	CShaderProgram(GPUDevice* dev, std::vector<SharedPtr<CShader>> shaders) :
 		CGraphicObject(dev){
 		numStages = 0;
 

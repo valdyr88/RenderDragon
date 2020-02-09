@@ -15,7 +15,7 @@ protected:
 
 public:
 
-	CPipelineState(WeakPtr<GPUDevice>& dev, const SPipelineStateDesc& desc)
+	CPipelineState(GPUDevice* dev, const SPipelineStateDesc& desc)
 		: CGraphicObject(dev), descriptor(desc) {
 	}
 

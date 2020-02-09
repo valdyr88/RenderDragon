@@ -74,7 +74,7 @@ class CShaderResource : public CGraphicObject{
 protected:
 	SShaderResourceDesc resourceDescriptor;
 public:
-	CShaderResource(WeakPtr<GPUDevice>& dev, const SShaderResourceDesc& desc) : 
+	CShaderResource(GPUDevice* dev, const SShaderResourceDesc& desc) : 
 		CGraphicObject(dev), resourceDescriptor(desc){}
 	const SShaderResourceDesc getDescriptor(){ return resourceDescriptor; }
 };
@@ -93,7 +93,7 @@ class CSampler : public CShaderResource{
 protected:
 	SSamplerDesc descriptor;
 public:
-	CSampler(WeakPtr<GPUDevice>& dev, const SShaderResourceDesc& sr, const SSamplerDesc& desc) :
+	CSampler(GPUDevice* dev, const SShaderResourceDesc& sr, const SSamplerDesc& desc) :
 		CShaderResource(dev, sr), descriptor(desc){}
 };
 
@@ -104,17 +104,17 @@ protected:
 	SharedPtr<CTexture> texture;
 	SharedPtr<CSampler> sampler;
 public:
-	CTextureView(WeakPtr<GPUDevice>& dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx) :
+	CTextureView(GPUDevice* dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx) :
 		CShaderResource(dev, sr), texture(tx), sampler(nullptr){}
 
-	CTextureView(WeakPtr<GPUDevice>& dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
+	CTextureView(GPUDevice* dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
 		CShaderResource(dev, sr), texture(tx), sampler(s){}
 };
 
 class IUniformBuffer : public CShaderResource{
 protected:
 public:
-	IUniformBuffer(WeakPtr<GPUDevice>& dev, const SShaderResourceDesc& sr) : CShaderResource(dev, sr){}
+	IUniformBuffer(GPUDevice* dev, const SShaderResourceDesc& sr) : CShaderResource(dev, sr){}
 
 	virtual bool setUniform(const char* name, float value){ LOG_ERR("not implemented!"); return false; }
 	virtual bool setUniform(const char* name, vec2 value){ LOG_ERR("not implemented!"); return false; }

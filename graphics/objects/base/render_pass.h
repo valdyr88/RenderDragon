@@ -19,7 +19,7 @@ protected:
 	SClearColorValues clearColor;
 
 public:
-	CRenderPass(WeakPtr<GPUDevice>& dev, const SRenderPassDesc& desc) :
+	CRenderPass(GPUDevice* dev, const SRenderPassDesc& desc) :
 		CGraphicObject(dev), descriptor(desc) {}
 
 	bool isCompatibleWith(SRenderPassDesc& other){ return descriptor == other; }

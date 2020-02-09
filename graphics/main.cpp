@@ -10,8 +10,7 @@ int main(){
 	SWindow window;
 	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
 
-	SharedPtr<GPUDevice> dev = rdCreateGPUDevice(devdesc);
-	WeakPtr<GPUDevice> wdev = dev;
+	UniquePtr<GPUDevice> dev = GPUDevice::CreateGPUDevice(devdesc);
 
 	dev->InitContextOnWindow(window);
 	
@@ -35,12 +34,12 @@ int main(){
 		{ EValueType::float32, EValueSize::scalar, 1, "intensity"}
 	};
 
-	auto shub = SharedPtr<CUniformBuffer<UBStruct>>(new CUniformBuffer<UBStruct>(wdev, desc, "UBStruct",
+	auto shub = CUniformBuffer<UBStruct>::CreateUniformBuffer(dev.get(), desc, "UBStruct",
 				{
 					{ EValueType::float32, EValueSize::vec4, 1, "color"},
 					{ EValueType::float32, EValueSize::scalar, 1, "time"},
 					{ EValueType::float32, EValueSize::scalar, 1, "intensity"}
-				}) );
+				} );
 	auto& ub = *shub.get();
 
 	ub->color = vec4(1.0f, 0.0f, 1.0f, 1.0f);
@@ -59,7 +58,7 @@ int main(){
 		srdesc.type = EShaderResourceType::Texture;
 		srdesc.updateType = EShaderResourceUpdateType::Static;
 	};
-	SharedPtr<CShaderResource> sr = SharedPtr<CShaderResource>(new CShaderResource(wdev, srdesc));
+	SharedPtr<CShaderResource> sr = SharedPtr<CShaderResource>(new CShaderResource(dev.get(), srdesc));
 
 	SShaderDesc fsdesc;
 	{
@@ -83,10 +82,10 @@ int main(){
 		};
 	};
 
-	auto fshader = SharedPtr<CShader>(new CShader(wdev, fsdesc));
-	auto vshader = SharedPtr<CShader>(new CShader(wdev, vsdesc));
+	auto fshader = SharedPtr<CShader>(new CShader(dev.get(), fsdesc));
+	auto vshader = SharedPtr<CShader>(new CShader(dev.get(), vsdesc));
 
-	auto shaderProgram = CShaderProgram(wdev, { vshader,fshader });
+	auto shaderProgram = CShaderProgram(dev.get(), { vshader,fshader });
 
 	MainPlatformLoop();
 	

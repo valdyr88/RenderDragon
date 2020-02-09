@@ -15,6 +15,9 @@ protected:
 	uint32 count;
 public:
 
+	CVertexBuffer(GPUDevice* dev, const SVertexFormat& fmt, uint32 s) :
+		CGraphicObject(dev), format(fmt), count(s){}
+
 	virtual ~CVertexBuffer() = default;
 };
 
@@ -23,6 +26,9 @@ protected:
 	EValueType type;
 	uint32 count;
 public:
+
+	CIndexBuffer(GPUDevice* dev, EValueType t, uint32 s) :
+		CGraphicObject(dev), type(t), count(s){}
 
 	virtual ~CIndexBuffer() = default;
 };

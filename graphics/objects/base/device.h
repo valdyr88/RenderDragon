@@ -31,17 +31,16 @@ public:
 	UniquePtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc){ return nullptr; }
 	UniquePtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc){ return nullptr; }
 	UniquePtr<CBuffer> CreateBuffer(const SBufferDesc& desc){ return nullptr; }
-	UniquePtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc){ return nullptr; }
+	SharedPtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr){ return nullptr; }
 	//UniquePtr<CShader> CreateShaderModule(const SShaderDesc& desc){ return nullptr; }
 	//UniquePtr<CShaderResource> CreateShaderResrouce(const SShaderResourceDesc& desc){ return nullptr; }
 	UniquePtr<CSampler> CreateSampler(const SSamplerDesc& desc){ return nullptr; }
 	UniquePtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count){ return nullptr; }
 	UniquePtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count){ return nullptr; }
+	
+	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
 };
 
-inline UniquePtr<GPUDevice> rdCreateGPUDevice(const SGPUDeviceDesc& desc){
-	return NewUnique<GPUDevice>(desc);
-}
 
 #endif //RD_API_BASE
 #endif //DEVICE_H

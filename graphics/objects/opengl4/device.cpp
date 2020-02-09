@@ -3,10 +3,6 @@
 #include "../../utils/platform_defines.h"
 #include "device.h"
 
-UniquePtr<GPUDevice> rdCreateGPUDevice(const SGPUDeviceDesc& desc){
-	return NewUnique<GPUDevice>(desc);
-}
-
 SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& descriptor){
 	SGPUDeviceContext GPUDeviceContext;
 
@@ -210,6 +206,10 @@ SGPUDeviceContext GPUDevice::InitOpenGL(SWindow& window){
 bool GPUDevice::InitContextOnWindow(SWindow& window){
 	context = this->InitOpenGL(window);
 	return true;
+}
+
+UniquePtr<GPUDevice> GPUDevice::CreateGPUDevice(const SGPUDeviceDesc& desc){
+	return NewUnique<GPUDevice>(desc);
 }
 
 #endif //RD_API_OPENGL4

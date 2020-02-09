@@ -7,10 +7,10 @@ class GPUDevice;
 
 class CGraphicObject {
 protected:
-	WeakPtr<GPUDevice> device;
+	GPUDevice* device = nullptr;
 
 	CGraphicObject() = delete;
-	CGraphicObject(WeakPtr<GPUDevice>& dev) : device(dev) {}
+	CGraphicObject(GPUDevice* dev) : device(dev) {}
 
 public:
 	virtual ~CGraphicObject() = default;

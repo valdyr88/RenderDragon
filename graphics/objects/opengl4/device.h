@@ -36,7 +36,7 @@
 #ifdef PLATFORM_MAC
 #endif
 
-
+#include "gl/GLState.h"
 
 struct SGPUDeviceContext{
 #ifdef PLATFORM_WINDOWS
@@ -53,34 +53,36 @@ struct SGPUDeviceContext{
 #endif
 };
 
-
 class GPUDevice {
 protected:
 	SGPUDeviceDesc descriptor;
 	SGPUDeviceContext context;
+	CGLState gl;
+	std::list<SharedPtr<CGraphicObject>> objects;
 
 	GPUDevice() = delete;
 
 	SGPUDeviceContext InitOpenGL(SWindow& window);
 public:
 
-	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){ 
-		descriptor.api = EGraphicsAPI::OpenGL4; }
+	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){
+		descriptor.api = EGraphicsAPI::OpenGL4;
+	}
 
 	bool InitContextOnWindow(SWindow& window);
 
-	UniquePtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc){ return nullptr; }
-	UniquePtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc){ return nullptr; }
-	UniquePtr<CBuffer> CreateBuffer(const SBufferDesc& desc){ return nullptr; }
-	UniquePtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc){ return nullptr; }
-	//UniquePtr<CShader> CreateShaderModule(const SShaderDesc& desc){ return nullptr; }
-	//UniquePtr<CShaderResource> CreateShaderResrouce(const SShaderResourceDesc& desc){ return nullptr; }
-	UniquePtr<CSampler> CreateSampler(const SSamplerDesc& desc){ return nullptr; }
-	UniquePtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count){ return nullptr; }
-	UniquePtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count){ return nullptr; }
-};
+	SharedPtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc);
+	SharedPtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc);
+	SharedPtr<CBuffer> CreateBuffer(const SBufferDesc& desc);
+	SharedPtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr);
+	//SharedPtr<CShader> CreateShaderModule(const SShaderDesc& desc);
+	//SharedPtr<CShaderResource> CreateShaderResrouce(const SShaderResourceDesc& desc);
+	SharedPtr<CSampler> CreateSampler(const SShaderResourceDesc& sr, const SSamplerDesc& desc);
+	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count);
+	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count);
 
-UniquePtr<GPUDevice> rdCreateGPUDevice(const SGPUDeviceDesc& desc);
+	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
+};
 
 
 #endif //RD_API_OPENGL4

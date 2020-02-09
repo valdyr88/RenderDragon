@@ -20,7 +20,7 @@ protected:
 	SharedPtr<CTexture> DepthStencil;
 	
 public:
-	CFramebuffer(WeakPtr<GPUDevice>& dev, const SRenderPassDesc desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr) :
+	CFramebuffer(GPUDevice* dev, const SRenderPassDesc desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr) :
 		CGraphicObject(dev), descriptor(desc) {
 		for(uint i = 0; i < textures.size() && i < RD_MAX_RENDER_ATTACHMENTS; ++i){
 			this->Attachments[i] = textures[i];
