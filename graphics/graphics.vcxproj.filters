@@ -147,14 +147,8 @@
     <ClInclude Include="descriptors\device_desc.h">
       <Filter>Header Files\descriptors</Filter>
     </ClInclude>
-    <ClInclude Include="objects\base\platform.h">
-      <Filter>Header Files\objects\base</Filter>
-    </ClInclude>
     <ClInclude Include="utils\platform_defines.h">
       <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="objects\opengl4\platform.h">
-      <Filter>Header Files\objects\opengl4</Filter>
     </ClInclude>
     <ClInclude Include="objects\opengl4\gl\GL.h">
       <Filter>Header Files\objects\opengl4\gl</Filter>
@@ -193,6 +187,12 @@
     </ClCompile>
     <ClCompile Include="objects\opengl4\gl\GLState.cpp">
       <Filter>Header Files\objects\opengl4\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\pipeline_state.cpp">
+      <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\render_pass.cpp">
+      <Filter>Source Files\objects</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

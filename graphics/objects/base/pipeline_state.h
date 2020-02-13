@@ -19,11 +19,12 @@ public:
 		: CGraphicObject(dev), descriptor(desc) {
 	}
 
-	const SPipelineStateDesc& getDescriptor() { return descriptor; }
+	const auto& getDescriptor(){ return descriptor; }
+
 	bool operator == (CPipelineState& other) { return descriptor == other.descriptor; }
 	bool operator == (SPipelineStateDesc& desc) { return descriptor == desc; }
 
-	bool bind(){}
+	bool bind(){ return true; }
 
 	CShaderProgram* getShaderProgram() { return descriptor.shader.get(); }
 

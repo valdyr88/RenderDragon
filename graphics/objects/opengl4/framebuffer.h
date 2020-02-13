@@ -28,6 +28,8 @@ public:
 		DepthStencil = depthStencilTextures;
 	}
 
+	const auto& getDescriptor(){ return descriptor; }
+
 	bool isCompatibleWith(SRenderPassDesc& rpdesc){ return this->descriptor == rpdesc; }
 	bool isCompatibleWith(CRenderPass& rp){ return rp.isCompatibleWith(this->descriptor); }
 

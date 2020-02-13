@@ -51,7 +51,6 @@ int main(){
 	ub.setUniform("color", vec4(0.1f, 0.7f, 0.8f, 1.0f));
 	ub.setUniform("color", 1.2f);
 
-
 	SShaderResourceDesc srdesc(EShaderResourceType::Texture);
 	{
 		srdesc.stages = EShaderStage::VertexShader | EShaderStage::FragmentShader;
@@ -85,7 +84,18 @@ int main(){
 	auto fshader = SharedPtr<CShader>(new CShader(dev.get(), fsdesc));
 	auto vshader = SharedPtr<CShader>(new CShader(dev.get(), vsdesc));
 
-	auto shaderProgram = CShaderProgram(dev.get(), { vshader,fshader });
+	auto shaderProgram = SharedPtr<CShaderProgram>(new CShaderProgram(dev.get(), { vshader,fshader }));
+
+
+	SPipelineStateDesc psdesc;
+	{
+		psdesc.shader = shaderProgram;
+		psdesc.blendDesc.alphaToCoverageEnable = true;
+	}
+	auto pipeline = dev->CreatePipelineState(psdesc);
+
+	pipeline->bind();
+
 
 	MainPlatformLoop();
 	

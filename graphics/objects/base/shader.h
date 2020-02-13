@@ -12,7 +12,7 @@
 #include "../../descriptors/shader_desc.h"
 #include "../../descriptors/graphic_object.h"
 
-class CShader : CGraphicObject{
+class CShader : public CGraphicObject{
 protected:
 	SShaderDesc descriptor;
 
@@ -22,6 +22,8 @@ public:
 	CShader(GPUDevice* dev, const SShaderDesc& desc) :
 		CGraphicObject(dev), descriptor(desc){}
 
+	const auto& getDescriptor(){ return descriptor; }
+
 	virtual ~CShader() = default;
 
 	friend class CShaderProgram;
@@ -29,7 +31,7 @@ public:
 };
 
 
-class CShaderProgram : CGraphicObject{
+class CShaderProgram : public CGraphicObject{
 protected:
 	SharedPtr<CShader> shader[EShaderStage::NumStages];
 	uint numStages;

@@ -56,9 +56,15 @@ private:
 	GLState_prefix_var int BIND_TEXTURE2D_ID;
 	GLState_prefix_var int BIND_TEXTURE3D_ID;
 	GLState_prefix_var int ACTIVE_TEXTURE_ID;
+	GLState_prefix_var int DEPTH_FUNC;
 	GLState_prefix_var int BLEND_SRC, BLEND_DST, BLEND_SRC_ALPHA,BLEND_DST_ALPHA, BLEND_OP, BLEND_OP_ALPHA;
 	GLState_prefix_var bool VERTEX_ARRAY_ENABLED,NORMAL_ARRAY_ENABLED,TEXTURE_COORD_ARRAY_ENABLED,COLOR_ARRAY_ENABLED;
-	GLState_prefix_var bool LIGHTING_ENABLED,DEPTH_TEST_ENABLED,ALPHA_TEST_ENABLED,STENCIL_TEST_ENABLED,BLEND_ENABLED,TEXTURE1D_ENABLED,TEXTURE2D_ENABLED,TEXTURE3D_ENABLED,TEXTURECUBE_ENABLED,MULTISAMPLE_ENABLED,SCISSOR_TEST_ENABLED,SAMPLE_ALPHA_TO_COVERAGE_ENABLED,CULL_FACE_ENABLED, SAMPLE_MASK_ENABLED, SAMPLE_COVERAGE_ENABLED, SAMPLE_ALPHA_TO_ONE_ENABLED, TEXTURECUBESEAMLESS_ENABLED;
+	GLState_prefix_var bool LIGHTING_ENABLED,DEPTH_TEST_ENABLED, DEPTH_WRITE_ENABLED, DEPTH_CLAMP_ENABLED,ALPHA_TEST_ENABLED,STENCIL_TEST_ENABLED,BLEND_ENABLED,
+		TEXTURE1D_ENABLED,TEXTURE2D_ENABLED,TEXTURE3D_ENABLED,TEXTURECUBE_ENABLED, LINE_SMOOTH_ENABLED,
+		MULTISAMPLE_ENABLED,SCISSOR_TEST_ENABLED,SAMPLE_ALPHA_TO_COVERAGE_ENABLED,
+		CULL_FACE_ENABLED, SAMPLE_MASK_ENABLED, SAMPLE_COVERAGE_ENABLED, 
+		SAMPLE_ALPHA_TO_ONE_ENABLED, TEXTURECUBESEAMLESS_ENABLED,
+		POLYGON_OFFSET_FILL_ENABLED, POLYGON_OFFSET_LINE_ENABLED, POLYGON_OFFSET_POINT_ENABLED;
 	GLState_prefix_var int init;
 	GLState_prefix_var GLvoid* pVertexBuffer,*pNormalBuffer,*pTexCoordBuffer,*pColorBuffer;
 	GLState_prefix_var int program_link, previous_program_link;
@@ -78,7 +84,6 @@ private:
 	
 #ifdef GLState_LogErrorOnFunctionCall
 	#define GLS_OFR \
-		 if(OpenGLFunctionsFetched == false){ LOG_ERR(" %s() called before OpenGL functions were fetched!!", __FUNCTION__); }		\
 		 GLStateOnFuctionReturn ofr( [](CGLState* pState, const char* FunctionName){ if(pState) pState->LogErrors(FunctionName); }, __FUNCTION__, this );
 #else
 	#define GLS_OFR
@@ -87,7 +92,7 @@ private:
 public:
 #pragma region enums
 
-	enum class EGLError : uint{
+	enum EGLError : uint{
 		EGL_NO_ERROR = GL_NO_ERROR,
 		EGL_INVALID_VALUE = GL_INVALID_VALUE,
 		EGL_INVALID_ENUM = GL_INVALID_ENUM,
@@ -99,7 +104,7 @@ public:
 		EGL_INVALID_INDEX = ((uint)GL_INVALID_INDEX)
 	};
 
-	enum class EGLTextureTargets{
+	enum EGLTextureTargets{
 		EGL_TEXTURE_NONE = -1,
 		EGL_TEXTURE_2D = GL_TEXTURE_2D,
 		EGL_TEXTURE_1D = GL_TEXTURE_1D,
@@ -114,7 +119,7 @@ public:
 		EGL_TEXTURE_2D_MULTISAMPLE_ARRAY = GL_TEXTURE_2D_MULTISAMPLE_ARRAY
 	};
 
-	enum class EGLTextureFilters{
+	enum EGLTextureFilters{
 		EGL_NEAREST = GL_NEAREST,
 		EGL_LINEAR = GL_LINEAR,
 		EGL_NEAREST_MIPMAP_NEAREST = GL_NEAREST_MIPMAP_NEAREST,
@@ -134,7 +139,7 @@ public:
 		EGL_TEXTURE_MAX_LEVEL = GL_TEXTURE_MAX_LEVEL
 	};
 
-	enum class EGLTextureCubeSide{
+	enum EGLTextureCubeSide{
 		EGL_TEXTURE_CUBE_MAP_POSITIVE_X = GL_TEXTURE_CUBE_MAP_POSITIVE_X, 	//Right
 		EGL_TEXTURE_CUBE_MAP_NEGATIVE_X = GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 	//Left
 		EGL_TEXTURE_CUBE_MAP_POSITIVE_Y = GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 	//Top
@@ -143,7 +148,7 @@ public:
 		EGL_TEXTURE_CUBE_MAP_NEGATIVE_Z = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z 	//Front
 	};
 
-	enum class EGLValueType{
+	enum EGLValueType{
 		EGL_VAR_NONE = -1,
 		EGL_BYTE = GL_BYTE,
 		EGL_UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
@@ -171,7 +176,7 @@ public:
 		EGL_UNSIGNED_INT_2_10_10_10_REV = GL_UNSIGNED_INT_2_10_10_10_REV
 	};
 
-	enum class EGLTextureInternalFormat{
+	enum EGLTextureInternalFormat{
 		EGL_FORMAT_NONE = -1,
 		EGL_DEPTH_COMPONENT = GL_DEPTH_COMPONENT, 	//Depth 	D
 		EGL_DEPTH_STENCIL = GL_DEPTH_STENCIL, 	//Depth, Stencil 	D, S
@@ -257,7 +262,7 @@ public:
 		EGL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT 	//GL_RGB 	Specific
 	};
 
-	enum class EGLSymbolicFormat{
+	enum EGLSymbolicFormat{
 		syGL_SYMBOLIC_NONE = -1,
 		syGL_RED = GL_RED,
 		syGL_RG = GL_RG,
@@ -276,7 +281,7 @@ public:
 		syGL_DEPTH_STENCIL = GL_DEPTH_STENCIL
 	};
 
-	enum class EGLBufferUsage{
+	enum EGLBufferUsage{
 		EGL_STREAM_DRAW = GL_STREAM_DRAW,
 		EGL_STREAM_READ = GL_STREAM_READ,
 		EGL_STREAM_COPY = GL_STREAM_COPY,
@@ -288,7 +293,7 @@ public:
 		EGL_DYNAMIC_COPY = GL_DYNAMIC_COPY
 	};
 
-	enum class EGLBufferBindingTarget{
+	enum EGLBufferBindingTarget{
 		EGL_ARRAY_BUFFER = GL_ARRAY_BUFFER,// 	Vertex attributes
 		EGL_ATOMIC_COUNTER_BUFFER = GL_ATOMIC_COUNTER_BUFFER,// 	Atomic counter storage
 		EGL_COPY_READ_BUFFER = GL_COPY_READ_BUFFER,// 	Buffer copy source
@@ -305,7 +310,7 @@ public:
 		EGL_UNIFORM_BUFFER = GL_UNIFORM_BUFFER// 	Uniform block storage
 	};
 
-	enum class EGLProgramInterface{
+	enum EGLProgramInterface{
 
 		EGL_UNIFORM = GL_UNIFORM,
 		EGL_UNIFORM_BLOCK = GL_UNIFORM_BLOCK,
@@ -332,24 +337,29 @@ public:
 		EGL_SHADER_STORAGE_BLOCK = GL_SHADER_STORAGE_BLOCK//
 	};
 
-	enum class EGLAccess{
+	enum EGLAccess{
 		EGL_READ_ONLY = GL_READ_ONLY,
 		EGL_WRITE_ONLY = GL_WRITE_ONLY,
 		EGL_READ_WRITE = GL_READ_WRITE
 	};
 
-	enum class EGLDrawMode{
+	enum EGLDrawMode{
+		EGL_POINTS = GL_POINTS,
 		EGL_LINES = GL_LINES,
 		EGL_LINE_LOOP = GL_LINE_LOOP,
 		EGL_LINE_STRIP = GL_LINE_STRIP,
+		EGL_LINES_ADJACENCY = GL_LINES_ADJACENCY,
+		EGL_LINE_STRIP_ADJACENCY = GL_LINE_STRIP_ADJACENCY,
 		EGL_TRIANGLES = GL_TRIANGLES,
 		EGL_TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
 		EGL_TRIANGLE_FAN = GL_TRIANGLE_FAN,
+		EGL_TRIANGLES_ADJACENCY = GL_TRIANGLES_ADJACENCY,
+		EGL_TRIANGLES_STRIP_ADJACENCY = GL_TRIANGLE_STRIP_ADJACENCY,
 		EGL_QUADS = GL_QUADS,
 		EGL_QUAD_STRIP = GL_QUAD_STRIP
 	};
 
-	enum class EGLShaderStage{
+	enum EGLShaderStage{
 		EGL_VERTEX_SHADER = GL_VERTEX_SHADER,
 		EGL_TESS_CONTROL_SHADER = GL_TESS_CONTROL_SHADER, //how much tessellation to do
 		EGL_TESS_EVALUATION_SHADER = GL_TESS_EVALUATION_SHADER, //vertex shader for tessellated data
@@ -358,7 +368,7 @@ public:
 		STAGE_NUMBER = 5
 	};
 	
-	enum class EGLShaderStatus{
+	enum EGLShaderStatus{
 		EGL_DELETE_STATUS = GL_DELETE_STATUS,
 		EGL_COMPILE_STATUS = GL_COMPILE_STATUS,
 		EGL_LINK_STATUS = GL_LINK_STATUS,
@@ -376,7 +386,7 @@ public:
 	};
 
 
-	enum class EGLFramebuffer{
+	enum EGLFramebuffer{
 
 		EGL_DRAW_FRAMEBUFFER_BINDING = GL_DRAW_FRAMEBUFFER_BINDING,
 		EGL_FRAMEBUFFER_BINDING = GL_FRAMEBUFFER_BINDING,
@@ -422,7 +432,7 @@ public:
 
 	};
 
-	enum class EGLRenderbuffer{
+	enum EGLRenderbuffer{
 
 		EGL_RENDERBUFFER_BINDING = GL_RENDERBUFFER_BINDING,
 		EGL_RENDERBUFFER_SAMPLES = GL_RENDERBUFFER_SAMPLES,
@@ -445,8 +455,6 @@ public:
 		Init();
 	}
 	
-	GLState_prefix_func bool glFetchFunctions();
-
 	GLState_prefix_func void Init();
 
 	forceinline GLState_prefix_func GLenum GetError(){
@@ -579,6 +587,15 @@ public:
 	forceinline GLState_prefix_func void Viewport(GLint x, GLint y, GLsizei width, GLsizei height){
 		 glViewport(x,y,width,height); GLS_OFR return;
 	}
+	forceinline GLState_prefix_func void Scissor(GLint x, GLint y, GLsizei width, GLsizei height){
+		glScissor(x, y, width, height); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void Viewport(GLfloat x, GLfloat y, GLfloat width, GLfloat height){
+		glViewport((GLint)x, (GLint)y, (GLsizei)width, (GLsizei)height); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void Scissor(GLfloat x, GLfloat y, GLfloat width, GLfloat height){
+		glScissor((GLint)x, (GLint)y, (GLsizei)width, (GLsizei)height); GLS_OFR return;
+	}
 	forceinline GLState_prefix_func void PointSize(GLfloat size){
 		 glPointSize(size); GLS_OFR return;
 	}
@@ -598,122 +615,145 @@ public:
 		 glPushAttrib(bits); ++PUSH_ATTRIB_BITS; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void PopAttrib(){
-		if(PUSH_ATTRIB_BITS){  glPopAttrib(); --PUSH_ATTRIB_BITS; } GLS_OFR return;
+		{  glPopAttrib(); --PUSH_ATTRIB_BITS; } GLS_OFR return;
 	}
 
-
+	forceinline GLState_prefix_func void DepthWriteEnable(){
+		glDepthMask(GL_TRUE); DEPTH_WRITE_ENABLED = true; GLS_OFR; return;
+	}
+	forceinline GLState_prefix_func void DepthWriteDisable(){
+		glDepthMask(GL_FALSE); DEPTH_WRITE_ENABLED = false; GLS_OFR; return;
+	}
+	forceinline GLState_prefix_func void DepthMask(bool enabled){
+		glDepthMask(enabled); DEPTH_WRITE_ENABLED = enabled; GLS_OFR; return;
+	}
 	forceinline GLState_prefix_func void EnableDepthTest(){
-		if(DEPTH_TEST_ENABLED) return;
 		 glEnable(GL_DEPTH_TEST); DEPTH_TEST_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableDepthTest(){
-		if(DEPTH_TEST_ENABLED){  glDisable(GL_DEPTH_TEST); DEPTH_TEST_ENABLED = false; } GLS_OFR return;
+		{  glDisable(GL_DEPTH_TEST); DEPTH_TEST_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableStencilTest(){
-		if(STENCIL_TEST_ENABLED) return;
 		glEnable(GL_STENCIL_TEST); STENCIL_TEST_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableStencilTest(){
-		if(STENCIL_TEST_ENABLED){ glDisable(GL_STENCIL_TEST); STENCIL_TEST_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_STENCIL_TEST); STENCIL_TEST_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableBlend(){
-		if(BLEND_ENABLED) return;
 		 glEnable(GL_BLEND); BLEND_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableBlend(){
-		if(BLEND_ENABLED){  glDisable(GL_BLEND); BLEND_ENABLED = false; } GLS_OFR return;
+		{  glDisable(GL_BLEND); BLEND_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableTexture1D(){
-		if(TEXTURE1D_ENABLED) return;
 		 glEnable(GL_TEXTURE_1D); TEXTURE1D_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableTexture1D(){
-		if(TEXTURE1D_ENABLED){  glDisable(GL_TEXTURE_1D); TEXTURE1D_ENABLED = false; } GLS_OFR return;
+		{  glDisable(GL_TEXTURE_1D); TEXTURE1D_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableTexture2D(){
-		if(TEXTURE2D_ENABLED) return;
 		 glEnable(GL_TEXTURE_2D); TEXTURE2D_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableTexture2D(){ return;
-		if(TEXTURE2D_ENABLED){  glDisable(GL_TEXTURE_2D); TEXTURE2D_ENABLED = false; } GLS_OFR return;
+		{  glDisable(GL_TEXTURE_2D); TEXTURE2D_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableTexture3D(){
-		if(TEXTURE3D_ENABLED) return;
 		 glEnable(GL_TEXTURE_3D); TEXTURE3D_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableTexture3D(){
-		if(TEXTURE3D_ENABLED){  glDisable(GL_TEXTURE_3D); TEXTURE3D_ENABLED = false; } GLS_OFR return;
+		{  glDisable(GL_TEXTURE_3D); TEXTURE3D_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableTextureCube(){
-		if(TEXTURECUBE_ENABLED) return;
 		glEnable(GL_TEXTURE_CUBE_MAP); TEXTURECUBE_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableTextureCube(){
-		if(TEXTURECUBE_ENABLED){ glDisable(GL_TEXTURE_CUBE_MAP); TEXTURECUBE_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_TEXTURE_CUBE_MAP); TEXTURECUBE_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableTextureCubeSeamless(){
-		if(TEXTURECUBESEAMLESS_ENABLED) return;
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); TEXTURECUBESEAMLESS_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableTextureCubeSeamless(){
-		if(TEXTURECUBESEAMLESS_ENABLED){ glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS); TEXTURECUBESEAMLESS_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS); TEXTURECUBESEAMLESS_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableAlphaTest(){
-		if(ALPHA_TEST_ENABLED) return;
 		glEnable(GL_ALPHA_TEST); ALPHA_TEST_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableAlphaTest(){
-		if(ALPHA_TEST_ENABLED){ glDisable(GL_ALPHA_TEST); ALPHA_TEST_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_ALPHA_TEST); ALPHA_TEST_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableCullFace(){
-		if(CULL_FACE_ENABLED) return;
 		glEnable(GL_CULL_FACE); CULL_FACE_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableCullFace(){
-		if(CULL_FACE_ENABLED){ glDisable(GL_CULL_FACE); CULL_FACE_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_CULL_FACE); CULL_FACE_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableSampleAlphaToCoverage(){
-		if(SAMPLE_ALPHA_TO_COVERAGE_ENABLED) return;
 		glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE); SAMPLE_ALPHA_TO_COVERAGE_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableSampleAlphaToCoverage(){
-		if(SAMPLE_ALPHA_TO_COVERAGE_ENABLED){ glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE); SAMPLE_ALPHA_TO_COVERAGE_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE); SAMPLE_ALPHA_TO_COVERAGE_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableScissorTest(){
-		if(SCISSOR_TEST_ENABLED) return;
 		glEnable(GL_SCISSOR_TEST); SCISSOR_TEST_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableScissorTest(){
-		if(SCISSOR_TEST_ENABLED){ glDisable(GL_SCISSOR_TEST); SCISSOR_TEST_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_SCISSOR_TEST); SCISSOR_TEST_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableMultisample(){
-		if(MULTISAMPLE_ENABLED) return;
 		glEnable(GL_MULTISAMPLE); MULTISAMPLE_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableMultisample(){
-		if(MULTISAMPLE_ENABLED){ glDisable(GL_MULTISAMPLE); MULTISAMPLE_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_MULTISAMPLE); MULTISAMPLE_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableSampleMask(){
-		if(SAMPLE_MASK_ENABLED) return;
 		glEnable(GL_SAMPLE_MASK); SAMPLE_MASK_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableSampleMask(){
-		if(SAMPLE_MASK_ENABLED){ glDisable(GL_SAMPLE_MASK); SAMPLE_MASK_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_SAMPLE_MASK); SAMPLE_MASK_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableSampleCoverage(){
-		if(SAMPLE_COVERAGE_ENABLED) return;
 		glEnable(GL_SAMPLE_COVERAGE); SAMPLE_COVERAGE_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableSampleCoverage(){
-		if(SAMPLE_COVERAGE_ENABLED){ glDisable(GL_SAMPLE_COVERAGE); SAMPLE_COVERAGE_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_SAMPLE_COVERAGE); SAMPLE_COVERAGE_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableSampleAlphaToOne(){
-		if(SAMPLE_ALPHA_TO_ONE_ENABLED) return;
 		glEnable(GL_SAMPLE_ALPHA_TO_ONE); SAMPLE_ALPHA_TO_ONE_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableSampleAlphaToOne(){
-		if(SAMPLE_ALPHA_TO_ONE_ENABLED){ glDisable(GL_SAMPLE_ALPHA_TO_ONE); SAMPLE_ALPHA_TO_ONE_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_SAMPLE_ALPHA_TO_ONE); SAMPLE_ALPHA_TO_ONE_ENABLED = false; } GLS_OFR return;
 	}
+	forceinline GLState_prefix_func void EnableDepthClamp(){
+		glEnable(GL_DEPTH_CLAMP); DEPTH_CLAMP_ENABLED = true; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void DisableDepthClamp(){
+		{ glDisable(GL_DEPTH_CLAMP); DEPTH_CLAMP_ENABLED = false; } GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void EnableLineSmooth(){
+		glEnable(GL_LINE_SMOOTH); LINE_SMOOTH_ENABLED = true; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void DisableLineSmooth(){
+		{ glDisable(GL_LINE_SMOOTH); LINE_SMOOTH_ENABLED = false; } GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void EnablePolygonOffsetFill(){
+		glEnable(GL_POLYGON_OFFSET_FILL); POLYGON_OFFSET_FILL_ENABLED = true; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void DisablePolygonOffsetFill(){
+		{ glDisable(GL_POLYGON_OFFSET_FILL); POLYGON_OFFSET_FILL_ENABLED = false; } GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void EnablePolygonOffsetLine(){
+		glEnable(GL_POLYGON_OFFSET_LINE); POLYGON_OFFSET_LINE_ENABLED = true; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void DisablePolygonOffsetLine(){
+		{ glDisable(GL_POLYGON_OFFSET_LINE); POLYGON_OFFSET_LINE_ENABLED = false; } GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void EnablePolygonOffsetPoint(){
+		glEnable(GL_POLYGON_OFFSET_POINT); POLYGON_OFFSET_POINT_ENABLED = true; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void DisablePolygonOffsetPoint(){
+		{ glDisable(GL_POLYGON_OFFSET_POINT); POLYGON_OFFSET_POINT_ENABLED = false; } GLS_OFR return;
+	}
+
 
 	forceinline GLState_prefix_func void Enable(GLenum cap){
 		switch(cap){
@@ -733,6 +773,11 @@ public:
 			case GL_SAMPLE_COVERAGE: return EnableSampleCoverage();
 			case GL_SAMPLE_ALPHA_TO_ONE: return EnableSampleAlphaToOne();
 			case GL_SAMPLE_ALPHA_TO_COVERAGE: return EnableSampleAlphaToCoverage();
+			case GL_DEPTH_CLAMP: return EnableDepthClamp();
+			case GL_LINE_SMOOTH: return EnableLineSmooth();
+			case GL_POLYGON_OFFSET_FILL: return EnablePolygonOffsetFill();
+			case GL_POLYGON_OFFSET_LINE: return EnablePolygonOffsetLine();
+			case GL_POLYGON_OFFSET_POINT: return EnablePolygonOffsetPoint();
 		}
 		return;
 	}
@@ -754,18 +799,96 @@ public:
 			case GL_SAMPLE_COVERAGE: return DisableSampleCoverage();
 			case GL_SAMPLE_ALPHA_TO_ONE: return DisableSampleAlphaToOne();
 			case GL_SAMPLE_ALPHA_TO_COVERAGE: return DisableSampleAlphaToCoverage();
+			case GL_DEPTH_CLAMP: return DisableDepthClamp();
+			case GL_LINE_SMOOTH: return DisableLineSmooth();
+			case GL_POLYGON_OFFSET_FILL: return DisablePolygonOffsetFill();
+			case GL_POLYGON_OFFSET_LINE: return DisablePolygonOffsetLine();
+			case GL_POLYGON_OFFSET_POINT: return DisablePolygonOffsetPoint();
+		}
+		return;
+	}
+	
+
+	forceinline GLState_prefix_func void EnableBlend(GLuint i){
+		glEnablei(i, GL_BLEND); BLEND_ENABLED = true; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void DisableBlend(GLuint i){
+		{ glDisablei(i, GL_BLEND); BLEND_ENABLED = false; } GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void EnableScissorTest(GLuint i){
+		glEnablei(i, GL_SCISSOR_TEST); SCISSOR_TEST_ENABLED = true; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void DisableScissorTest(GLuint i){
+		{ glDisablei(i, GL_SCISSOR_TEST); SCISSOR_TEST_ENABLED = false; } GLS_OFR return;
+	}
+
+	forceinline GLState_prefix_func void Enablei(GLuint i, GLenum cap){
+		switch(cap){
+			case GL_BLEND: return EnableBlend(i);
+			case GL_SCISSOR_TEST: return EnableScissorTest(i);
+			default: LOG_WARN("glEnablei(%d): not an indexed enum! <%d>", i, cap);
+		}
+		return;
+	}
+	forceinline GLState_prefix_func void Disablei(GLuint i, GLenum cap){
+		switch(cap){
+			case GL_BLEND: return DisableBlend(i);
+			case GL_SCISSOR_TEST: return DisableScissorTest(i);
+			default: LOG_WARN("glDisablei(%d): not an indexed enum! <%d>", i, cap);
 		}
 		return;
 	}
 
-	forceinline GLState_prefix_func void BlendFunc(int src,int dst){
-		if(src == BLEND_SRC && dst == BLEND_DST && src == BLEND_SRC_ALPHA && dst == BLEND_DST_ALPHA) return;
+	forceinline GLState_prefix_func void BlendFunc(GLenum src, GLenum dst){
 		 glBlendFunc(src, dst); BLEND_SRC = src; BLEND_DST = dst; BLEND_SRC_ALPHA = src; BLEND_DST_ALPHA = dst; GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BlendFuncSeparate(int src, int dst, int srcA, int dstA){
-		if(src == BLEND_SRC && dst == BLEND_DST && srcA == BLEND_SRC_ALPHA && dstA == BLEND_DST_ALPHA) return;
+	forceinline GLState_prefix_func void BlendFuncSeparate(GLenum src, GLenum dst, GLenum srcA, GLenum dstA){
 		glBlendFuncSeparate(src, dst, srcA, dstA); BLEND_SRC = src; BLEND_DST = dst; BLEND_SRC_ALPHA = srcA; BLEND_DST_ALPHA = dstA; GLS_OFR return;
 	}
+	forceinline GLState_prefix_func void BlendFuncSeparatei(GLenum buf, GLenum src, GLenum dst, GLenum srcA, GLenum dstA){
+		glBlendFuncSeparatei(buf, src, dst, srcA, dstA); BLEND_SRC = src; BLEND_DST = dst; BLEND_SRC_ALPHA = srcA; BLEND_DST_ALPHA = dstA; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void BlendEquation(GLenum op){
+		glBlendEquation(BLEND_OP); BLEND_OP = op; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void BlendEquationSeparate(GLenum op, GLenum opA){
+		glBlendEquationSeparate(op, opA); BLEND_OP = op; BLEND_OP_ALPHA = opA; GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void BlendEquationSeparatei(GLenum buf, GLenum op, GLenum opA){
+		glBlendEquationSeparatei(buf, op, opA); GLS_OFR return;
+	}
+
+	forceinline GLState_prefix_func void DepthFunc(GLenum func){
+		glDepthFunc(func); DEPTH_FUNC = func; GLS_OFR return;
+	}
+	
+	forceinline GLState_prefix_func void StencilFuncSeparate(GLenum front, GLenum back, uint ref, uint mask){
+		glStencilFuncSeparate(front, back, ref, mask); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void StencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass){
+		glStencilOpSeparate(face, sfail, dpfail, dppass); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void StencilMaskSeparate(GLenum face, uint mask){
+		glStencilMaskSeparate(face, mask); GLS_OFR return;
+	}
+
+	forceinline GLState_prefix_func void PolygonMode(GLenum face, GLenum mode){
+		glPolygonMode(face, mode); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void PolygonOffset(GLfloat factor, GLfloat units){
+		glPolygonOffset(factor, units); GLS_OFR return;
+	}
+
+	forceinline GLState_prefix_func void ViewportIndexedf(GLuint i, GLfloat x, GLfloat y, GLfloat w, GLfloat h){
+		glViewportIndexedf(i, x, y, w, h); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void ScissorIndexed(GLuint i, GLint x, GLint y, GLsizei w, GLsizei h){
+		glScissorIndexed(i, x, y, w, h); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void ScissorIndexed(GLuint i, GLfloat x, GLfloat y, GLfloat w, GLfloat h){
+		glScissorIndexed(i, (GLint)x, (GLint)y, (GLsizei)w, (GLsizei)h); GLS_OFR return;
+	}
+
 	forceinline GLState_prefix_func GLvoid* MapBuffer(GLenum target, GLenum access){
 		 auto rtn = glMapBuffer(target,access); GLS_OFR return rtn;
 	}
@@ -992,7 +1115,7 @@ public:
 		glTextureParameterf(texture, param, val); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void UseProgramObjectARB(GLint program){
-		if(program != program_link){
+		{
 			if(program == 0){
 				glUseProgramObjectARB(0);
 				previous_program_link = program_link; program_link = 0;
@@ -1004,66 +1127,56 @@ public:
 		}
 		GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void EnableClientState(int state){
+	forceinline GLState_prefix_func void EnableClientState(GLenum state){
 		switch(state){
 			case GL_VERTEX_ARRAY:
-				if(VERTEX_ARRAY_ENABLED) return;
-				glEnableClientState(GL_VERTEX_ARRAY); VERTEX_ARRAY_ENABLED = true;
+						glEnableClientState(GL_VERTEX_ARRAY); VERTEX_ARRAY_ENABLED = true;
 				break;
 			case GL_NORMAL_ARRAY:
-				if(NORMAL_ARRAY_ENABLED) return;
-				glEnableClientState(GL_NORMAL_ARRAY); NORMAL_ARRAY_ENABLED = true;
+						glEnableClientState(GL_NORMAL_ARRAY); NORMAL_ARRAY_ENABLED = true;
 				break;
 			case GL_TEXTURE_COORD_ARRAY:
-				if(TEXTURE_COORD_ARRAY_ENABLED) return;
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY); TEXTURE_COORD_ARRAY_ENABLED = true;
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY); TEXTURE_COORD_ARRAY_ENABLED = true;
 				break;
 			case GL_COLOR_ARRAY:
-				if(COLOR_ARRAY_ENABLED) return;
-				glEnableClientState(GL_COLOR_ARRAY); COLOR_ARRAY_ENABLED = true;
+						glEnableClientState(GL_COLOR_ARRAY); COLOR_ARRAY_ENABLED = true;
 				break;
 		}
 		GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void DisableClientState(int state){
+	forceinline GLState_prefix_func void DisableClientState(GLenum state){
 		switch(state){
 			case GL_VERTEX_ARRAY:
-				if(VERTEX_ARRAY_ENABLED){ glDisableClientState(GL_VERTEX_ARRAY); VERTEX_ARRAY_ENABLED = false; }
+				{ glDisableClientState(GL_VERTEX_ARRAY); VERTEX_ARRAY_ENABLED = false; }
 				break;
 			case GL_NORMAL_ARRAY:
-				if(NORMAL_ARRAY_ENABLED){ glDisableClientState(GL_NORMAL_ARRAY); NORMAL_ARRAY_ENABLED = false; }
+				{ glDisableClientState(GL_NORMAL_ARRAY); NORMAL_ARRAY_ENABLED = false; }
 				break;
 			case GL_TEXTURE_COORD_ARRAY:
-				if(TEXTURE_COORD_ARRAY_ENABLED){ glDisableClientState(GL_TEXTURE_COORD_ARRAY); TEXTURE_COORD_ARRAY_ENABLED = false; }
+				{ glDisableClientState(GL_TEXTURE_COORD_ARRAY); TEXTURE_COORD_ARRAY_ENABLED = false; }
 				break;
 			case GL_COLOR_ARRAY:
-				if(COLOR_ARRAY_ENABLED){ glDisableClientState(GL_COLOR_ARRAY); COLOR_ARRAY_ENABLED = false; }
+				{ glDisableClientState(GL_COLOR_ARRAY); COLOR_ARRAY_ENABLED = false; }
 				break;
 		}
 		GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void VertexPointer(int size,int type,int stride,GLvoid* pointer){
-		if(pointer == pVertexBuffer) return;
+	forceinline GLState_prefix_func void VertexPointer(GLint size, GLenum type, GLint stride,GLvoid* pointer){
 		glVertexPointer(size,type,stride,pointer); pVertexBuffer = pointer; GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void NormalPointer(int type,int stride,GLvoid* pointer){
-		if(pointer == pNormalBuffer) return;
+	forceinline GLState_prefix_func void NormalPointer(GLenum type,int stride,GLvoid* pointer){
 		glNormalPointer(type,stride,pointer); pNormalBuffer = pointer; GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void TexCoordPointer(int size,int type,int stride,GLvoid* pointer){
-		if(pointer == pTexCoordBuffer) return;
+	forceinline GLState_prefix_func void TexCoordPointer(GLint size, GLenum type, GLint stride,GLvoid* pointer){
 		glTexCoordPointer(size,type,stride,pointer); pTexCoordBuffer = pointer; GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void ColorPointer(int size,int type,int stride,GLvoid* pointer){
-		if(pointer == pColorBuffer) return;
+	forceinline GLState_prefix_func void ColorPointer(GLint size,GLenum type, GLint stride,GLvoid* pointer){
 		glColorPointer(size,type,stride,pointer); pColorBuffer = pointer; GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void ActiveTextureARB(int id){
-		if(id == ACTIVE_TEXTURE_ID) return;
+	forceinline GLState_prefix_func void ActiveTextureARB(GLenum id){
 		glActiveTexture(id); ACTIVE_TEXTURE_ID = id; GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void ActiveTexture(int id){
-		if(id == ACTIVE_TEXTURE_ID) return;
+	forceinline GLState_prefix_func void ActiveTexture(GLenum id){
 		glActiveTexture(id); ACTIVE_TEXTURE_ID = id; GLS_OFR return;
 	}
 
@@ -1139,7 +1252,6 @@ public:
 	}
 
 	forceinline GLState_prefix_func void MatrixMode(int mode){
-		if(mode==MATRIX_MODE) return;
 		glMatrixMode(mode); MATRIX_MODE = mode; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void PushMatrix(){
@@ -1156,20 +1268,19 @@ public:
 	forceinline GLState_prefix_func void PopMatrix(){
 		switch(MATRIX_MODE){
 			case GL_MODELVIEW:
-				if(PUSH_MODELVIEW_MATRIX){ --PUSH_MODELVIEW_MATRIX; glPopMatrix(); } break;
+				{ --PUSH_MODELVIEW_MATRIX; glPopMatrix(); } break;
 			case GL_TEXTURE:
-				if(PUSH_TEXTURE_MATRIX){ --PUSH_TEXTURE_MATRIX; glPopMatrix(); } break;
+				{ --PUSH_TEXTURE_MATRIX; glPopMatrix(); } break;
 			case GL_PROJECTION:
-				if(PUSH_PROJECTION_MATRIX){ --PUSH_PROJECTION_MATRIX; glPopMatrix(); } break;
+				{ --PUSH_PROJECTION_MATRIX; glPopMatrix(); } break;
 		}
 		GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableLighting(){
-		if(LIGHTING_ENABLED) return;
 		glEnable(GL_LIGHTING); LIGHTING_ENABLED = true; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableLighting(){
-		if(LIGHTING_ENABLED){ glDisable(GL_LIGHTING); LIGHTING_ENABLED = false; } GLS_OFR return;
+		{ glDisable(GL_LIGHTING); LIGHTING_ENABLED = false; } GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void LoadIdentity(){
 		glLoadIdentity(); GLS_OFR return;
@@ -1220,6 +1331,237 @@ inline EShaderStage GetShaderStage(CGLState::EGLShaderStage stage){
 		default: break;
 	}
 	return EShaderStage::NumStages;
+}
+
+inline GLenum glenum(const EShaderStage& v){
+	switch(v)
+	{
+		case EShaderStage::VertexShader: return (GLenum)CGLState::EGLShaderStage::EGL_VERTEX_SHADER;
+		case EShaderStage::TessControlShader: return (GLenum)CGLState::EGLShaderStage::EGL_TESS_CONTROL_SHADER;
+		case EShaderStage::TessEvaluationShader: return (GLenum)CGLState::EGLShaderStage::EGL_TESS_EVALUATION_SHADER;
+		case EShaderStage::GeometryShader: return (GLenum)CGLState::EGLShaderStage::EGL_GEOMETRY_SHADER;
+		case EShaderStage::FragmentShader: return (GLenum)CGLState::EGLShaderStage::EGL_FRAGMENT_SHADER;
+		default: break;
+	}
+	return (GLenum)GL_NONE;
+}
+inline GLenum glenum(const EPrimitiveTopology& v){
+	switch(v)
+	{
+		case EPrimitiveTopology::PointList: return (GLenum)CGLState::EGLDrawMode::EGL_POINTS;
+		case EPrimitiveTopology::LineList: return (GLenum)CGLState::EGLDrawMode::EGL_LINES;
+		case EPrimitiveTopology::LineStrip: return (GLenum)CGLState::EGLDrawMode::EGL_LINE_STRIP;
+		case EPrimitiveTopology::LineLoop: return (GLenum)CGLState::EGLDrawMode::EGL_LINE_LOOP;
+		case EPrimitiveTopology::LineListAdjacency: return (GLenum)CGLState::EGLDrawMode::EGL_LINES_ADJACENCY;
+		case EPrimitiveTopology::LineStripAdjacency: return (GLenum)CGLState::EGLDrawMode::EGL_LINE_STRIP_ADJACENCY;
+		case EPrimitiveTopology::TriangleList: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLES;
+		case EPrimitiveTopology::TriangleStrip: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLE_STRIP;
+		case EPrimitiveTopology::TriangleFan: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLE_FAN;
+		case EPrimitiveTopology::TriangleListAdjacency: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLES_ADJACENCY;
+		case EPrimitiveTopology::TriangleStripAdjacency: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLES_STRIP_ADJACENCY;
+		default: (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EBlendFactor& v){
+	switch(v)
+	{
+		case EBlendFactor::Zero: return (GLenum)GL_ZERO;
+		case EBlendFactor::One: return (GLenum)GL_ONE;
+		case EBlendFactor::SrcColor: return (GLenum)GL_SRC_COLOR;
+		case EBlendFactor::OneMinusSrcColor: return (GLenum)GL_ONE_MINUS_SRC_COLOR;
+		case EBlendFactor::DstColor: return (GLenum)GL_DST_COLOR;
+		case EBlendFactor::OneMinusDstColor: return (GLenum)GL_ONE_MINUS_DST_COLOR;
+		case EBlendFactor::SrcAlpha: return (GLenum)GL_SRC_ALPHA;
+		case EBlendFactor::OneMinusSrcAlpha: return (GLenum)GL_ONE_MINUS_SRC_ALPHA;
+		case EBlendFactor::DstAlpha: return (GLenum)GL_DST_ALPHA;
+		case EBlendFactor::OneMinusDstAlpha: return (GLenum)GL_ONE_MINUS_DST_ALPHA;
+		case EBlendFactor::ConstantColor: return (GLenum)GL_CONSTANT_COLOR;
+		case EBlendFactor::OneMinusConstantColor: return (GLenum)GL_ONE_MINUS_CONSTANT_COLOR;
+		case EBlendFactor::ConstantAlpha: return (GLenum)GL_CONSTANT_ALPHA;
+		case EBlendFactor::OneMinusConstantAlpha: return (GLenum)GL_ONE_MINUS_CONSTANT_ALPHA;
+		case EBlendFactor::SrcAlphaSaturate: return (GLenum)GL_SRC_ALPHA_SATURATE;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EBlendOperation& v){
+	switch(v)
+	{
+		case EBlendOperation::Add: return (GLenum)GL_ADD;
+		case EBlendOperation::Subtract: return (GLenum)GL_SUBTRACT;
+		case EBlendOperation::ReverseSubtract: return (GLenum)GL_FUNC_REVERSE_SUBTRACT;
+		case EBlendOperation::Min: return (GLenum)GL_MIN;
+		case EBlendOperation::Max: return (GLenum)GL_MAX;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const ELogicOperation& v){
+	switch(v)
+	{
+		case ELogicOperation::NoOp: return (GLenum)GL_NOOP;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EDepthTestMode& v){
+	switch(v)
+	{
+		case EDepthTestMode::None: return (GLenum)GL_NONE;
+		case EDepthTestMode::Less: return (GLenum)GL_LESS;
+		case EDepthTestMode::LessEqual: return (GLenum)GL_LEQUAL;
+		case EDepthTestMode::Equal: return (GLenum)GL_EQUAL;
+		case EDepthTestMode::Greater: return (GLenum)GL_GREATER;
+		case EDepthTestMode::GreaterEqual: return (GLenum)GL_GEQUAL;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const ECullMode& v){
+	switch(v)
+	{
+		case ECullMode::None: return (GLenum)GL_NONE;
+		case ECullMode::FrontFaces: return (GLenum)GL_FRONT;
+		case ECullMode::BackFaces: return (GLenum)GL_BACK;
+		case ECullMode::Both: return (GLenum)GL_FRONT_AND_BACK;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EFrontFace& v){
+	switch(v)
+	{
+		case EFrontFace::Clockwise: return (GLenum)GL_CW;
+		case EFrontFace::CounterClockwise: return (GLenum)GL_CCW;
+		default: (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EComparisonOp& v){
+	switch(v)
+	{
+		case EComparisonOp::Never: return (GLenum)GL_NEVER;
+		case EComparisonOp::Less: return (GLenum)GL_LESS;
+		case EComparisonOp::Equal: return (GLenum)GL_EQUAL;
+		case EComparisonOp::LessEqual: return (GLenum)GL_LEQUAL;
+		case EComparisonOp::Greater: return (GLenum)GL_GREATER;
+		case EComparisonOp::NotEqual: return (GLenum)GL_NOTEQUAL;
+		case EComparisonOp::GreaterEqual: return (GLenum)GL_GEQUAL;
+		case EComparisonOp::Always: return (GLenum)GL_ALWAYS;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EStencilOp& v){
+	switch(v)
+	{
+		case EStencilOp::Keep: return (GLenum)GL_KEEP;
+		case EStencilOp::Zero: return (GLenum)GL_ZERO;
+		case EStencilOp::Replace: return (GLenum)GL_REPLACE;
+		case EStencilOp::Inc: return (GLenum)GL_INCR;
+		case EStencilOp::Dec: return (GLenum)GL_DECR;
+		case EStencilOp::Invert: return (GLenum)GL_INVERT;
+		case EStencilOp::IncWrap: return (GLenum)GL_INCR_WRAP;
+		case EStencilOp::DecWrap: return (GLenum)GL_DECR_WRAP;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const ETypedTextureFormat& v){
+	switch(v)
+	{
+		case ETypedTextureFormat::None: return (GLenum)GL_NONE;
+		case ETypedTextureFormat::R32G32B32A32_typeless: return (GLenum)GL_RGBA32UI;
+		case ETypedTextureFormat::R32G32B32A32_float: return (GLenum)GL_RGBA32F;
+		case ETypedTextureFormat::R32G32B32A32_uint: return (GLenum)GL_RGBA32UI;
+		case ETypedTextureFormat::R32G32B32A32_sint: return (GLenum)GL_RGBA32I;
+		case ETypedTextureFormat::R32G32B32_typeless: return (GLenum)GL_RGB32UI;
+		case ETypedTextureFormat::R32G32B32_float: return (GLenum)GL_RGB32F;
+		case ETypedTextureFormat::R32G32B32_uint: return (GLenum)GL_RGB32UI;
+		case ETypedTextureFormat::R32G32B32_sint: return (GLenum)GL_RGB32I;
+		case ETypedTextureFormat::R16G16B16A16_typeless: return (GLenum)GL_RGBA16UI;
+		case ETypedTextureFormat::R16G16B16A16_float: return (GLenum)GL_RGBA16F;
+		case ETypedTextureFormat::R16G16B16A16_unorm: return (GLenum)GL_RGBA16F;
+		case ETypedTextureFormat::R16G16B16A16_uint: return (GLenum)GL_RGBA16UI;
+		case ETypedTextureFormat::R16G16B16A16_snorm: return (GLenum)GL_RGBA16F;
+		case ETypedTextureFormat::R16G16B16A16_sint: return (GLenum)GL_RGBA16I;
+		case ETypedTextureFormat::R32G32_typeless: return (GLenum)GL_RG32UI;
+		case ETypedTextureFormat::R32G32_float: return (GLenum)GL_RG32F;
+		case ETypedTextureFormat::R32G32_uint: return (GLenum)GL_RG32UI;
+		case ETypedTextureFormat::R32G32_sint: return (GLenum)GL_RG32I;
+		case ETypedTextureFormat::R10G10B10A2_typeless: return (GLenum)GL_RGB10_A2UI;
+		case ETypedTextureFormat::R10G10B10A2_unorm: return (GLenum)GL_NONE;
+		case ETypedTextureFormat::R10G10B10A2_uint: return (GLenum)GL_RGB10_A2UI;
+		case ETypedTextureFormat::R11G11B10_float: return (GLenum)GL_R11F_G11F_B10F;
+		case ETypedTextureFormat::R8G8B8A8_typeless: return (GLenum)GL_RGBA8UI;
+		case ETypedTextureFormat::R8G8B8A8_unorm: return (GLenum)GL_RGBA8UI;
+		case ETypedTextureFormat::R8G8B8A8_unorm_sRGB: return (GLenum)GL_SRGB8;
+		case ETypedTextureFormat::R8G8B8A8_uint: return (GLenum)GL_RGBA8UI;
+		case ETypedTextureFormat::R8G8B8A8_snorm: return (GLenum)GL_RGBA8_SNORM;
+		case ETypedTextureFormat::R8G8B8A8_sint: return (GLenum)GL_RGBA8I;
+		case ETypedTextureFormat::R16G16_typeless: return (GLenum)GL_RG16UI;
+		case ETypedTextureFormat::R16G16_float: return (GLenum)GL_RG16F;
+		case ETypedTextureFormat::R16G16_unorm: return (GLenum)GL_RG16F;
+		case ETypedTextureFormat::R16G16_uint: return (GLenum)GL_RG16UI;
+		case ETypedTextureFormat::R16G16_snorm: return (GLenum)GL_RG16_SNORM;
+		case ETypedTextureFormat::R16G16_sint: return (GLenum)GL_RG16I;
+		case ETypedTextureFormat::R32_typeless: return (GLenum)GL_R32UI;
+		case ETypedTextureFormat::Depth32_float: return (GLenum)GL_DEPTH32F_STENCIL8;
+		case ETypedTextureFormat::R32_float: return (GLenum)GL_R32F;
+		case ETypedTextureFormat::R32_uint: return (GLenum)GL_R32UI;
+		case ETypedTextureFormat::R32_sint: return (GLenum)GL_R32I;
+		case ETypedTextureFormat::Depth24_unorm: return (GLenum)GL_DEPTH24_STENCIL8;
+		case ETypedTextureFormat::Depth24_unorm_Stencil8_uint: return (GLenum)GL_DEPTH24_STENCIL8;
+		case ETypedTextureFormat::R8G8_typeless: return (GLenum)GL_RG8UI;
+		case ETypedTextureFormat::R8G8_unorm: return (GLenum)GL_RG8UI;
+		case ETypedTextureFormat::R8G8_uint: return (GLenum)GL_RG8UI;
+		case ETypedTextureFormat::R8G8_snorm: return (GLenum)GL_RG8I;
+		case ETypedTextureFormat::R8G8_sint: return (GLenum)GL_RG8I;
+		case ETypedTextureFormat::R16_typeless: return (GLenum)GL_R16UI;
+		case ETypedTextureFormat::R16_float: return (GLenum)GL_R16F;
+		case ETypedTextureFormat::Depth16_unorm: return (GLenum)GL_NONE;
+		case ETypedTextureFormat::R16_unorm: return (GLenum)GL_R16F;
+		case ETypedTextureFormat::R16_uint: return (GLenum)GL_R16UI;
+		case ETypedTextureFormat::R16_snorm: return (GLenum)GL_R16F;
+		case ETypedTextureFormat::R16_sint: return (GLenum)GL_R16I;
+		case ETypedTextureFormat::R8_typeless: return (GLenum)GL_R8UI;
+		case ETypedTextureFormat::R8_unorm: return (GLenum)GL_R8UI;
+		case ETypedTextureFormat::R8_uint: return (GLenum)GL_R8UI;
+		case ETypedTextureFormat::R8_snorm: return (GLenum)GL_R8I;
+		case ETypedTextureFormat::R8_sint: return (GLenum)GL_R8I;
+		case ETypedTextureFormat::R9G9B9E5_sharedexp: return (GLenum)GL_RGB9_E5;
+		case ETypedTextureFormat::BC1_typeless: return (GLenum)GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		case ETypedTextureFormat::BC1_unorm: return (GLenum)GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		case ETypedTextureFormat::BC1_unorm_sRGB: return (GLenum)GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
+		case ETypedTextureFormat::BC2_typeless: return (GLenum)GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		case ETypedTextureFormat::BC2_unorm: return (GLenum)GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		case ETypedTextureFormat::BC2_unorm_sRGB: return (GLenum)GL_NONE;
+		case ETypedTextureFormat::BC3_typeless: return (GLenum)GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		case ETypedTextureFormat::BC3_unorm: return (GLenum)GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		case ETypedTextureFormat::BC3_unorm_sRGB: return (GLenum)GL_NONE;
+		case ETypedTextureFormat::B5G6R5_unorm: return (GLenum)GL_RGB565;
+		case ETypedTextureFormat::B5G5R5A1_unorm: return (GLenum)GL_RGB565;
+		case ETypedTextureFormat::B8G8R8A8_unorm: return (GLenum)GL_RGBA8UI;
+		case ETypedTextureFormat::B8G8R8X8_unorm: return (GLenum)GL_RGBA8UI;
+		case ETypedTextureFormat::B8G8R8A8_typeless: return (GLenum)GL_RGBA8UI;
+		case ETypedTextureFormat::B8G8R8X8_typeless: return (GLenum)GL_RGBA8UI;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const ETextureFormat& v){
+	switch(v)
+	{
+		case ETextureFormat::None: return (GLenum)GL_NONE;
+		case ETextureFormat::R: return (GLenum)GL_R;
+		case ETextureFormat::RG: return (GLenum)GL_RG;
+		case ETextureFormat::RGB: return (GLenum)GL_RGB;
+		case ETextureFormat::RGBA: return (GLenum)GL_RGBA;
+		case ETextureFormat::Depth: return (GLenum)GL_DEPTH;
+		case ETextureFormat::DepthStencil: return (GLenum)GL_DEPTH_STENCIL;
+		case ETextureFormat::RGBE: return (GLenum)GL_RGBA;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EFillMode& v){
+	switch(v)
+	{
+		case EFillMode::Point: return (GLenum)GL_POINT;
+		case EFillMode::Wireframe: return (GLenum)GL_LINE;
+		case EFillMode::Solid: return (GLenum)GL_FILL;
+		default: return (GLenum)GL_NONE;
+	}
 }
 
 #endif //RD_API_OPENGL4

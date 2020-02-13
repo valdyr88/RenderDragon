@@ -11,12 +11,14 @@
 
 class CTexture : public CGraphicObject{
 protected:
-	STextureDesc description;
+	STextureDesc descriptor;
 	UniquePtr<CTextureView> view;
 public:
 	CTexture(GPUDevice* dev, const STextureDesc& desc, const SRawData& data) :
-		CGraphicObject(dev), description(desc){
+		CGraphicObject(dev), descriptor(desc){
 	}
+
+	const auto& getDescriptor(){ return descriptor; }
 
 	virtual ~CTexture() = default;
 };

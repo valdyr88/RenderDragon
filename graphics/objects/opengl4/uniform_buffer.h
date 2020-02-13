@@ -10,13 +10,14 @@
 #include "../../descriptors/uniform_buffer_desc.h"
 #include "../../descriptors/shader_desc.h"
 #include "buffer.h"
+SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);
 
 template <typename Type> class CUniformBuffer : public IUniformBuffer{
 protected:
 	Type data;
 	std::map<std::string, SUniformMap> mapping;
 	std::string name;
-	UniquePtr<CBuffer> buffer;
+	SharedPtr<CBuffer> buffer;
 
 	template <typename UniformType> bool setUniform(const char* name, EValueType type, EValueSize size, uint32 count, UniformType& value);
 
@@ -183,6 +184,7 @@ template<typename Type> void CUniformBuffer<Type>::CreateBuffer(uint32 size){
 			desc.size = size;
 		};
 		//this->buffer = device->CreateBuffer(desc);
+		this->buffer = rdDeviceCreateBuffer(device, desc);
 	}
 }
 

@@ -7,12 +7,14 @@
 #include "../../descriptors/buffer_desc.h"
 #include "../../descriptors/graphic_object.h"
 
-class CBuffer : CGraphicObject{
+class CBuffer : public CGraphicObject{
 protected:
 	SBufferDesc descriptor;
 public:
 	CBuffer(GPUDevice* dev, const SBufferDesc& desc) :
 		CGraphicObject(dev), descriptor(desc){}
+
+	const auto& getDescriptor(){ return descriptor; }
 
 	EBufferType getType(){ return descriptor.type; }
 

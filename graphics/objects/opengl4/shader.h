@@ -12,7 +12,7 @@
 #include "../../descriptors/shader_desc.h"
 #include "../../descriptors/graphic_object.h"
 
-class CShader : CGraphicObject{
+class CShader : public CGraphicObject{
 protected:
 	SShaderDesc descriptor;
 
@@ -29,7 +29,7 @@ public:
 };
 
 
-class CShaderProgram : CGraphicObject{
+class CShaderProgram : public CGraphicObject{
 protected:
 	SharedPtr<CShader> shader[EShaderStage::NumStages];
 	uint numStages;

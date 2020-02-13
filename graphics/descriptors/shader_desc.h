@@ -77,6 +77,8 @@ public:
 	CShaderResource(GPUDevice* dev, const SShaderResourceDesc& desc) : 
 		CGraphicObject(dev), resourceDescriptor(desc){}
 	const SShaderResourceDesc getDescriptor(){ return resourceDescriptor; }
+
+	const auto& getResourceDescriptor(){ return resourceDescriptor; }
 };
 
 struct SShaderDesc{
@@ -95,6 +97,8 @@ protected:
 public:
 	CSampler(GPUDevice* dev, const SShaderResourceDesc& sr, const SSamplerDesc& desc) :
 		CShaderResource(dev, sr), descriptor(desc){}
+
+	const auto& getDescriptor(){ return descriptor; }
 };
 
 

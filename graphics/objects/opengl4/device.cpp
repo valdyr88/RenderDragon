@@ -161,7 +161,7 @@ SGPUDeviceContext rdInitOpenGL_ARB(SWindow& window, const SGPUDeviceDesc& descri
 	}
 	LOG("wglChoosePixelFormatARB() PixelFormat chosen == %d\n", pixelFormat);
 	
-	//TODO: destroy current window and create new one to use new pixel format
+	//ToDo: destroy current window and create new one to use new pixel format
 	DestroyWindow(window.window); window.window = nullptr;
 	window.CreateProgramWindow(window.name, window.width, window.height, window.posX, window.posY, window.flags, true);
 
@@ -211,5 +211,273 @@ bool GPUDevice::InitContextOnWindow(SWindow& window){
 UniquePtr<GPUDevice> GPUDevice::CreateGPUDevice(const SGPUDeviceDesc& desc){
 	return NewUnique<GPUDevice>(desc);
 }
+
+SharedPtr<CPipelineState> GPUDevice::CreatePipelineState(const SPipelineStateDesc& desc){
+	auto obj = SharedPtr<CPipelineState>(new CPipelineState(this, desc));
+	objects.emplace_back(obj);
+	return obj;
+}
+SharedPtr<CRenderPass> GPUDevice::CreateRenderPass(const SRenderPassDesc& desc){
+	auto obj = SharedPtr<CRenderPass>(new CRenderPass(this, desc));
+	objects.emplace_back(obj);
+	return obj;
+}
+SharedPtr<CBuffer> GPUDevice::CreateBuffer(const SBufferDesc& desc){
+	auto obj = SharedPtr<CBuffer>(new CBuffer(this, desc));
+	objects.emplace_back(obj);
+	return obj;
+}
+SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc){
+	return device->CreateBuffer(desc);}
+
+SharedPtr<CFramebuffer> GPUDevice::CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTexture){
+	auto obj = SharedPtr<CFramebuffer>(new CFramebuffer(this, desc, textures, depthStencilTexture));
+	objects.emplace_back(obj);
+	return obj;
+}
+//SharedPtr<CShader> GPUDevice::CreateShaderModule(const SShaderDesc& desc);
+//SharedPtr<CShaderResource> GPUDevice::CreateShaderResrouce(const SShaderResourceDesc& desc);
+SharedPtr<CSampler> GPUDevice::CreateSampler(const SShaderResourceDesc& sr, const SSamplerDesc& desc){
+	auto obj = SharedPtr<CSampler>(new CSampler(this, sr, desc));
+	objects.emplace_back(obj);
+	return obj;
+}
+SharedPtr<CVertexBuffer> GPUDevice::CreateVertexBuffer(const SVertexFormat& desc, uint32 count){
+	auto obj = SharedPtr<CVertexBuffer>(new CVertexBuffer(this, desc, count));
+	objects.emplace_back(obj);
+	return obj;
+}
+SharedPtr<CIndexBuffer> GPUDevice::CreateIndexBuffer(EValueType type, uint32 count){
+	auto obj = SharedPtr<CIndexBuffer>(new CIndexBuffer(this, type, count));
+	objects.emplace_back(obj);
+	return obj;
+}
+
+//------------------------------------------------------------------------------------
+// gl state setting
+//------------------------------------------------------------------------------------
+
+bool GPUDevice::setBlendState(const SBlendStateDesc& mode){
+	if(mode.independentBlendEnable == false){
+		if(mode.alphaToCoverageEnable == this->pipelineState.blendDesc.alphaToCoverageEnable &&
+			mode.attachmentBlends[0] == this->pipelineState.blendDesc.attachmentBlends[0]) return true;}
+	else{
+		if(mode == this->pipelineState.blendDesc) return true; }
+	
+	if(mode.alphaToCoverageEnable != this->pipelineState.blendDesc.alphaToCoverageEnable){
+		if(mode.alphaToCoverageEnable == true)
+			gl.EnableSampleAlphaToCoverage();
+		else
+			gl.DisableSampleAlphaToCoverage();
+		this->pipelineState.blendDesc.alphaToCoverageEnable = mode.alphaToCoverageEnable;
+	}
+
+	if(mode.independentBlendEnable == false){
+		auto& blends = mode.attachmentBlends[0];
+		if(blends != this->pipelineState.blendDesc.attachmentBlends[0]){
+			gl.BlendFuncSeparate(glenum(blends.srcBlend),glenum(blends.dstBlend),glenum(blends.srcBlendAlpha),glenum(blends.dstBlendAlpha));
+			gl.BlendEquationSeparate(glenum(blends.blendOp), glenum(blends.blendOpAlpha));
+		}
+		this->pipelineState.blendDesc.attachmentBlends[0] = blends;
+	}
+	else{
+		for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){
+			auto& blends = mode.attachmentBlends[i];
+			if(blends != this->pipelineState.blendDesc.attachmentBlends[i]){
+				gl.BlendFuncSeparatei(i, glenum(blends.srcBlend), glenum(blends.dstBlend), glenum(blends.srcBlendAlpha), glenum(blends.dstBlendAlpha));
+				gl.BlendEquationSeparatei(i, glenum(blends.blendOp), glenum(blends.blendOpAlpha));
+			}
+			this->pipelineState.blendDesc.attachmentBlends[i] = blends;
+		}
+	}
+
+	return true;
+}
+
+bool GPUDevice::setDepthState(const SDepthStateDesc& mode){
+	if(mode == this->pipelineState.depthDesc) return true;
+
+	if(mode.enable != this->pipelineState.depthDesc.enable){
+		if(mode.enable == true)
+			gl.EnableDepthTest();
+		else
+			gl.DisableDepthTest();
+		this->pipelineState.depthDesc.enable = mode.enable;
+	}
+
+	if(mode.depthFunc != this->pipelineState.depthDesc.depthFunc){
+		gl.DepthFunc(glenum(mode.depthFunc));
+		this->pipelineState.depthDesc.depthFunc = mode.depthFunc;
+	}
+
+	if(mode.depthWriteEnable != this->pipelineState.depthDesc.depthWriteEnable){
+		gl.DepthMask(mode.depthWriteEnable);
+		this->pipelineState.depthDesc.depthWriteEnable = mode.depthWriteEnable;
+	}
+
+	return true;
+}
+
+bool GPUDevice::setStencilState(const SStencilStateDesc& mode){
+	if(mode == this->pipelineState.stencilDesc) return true;
+
+	if(mode.enable != this->pipelineState.stencilDesc.enable){
+		if(mode.enable == true)
+			gl.EnableStencilTest();
+		else
+			gl.EnableStencilTest();
+		this->pipelineState.stencilDesc.enable = mode.enable;
+	}
+
+	if(mode.frontFace != this->pipelineState.stencilDesc.frontFace ||
+	   mode.backFace != this->pipelineState.stencilDesc.backFace){
+
+		if(mode.frontFace != mode.backFace){
+			gl.StencilFuncSeparate(glenum(mode.frontFace.stencilFunc), glenum(mode.backFace.stencilFunc), mode.frontFace.referenceValue, mode.frontFace.ANDMask);
+			gl.StencilMaskSeparate(GL_FRONT, mode.frontFace.writeMask);
+			gl.StencilMaskSeparate(GL_BACK, mode.backFace.writeMask);
+			gl.StencilOpSeparate(GL_FRONT, glenum(mode.frontFace.stencilFailOp), glenum(mode.frontFace.stencilDepthFailOp), glenum(mode.frontFace.stencilPassOp));
+			gl.StencilOpSeparate(GL_BACK, glenum(mode.backFace.stencilFailOp), glenum(mode.backFace.stencilDepthFailOp), glenum(mode.backFace.stencilPassOp));
+		}
+		else{
+			gl.StencilFuncSeparate(glenum(mode.frontFace.stencilFunc), glenum(mode.backFace.stencilFunc), mode.frontFace.referenceValue, mode.frontFace.ANDMask);
+			gl.StencilMaskSeparate(GL_FRONT_AND_BACK, mode.frontFace.writeMask);
+			gl.StencilOpSeparate(GL_FRONT_AND_BACK, glenum(mode.frontFace.stencilFailOp), glenum(mode.frontFace.stencilDepthFailOp), glenum(mode.frontFace.stencilPassOp));
+		}
+		
+		this->pipelineState.stencilDesc = mode;
+	}
+
+	return true;
+}
+
+bool GPUDevice::setPrimitiveTopology(const EPrimitiveTopology& mode){
+	 this->pipelineState.primitiveTopology = mode; return true;	
+}
+
+bool GPUDevice::setRasterizerState(const SRasterizerStateDesc& mode){
+	if(mode == this->pipelineState.rasterizerDesc) return true;
+
+	if(mode.fillMode != this->pipelineState.rasterizerDesc.fillMode){
+		gl.PolygonMode(GL_FRONT_AND_BACK, glenum(mode.fillMode));
+		this->pipelineState.rasterizerDesc.fillMode = mode.fillMode;
+	}
+	if(mode.cullMode != this->pipelineState.rasterizerDesc.cullMode){
+		gl.CullFace(glenum(mode.cullMode));
+		this->pipelineState.rasterizerDesc.cullMode = mode.cullMode;
+	}
+	if(mode.frontFace != this->pipelineState.rasterizerDesc.frontFace){
+		gl.FrontFace(glenum(mode.frontFace));
+		this->pipelineState.rasterizerDesc.frontFace = mode.frontFace;
+	}
+	if(mode.depthClampEnable != this->pipelineState.rasterizerDesc.depthClampEnable){
+		if(mode.depthClampEnable)
+			gl.EnableDepthClamp();
+		else
+			gl.DisableDepthClamp();
+		this->pipelineState.rasterizerDesc.depthClampEnable = mode.depthClampEnable;
+	}
+	if(mode.antialiasedLineEnable != this->pipelineState.rasterizerDesc.antialiasedLineEnable){
+		if(mode.antialiasedLineEnable)
+			gl.EnableLineSmooth();
+		else
+			gl.DisableLineSmooth();
+		this->pipelineState.rasterizerDesc.antialiasedLineEnable = mode.antialiasedLineEnable;
+	}
+
+	if(mode.slopeScaledDepthBias != this->pipelineState.rasterizerDesc.slopeScaledDepthBias){
+		if(mode.slopeScaledDepthBias == 0.0f)
+			gl.DisablePolygonOffsetFill();
+		else
+			gl.EnablePolygonOffsetFill();
+		gl.PolygonOffset(mode.slopeScaledDepthBias, 0.0f);
+		this->pipelineState.rasterizerDesc.slopeScaledDepthBias = mode.slopeScaledDepthBias;
+	}	
+
+	return true;
+}
+
+bool GPUDevice::setSampleState(const SSampleDesc& mode){
+	if(mode == this->pipelineState.samplingDesc) return true;
+	//ToDo: implement this
+
+	LOG_ERR("not implemented!");
+	return true;
+}
+
+bool GPUDevice::setViewports(const SViewports& mode){
+	if(mode == this->pipelineState.viewports) return true;
+
+	if(mode.numViewports == 1){
+		gl.Viewport(mode.viewports[0].x, mode.viewports[0].y, mode.viewports[0].width, mode.viewports[0].height);
+		
+		if(mode.scissorTest[0] != this->pipelineState.viewports.scissorTest[0]){
+			if(mode.scissorTest[0].enable){
+				gl.EnableScissorTest();
+				gl.Scissor(mode.scissorTest[0].x, mode.scissorTest[0].y, mode.scissorTest[0].width, mode.scissorTest[0].height);
+			}
+			else{
+				gl.DisableScissorTest();
+			}
+		}
+	}
+	else{
+		for(uint i = 0; i < mode.numViewports; ++i){
+			if(mode.viewports[i] != this->pipelineState.viewports.viewports[i])
+				gl.ViewportIndexedf(i, mode.viewports[i].x, mode.viewports[i].y, mode.viewports[i].width, mode.viewports[i].height);
+		}
+		for(uint i = 0; i < mode.numViewports; ++i){
+			if(mode.scissorTest[i] != this->pipelineState.viewports.scissorTest[i]){
+				if(mode.scissorTest[i].enable){
+					gl.EnableScissorTest(i);
+					gl.ScissorIndexed(i, mode.scissorTest[i].x, mode.scissorTest[i].y, mode.scissorTest[i].width, mode.scissorTest[i].height);
+				}
+				else
+					gl.DisableScissorTest(i);
+			}
+		}
+	}
+
+	this->pipelineState.viewports = mode;
+
+	return true;
+}
+
+
+bool GPUDevice::bindShaderProgram(SharedPtr<CShaderProgram>& shader){
+	//ToDo: implement this
+
+	LOG_ERR("not implemented!");
+	return true;
+}
+//------------------------------------------------------------------------------------
+
+// public functions
+//------------------------------------------------------------------------------------
+void GPUDevice::ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear){
+
+	auto& descriptor = rp->getDescriptor();
+
+	bool attachmentClear[RD_MAX_RENDER_ATTACHMENTS]; memset(attachmentClear, 0, sizeof(bool)* RD_MAX_RENDER_ATTACHMENTS);
+	bool depthStencilClear = false;
+
+	for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){
+		if(descriptor.Attachments[i].loadOp == ELoadStoreOp::Clear ||
+		   descriptor.Attachments[i].loadOp == ELoadStoreOp::DontCare)
+			attachmentClear[i] = true;
+		else
+			attachmentClear[i] = false;
+	}
+	if(descriptor.DepthStencil.loadOp == ELoadStoreOp::Clear ||
+	   descriptor.DepthStencil.loadOp == ELoadStoreOp::DontCare)
+		depthStencilClear = true;
+	else
+		depthStencilClear = false;
+
+	//ToDo: implement this, activate coresponding attachment with glDrawBuffers() and glDepthWrite(true/false) & glStencilWrite(true/false) and clear those attachments
+	LOG_ERR("not implemented!");
+	
+}
+//------------------------------------------------------------------------------------
 
 #endif //RD_API_OPENGL4

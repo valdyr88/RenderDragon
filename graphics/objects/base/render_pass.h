@@ -22,6 +22,8 @@ public:
 	CRenderPass(GPUDevice* dev, const SRenderPassDesc& desc) :
 		CGraphicObject(dev), descriptor(desc) {}
 
+	const auto& getDescriptor(){ return descriptor; }
+
 	bool isCompatibleWith(SRenderPassDesc& other){ return descriptor == other; }
 	bool isCompatibleWith(CRenderPass& other){ return this->isCompatibleWith(other.descriptor); }
 

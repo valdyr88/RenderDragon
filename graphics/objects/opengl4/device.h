@@ -60,9 +60,22 @@ protected:
 	CGLState gl;
 	std::list<SharedPtr<CGraphicObject>> objects;
 
+	SPipelineStateDesc pipelineState;
+
 	GPUDevice() = delete;
 
 	SGPUDeviceContext InitOpenGL(SWindow& window);
+
+	bool setBlendState(const SBlendStateDesc& mode);
+	bool setDepthState(const SDepthStateDesc& mode);
+	bool setStencilState(const SStencilStateDesc& mode);
+	bool setPrimitiveTopology(const EPrimitiveTopology& mode);
+	bool setRasterizerState(const SRasterizerStateDesc& mode);
+	bool setSampleState(const SSampleDesc& mode);
+	bool setViewports(const SViewports& mode);
+
+	bool bindShaderProgram(SharedPtr<CShaderProgram>& shader);
+
 public:
 
 	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){
@@ -74,16 +87,29 @@ public:
 	SharedPtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc);
 	SharedPtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc);
 	SharedPtr<CBuffer> CreateBuffer(const SBufferDesc& desc);
-	SharedPtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr);
+	SharedPtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTexture = nullptr);
 	//SharedPtr<CShader> CreateShaderModule(const SShaderDesc& desc);
 	//SharedPtr<CShaderResource> CreateShaderResrouce(const SShaderResourceDesc& desc);
 	SharedPtr<CSampler> CreateSampler(const SShaderResourceDesc& sr, const SSamplerDesc& desc);
 	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count);
 	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count);
 
+	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear);
+
 	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
+
+	friend class CPipelineState;
+	friend class CRenderPass;
+	friend class CBuffer;
+	friend class CFramebuffer;
+	friend class CSampler;
+	friend class CVertexBuffer;
+	friend class CIndexBuffer;
+	friend class CShader;
+	friend class CShaderResource;
 };
 
+SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);
 
 #endif //RD_API_OPENGL4
 #endif //DEVICE_H

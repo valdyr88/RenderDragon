@@ -106,7 +106,7 @@ struct SRasterizerStateDesc {
 	EFillMode fillMode = EFillMode::Solid;
 	ECullMode cullMode = ECullMode::BackFaces;
 	EFrontFace frontFace = EFrontFace::CounterClockwise;
-	bool depthClipEnable = false;
+	bool depthClampEnable = false;
 	bool antialiasedLineEnable = false;
 	int32 depthBias = 0;
 	float depthBiasClamp = 0.0f;
@@ -116,7 +116,7 @@ struct SRasterizerStateDesc {
 		return fillMode == other.fillMode &&
 			cullMode == other.cullMode &&
 			frontFace == other.frontFace &&
-			depthClipEnable == other.depthClipEnable &&
+			depthClampEnable == other.depthClampEnable &&
 			antialiasedLineEnable == other.antialiasedLineEnable &&
 			depthBias == other.depthBias &&
 			depthBiasClamp == other.depthBiasClamp &&
@@ -130,7 +130,7 @@ struct SRasterizerStateDesc {
 		fillMode = other.fillMode;
 		cullMode = other.cullMode;
 		frontFace = other.frontFace;
-		depthClipEnable = other.depthClipEnable;
+		depthClampEnable = other.depthClampEnable;
 		antialiasedLineEnable = other.antialiasedLineEnable;
 		depthBias = other.depthBias;
 		depthBiasClamp = other.depthBiasClamp;
@@ -324,13 +324,13 @@ struct SPipelineStateDesc {
 	SRasterizerStateDesc rasterizerDesc;
 	SDepthStateDesc depthDesc;
 	SStencilStateDesc stencilDesc;
-	EPrimitiveTopology primitiveTopology;
+	EPrimitiveTopology primitiveTopology = EPrimitiveTopology::TriangleList;
 	SSampleDesc samplingDesc;
 	SViewports viewports;
 
 	bool operator == (const SPipelineStateDesc& other) const {
-		return shader == other.shader && //TODO: change pointer (address) comparison to actual object's operator ==
-			renderPass == other.renderPass && //TODO: same as in line above
+		return shader == other.shader && //ToDo: change pointer (address) comparison to actual object's operator ==
+			renderPass == other.renderPass && //ToDo: same as in line above
 			blendDesc == other.blendDesc &&
 			rasterizerDesc == other.rasterizerDesc &&
 			depthDesc == other.depthDesc &&

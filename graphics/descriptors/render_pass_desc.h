@@ -45,6 +45,7 @@ struct SAttachmentDesc {
 struct SRenderPassDesc {
 	uint32 NofAttachments = 0;
 	SAttachmentDesc Attachments[RD_MAX_RENDER_ATTACHMENTS];
+	SAttachmentDesc DepthStencil;
 
 	bool operator == (const SRenderPassDesc& other){
 		if(NofAttachments != other.NofAttachments) return false;
@@ -53,6 +54,7 @@ struct SRenderPassDesc {
 			auto& othrAtt = other.Attachments[i];
 			if(thisAtt != othrAtt) return false;
 		}
+		if(DepthStencil != other.DepthStencil) return false;
 		return true;
 	}
 	bool operator != (const SRenderPassDesc& other){ return !(*this == other); }
@@ -61,6 +63,7 @@ struct SRenderPassDesc {
 		NofAttachments = other.NofAttachments;
 		for(uint i = 0; i < NofAttachments; ++i)
 			Attachments[i] = other.Attachments[i];
+		DepthStencil = other.DepthStencil;
 
 		return *this;
 	}

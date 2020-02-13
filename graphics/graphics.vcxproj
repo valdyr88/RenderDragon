@@ -480,7 +480,6 @@
     <ClInclude Include="objects\base\device.h" />
     <ClInclude Include="objects\base\framebuffer.h" />
     <ClInclude Include="objects\base\pipeline_state.h" />
-    <ClInclude Include="objects\base\platform.h" />
     <ClInclude Include="objects\base\render_pass.h" />
     <ClInclude Include="objects\base\shader.h" />
     <ClInclude Include="objects\base\texture.h" />
@@ -495,7 +494,6 @@
     <ClInclude Include="objects\opengl4\gl\GLState.h" />
     <ClInclude Include="objects\opengl4\gl\wglext.h" />
     <ClInclude Include="objects\opengl4\pipeline_state.h" />
-    <ClInclude Include="objects\opengl4\platform.h" />
     <ClInclude Include="objects\opengl4\render_pass.h" />
     <ClInclude Include="objects\opengl4\shader.h" />
     <ClInclude Include="objects\opengl4\texture.h" />
@@ -512,6 +510,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="objects\device.cpp" />
     <ClCompile Include="objects\opengl4\gl\GLState.cpp" />
+    <ClCompile Include="objects\pipeline_state.cpp" />
+    <ClCompile Include="objects\render_pass.cpp" />
     <ClCompile Include="objects\shader.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />
     <ClCompile Include="utils\platform.cpp" />

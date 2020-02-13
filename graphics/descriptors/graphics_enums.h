@@ -58,7 +58,7 @@ enum class EBlendOperation {
 	Max
 };
 
-//TODO: implement this
+//ToDo: implement this
 enum class ELogicOperation { //not available in GLES2
 	NoOp
 };
@@ -67,6 +67,7 @@ enum class EDepthTestMode {
 	None,
 	Less,
 	LessEqual,
+	Equal,
 	Greater,
 	GreaterEqual,
 };
@@ -84,6 +85,7 @@ enum class EFrontFace {
 };
 
 enum class EFillMode {
+	Point,
 	Wireframe,
 	Solid
 };
