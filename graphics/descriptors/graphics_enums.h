@@ -401,6 +401,15 @@ inline bool isDepthFormat(const ETypedTextureFormat& format){
 inline bool isStencilFormat(const ETypedTextureFormat& format){
 	return isStencilFormat(getFormat(format)); }
 
+enum class ETextureType{
+	Texture1D,
+	Texture2D,
+	Texture3D,
+	TextureCube,
+	Texture1DArray,
+	Texture2DArray,
+	TextureCubeArray,
+};
 
 enum ETextureUsage{
 	ShaderResource = 1 << 0,
@@ -416,6 +425,7 @@ enum class ETextureWrapping{
 };
 
 enum class ETextureFiltering{
+	None,
 	Nearest,
 	Linear,
 	Anisotropic

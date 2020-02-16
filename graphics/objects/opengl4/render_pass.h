@@ -17,7 +17,6 @@ protected:
 	SRenderPassDesc descriptor;
 	CFramebuffer* boundFramebuffer = nullptr;
 	SClearColorValues clearColor;
-
 public:
 	CRenderPass(GPUDevice* dev, const SRenderPassDesc& desc) :
 		CGraphicObject(dev), descriptor(desc) {}
@@ -32,6 +31,8 @@ public:
 	void end(){
 		boundFramebuffer = nullptr;
 	}
+
+	bool doAttachmentsNeedClearing();
 
 	virtual ~CRenderPass() = default;
 };

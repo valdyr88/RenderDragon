@@ -14,6 +14,7 @@
 #include "framebuffer.h"
 #include "render_pass.h"
 #include "shader.h"
+#include "texture.h"
 #include "uniform_buffer.h"
 #include "vertex_buffer.h"
 
@@ -37,6 +38,9 @@ public:
 	UniquePtr<CSampler> CreateSampler(const SSamplerDesc& desc){ return nullptr; }
 	UniquePtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count){ return nullptr; }
 	UniquePtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count){ return nullptr; }
+	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data){ return nullptr; }
+
+	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear){}
 	
 	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
 };

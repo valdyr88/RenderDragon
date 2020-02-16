@@ -252,6 +252,11 @@ SharedPtr<CIndexBuffer> GPUDevice::CreateIndexBuffer(EValueType type, uint32 cou
 	objects.emplace_back(obj);
 	return obj;
 }
+SharedPtr<CTexture> GPUDevice::CreateTexture(const STextureDesc& desc, const STextureRawData& data){
+	auto obj = SharedPtr<CTexture>(new CTexture(this, desc, data));
+	objects.emplace_back(obj);
+	return obj;
+}
 
 //------------------------------------------------------------------------------------
 // gl state setting
@@ -460,11 +465,12 @@ void GPUDevice::ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorV
 
 	bool attachmentClear[RD_MAX_RENDER_ATTACHMENTS]; memset(attachmentClear, 0, sizeof(bool)* RD_MAX_RENDER_ATTACHMENTS);
 	bool depthStencilClear = false;
+	bool colorClear = false;
 
 	for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){
 		if(descriptor.Attachments[i].loadOp == ELoadStoreOp::Clear ||
-		   descriptor.Attachments[i].loadOp == ELoadStoreOp::DontCare)
-			attachmentClear[i] = true;
+		   descriptor.Attachments[i].loadOp == ELoadStoreOp::DontCare){
+			attachmentClear[i] = true; colorClear = true; }
 		else
 			attachmentClear[i] = false;
 	}
@@ -475,8 +481,29 @@ void GPUDevice::ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorV
 		depthStencilClear = false;
 
 	//ToDo: implement this, activate coresponding attachment with glDrawBuffers() and glDepthWrite(true/false) & glStencilWrite(true/false) and clear those attachments
-	LOG_ERR("not implemented!");
+	LOG_WARN("not implemented completely!");
+	GLbitfield flags = 0;
 	
+	this->bindFramebuffer(fb);
+
+	if(colorClear == true){
+		gl.ClearColor(clear.color[0].r, clear.color[0].g, clear.color[0].b, clear.color[0].a);
+		flags |= GL_COLOR_BUFFER_BIT;
+	}
+	if(depthStencilClear == true){
+		gl.ClearDepth(clear.depth);
+		flags |= GL_DEPTH_BUFFER_BIT;
+		gl.ClearStencil(clear.stencil);
+		flags |= GL_STENCIL_BUFFER_BIT;
+	}
+
+	gl.Clear(flags);
+}
+
+void GPUDevice::bindFramebuffer(CFramebuffer* framebuffer){
+	if(boundFramebuffer == framebuffer) return;
+	gl.BindFramebuffer(GL_FRAMEBUFFER, framebuffer->getId());
+	boundFramebuffer = framebuffer;
 }
 //------------------------------------------------------------------------------------
 

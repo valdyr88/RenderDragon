@@ -168,6 +168,9 @@
     <ClInclude Include="objects\opengl4\gl\GLState.h">
       <Filter>Header Files\objects\opengl4\gl</Filter>
     </ClInclude>
+    <ClInclude Include="utils\strings.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -192,6 +195,12 @@
       <Filter>Source Files\objects</Filter>
     </ClCompile>
     <ClCompile Include="objects\render_pass.cpp">
+      <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\framebuffer.cpp">
+      <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\texture.cpp">
       <Filter>Source Files\objects</Filter>
     </ClCompile>
   </ItemGroup>

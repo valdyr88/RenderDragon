@@ -81,6 +81,7 @@ public:
 	const auto& getResourceDescriptor(){ return resourceDescriptor; }
 };
 
+
 struct SShaderDesc{
 	EShaderStage stage = EShaderStage::FragmentShader;
 	std::string source = "";

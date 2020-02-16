@@ -68,7 +68,6 @@ private:
 	GLState_prefix_var int init;
 	GLState_prefix_var GLvoid* pVertexBuffer,*pNormalBuffer,*pTexCoordBuffer,*pColorBuffer;
 	GLState_prefix_var int program_link, previous_program_link;
-	GLState_prefix_var bool OpenGLFunctionsFetched;
 
 	class GLStateOnFuctionReturn{
 		CGLState* pState; const char* FunctionName;
@@ -481,12 +480,10 @@ public:
 		return GetStringFromError(GetError());
 	}
 	forceinline GLState_prefix_func void LogErrors(const char* FunctionName = NULL){
-
-		if(OpenGLFunctionsFetched == false) return;
-#ifdef GLState_LogFunctionCalls
-		if(FunctionName != NULL)
-			LOG( "%s%s\n"), FunctionName, "()") );
-#endif
+		#ifdef GLState_LogFunctionCalls
+			if(FunctionName != NULL)
+				LOG( "%s%s\n"), FunctionName, "()") );
+		#endif
 		bool print_tabs = false;
 		EGLError error = EGLError::EGL_NO_ERROR;
 
@@ -583,6 +580,9 @@ public:
 	}
 	forceinline GLState_prefix_func void ClearDepth(GLclampd depth){
 		 glClearDepth(depth); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void ClearStencil(GLint stencil){
+		glClearStencil(stencil); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void Viewport(GLint x, GLint y, GLsizei width, GLsizei height){
 		 glViewport(x,y,width,height); GLS_OFR return;
@@ -931,7 +931,7 @@ public:
 	forceinline GLState_prefix_func void BindFramebuffer(GLenum target, GLuint framebuffer){
 		 glBindFramebuffer(target,framebuffer); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BindFrameBufferEXT(GLenum mode, GLuint framebuffer){
+	forceinline GLState_prefix_func void BindFramebufferEXT(GLenum mode, GLuint framebuffer){
 		 glBindFramebufferEXT(mode,framebuffer); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindImageTexture(GLuint unit, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format){
@@ -1096,11 +1096,23 @@ public:
 	forceinline GLState_prefix_func void GenTextures(GLsizei n, GLuint* textures){
 		 glGenTextures(n, textures); GLS_OFR return;
 	}
+	forceinline GLState_prefix_func void DeleteTextures(GLsizei n, GLuint* textures){
+		glDeleteTextures(n, textures); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GenerateMipmap(GLenum target){
+		glGenerateMipmap(target); GLS_OFR return;
+	}
 	forceinline GLState_prefix_func void CompressedTexImage2D(GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, void* data){
 		 glCompressedTexImage2D(target,level,internalFormat,width,height,border,imageSize,data); GLS_OFR return;
 	}
+	forceinline GLState_prefix_func void TexImage1D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum type, void* data){
+		glTexImage1D(target, level, internalFormat, width, border, format, type, data); GLS_OFR return;
+	}
 	forceinline GLState_prefix_func void TexImage2D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, void* data){
 		 glTexImage2D(target,level,internalFormat,width,height,border,format,type,data); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void TexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, void* data){
+		glTexImage3D(target, level, internalFormat, width, height, depth, border, format, type, data); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void TexParameteri(GLenum target, GLenum param, GLint val){
 		glTexParameteri(target, param, val); GLS_OFR return;
@@ -1563,6 +1575,83 @@ inline GLenum glenum(const EFillMode& v){
 		default: return (GLenum)GL_NONE;
 	}
 }
-
+inline GLenum glenum(const ETextureType& v){
+	switch(v)
+	{
+		case ETextureType::Texture1D: return (GLenum)GL_TEXTURE_1D;
+		case ETextureType::Texture2D: return (GLenum)GL_TEXTURE_2D;
+		case ETextureType::Texture3D: return (GLenum)GL_TEXTURE_3D;
+		case ETextureType::TextureCube: return (GLenum)GL_TEXTURE_CUBE_MAP;
+		case ETextureType::Texture1DArray: return (GLenum)GL_TEXTURE_1D_ARRAY;
+		case ETextureType::Texture2DArray: return (GLenum)GL_TEXTURE_2D_ARRAY;
+		case ETextureType::TextureCubeArray: return (GLenum)GL_TEXTURE_CUBE_MAP_ARRAY;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const ETextureWrapping& v){
+	switch(v)
+	{
+		case ETextureWrapping::Clamp: return (GLenum)GL_CLAMP;
+		case ETextureWrapping::Wrap: return (GLenum)GL_REPEAT;
+		case ETextureWrapping::Mirror: return (GLenum)GL_MIRRORED_REPEAT;
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const ETextureFiltering& f, const ETextureFiltering& mipf){
+	switch(f)
+	{
+		case ETextureFiltering::Nearest: 
+			switch(mipf)
+			{
+				case ETextureFiltering::None:
+					return GL_NEAREST;
+				case ETextureFiltering::Nearest:
+					return GL_NEAREST_MIPMAP_NEAREST;
+				case ETextureFiltering::Linear:
+					return GL_NEAREST_MIPMAP_LINEAR;
+				case ETextureFiltering::Anisotropic:
+				default: return (GLenum)GL_NONE;
+			}
+		case ETextureFiltering::Linear:
+			switch(mipf)
+			{
+				case ETextureFiltering::None:
+					return GL_LINEAR;
+				case ETextureFiltering::Nearest:
+					return GL_LINEAR_MIPMAP_LINEAR;
+				case ETextureFiltering::Linear:
+					return GL_LINEAR_MIPMAP_LINEAR;
+				case ETextureFiltering::Anisotropic:
+				default: return (GLenum)GL_NONE;
+			}
+		case ETextureFiltering::Anisotropic:
+			switch(mipf)
+			{
+				case ETextureFiltering::None:
+				case ETextureFiltering::Nearest:
+				case ETextureFiltering::Linear:
+				case ETextureFiltering::Anisotropic:
+				default: return (GLenum)GL_NONE;
+			}
+		default: return (GLenum)GL_NONE;
+	}
+}
+inline GLenum glenum(const EValueType& v){
+	switch(v)
+	{
+		case EValueType::int8: return (GLenum)GL_BYTE;
+		case EValueType::int16: return (GLenum)GL_SHORT;
+		case EValueType::int32: return (GLenum)GL_INT;
+		case EValueType::uint8: return (GLenum)GL_UNSIGNED_BYTE;
+		case EValueType::uint16: return (GLenum)GL_UNSIGNED_SHORT;
+		case EValueType::uint24: return (GLenum)GL_UNSIGNED_INT_24_8;
+		case EValueType::uint32: return (GLenum)GL_UNSIGNED_INT;
+		case EValueType::float16: return (GLenum)GL_HALF_FLOAT;
+		case EValueType::float24: return (GLenum)GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+		case EValueType::float32: return (GLenum)GL_FLOAT;
+		case EValueType::float64: return (GLenum)GL_DOUBLE;
+		default: return (GLenum)GL_NONE;
+	}
+}
 #endif //RD_API_OPENGL4
 #endif //GLSTATE_H

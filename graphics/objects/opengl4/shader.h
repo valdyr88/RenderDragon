@@ -4,9 +4,9 @@
 #ifdef RD_API_OPENGL4
 
 #include <vector>
-#include <string>
 #include <list>
 #include "../../utils/pointers.h"
+#include "../../utils/strings.h"
 #include "../../utils/types/types.h"
 #include "../../descriptors/graphics_enums.h"
 #include "../../descriptors/shader_desc.h"
@@ -28,7 +28,6 @@ public:
 	friend class CPipelineState;
 };
 
-
 class CShaderProgram : public CGraphicObject{
 protected:
 	SharedPtr<CShader> shader[EShaderStage::NumStages];
@@ -48,7 +47,6 @@ public:
 	}
 
 	uint getNofStages(){ return numStages; }
-
 	IUniformBuffer* getUniformBuffer(EShaderStage stage, uint bindPoint);
 
 	virtual ~CShaderProgram() = default;

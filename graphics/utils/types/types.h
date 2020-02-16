@@ -87,4 +87,14 @@ inline uint count(EValueSize s){
 	return 0;
 }
 
+const uint64 uint64_max = ((uint64)(0xffffffffffffffff));
+const int64 int64_max = ((int64)(0x7fffffffffffffff));
+const uint32 uint32_max = ((uint32)(0xffffffff));//((uint)-1)
+const int32 int32_max = ((int32)(0x7fffffff));
+const int16 int16_max = ((int16)(0x7fff));
+const uint16 uint16_max = ((uint16)(0xffff));
+const int8 int8_max = ((int8)(0x7f));
+const uint8 uint8_max = ((uint8)(0xff));
+const byte byte_max = ((byte)(0xff));
+
 #endif //TYPES_H

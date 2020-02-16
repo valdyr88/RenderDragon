@@ -14,29 +14,11 @@
 #include "framebuffer.h"
 #include "render_pass.h"
 #include "shader.h"
+#include "texture.h"
 #include "uniform_buffer.h"
 #include "vertex_buffer.h"
 
-#ifdef PLATFORM_WINDOWS
-
-	#define GLEW_STATIC
-	#include "gl\glew.h"
-	#include "gl\gl.h"
-	#include "gl\glext.h"
-	#include "gl\wglext.h"
-
-#endif
-#ifdef PLATFORM_LINUX
-
-	#include <gl/glx.h>
-	#include <X11/X.h>
-	#include <X11/Xlib.h>
-
-#endif
-#ifdef PLATFORM_MAC
-#endif
-
-#include "gl/GLState.h"
+#include "glinclude.h"
 
 struct SGPUDeviceContext{
 #ifdef PLATFORM_WINDOWS
@@ -61,6 +43,7 @@ protected:
 	std::list<SharedPtr<CGraphicObject>> objects;
 
 	SPipelineStateDesc pipelineState;
+	CFramebuffer* boundFramebuffer = nullptr;
 
 	GPUDevice() = delete;
 
@@ -75,6 +58,8 @@ protected:
 	bool setViewports(const SViewports& mode);
 
 	bool bindShaderProgram(SharedPtr<CShaderProgram>& shader);
+
+	void bindFramebuffer(CFramebuffer* framebuffer);
 
 public:
 
@@ -93,6 +78,7 @@ public:
 	SharedPtr<CSampler> CreateSampler(const SShaderResourceDesc& sr, const SSamplerDesc& desc);
 	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count);
 	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count);
+	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data);
 
 	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear);
 
@@ -105,6 +91,7 @@ public:
 	friend class CSampler;
 	friend class CVertexBuffer;
 	friend class CIndexBuffer;
+	friend class CTexture;
 	friend class CShader;
 	friend class CShaderResource;
 };

@@ -26,8 +26,6 @@ int CGLState::program_link = 0,GLState::previous_program_link = 0;
 GLState_prefix_func void CGLState::Init(){
 	if(init) return;
 
-	OpenGLFunctionsFetched = false;
-
 	ACTIVE_TEXTURE_ID = -1; ACTIVE_FRAMEBUFFER = -1;
 	VERTEX_ARRAY_ENABLED = VERTEX_ARRAY_ENABLED = TEXTURE_COORD_ARRAY_ENABLED = COLOR_ARRAY_ENABLED = false;	
 	MATRIX_MODE = -1; BIND_TEXTURE1D_ID = -1; BIND_TEXTURE2D_ID = -1; BIND_TEXTURE3D_ID = -1;
