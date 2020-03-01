@@ -15,6 +15,8 @@
 #define LOG_WARN(format, ...)	printf_s("%s() Warning: " __FUNCTION__ "() " format "\n", __FUNCTION__, __VA_ARGS__)
 #define LOG(format, ...)		printf_s(format "\n", __VA_ARGS__)
 
+#define ASSERT(x) {if(!(x)) LOG_ERR(#x" is false");} 
+
 #else
 
 #define LOG_ERR(format, ...)

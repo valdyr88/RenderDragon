@@ -473,7 +473,7 @@ enum class EShaderResourceType{
 	UniformBuffer
 };
 
-enum class EShaderResourceUpdateType{
+enum class EShaderResourceUsageType{
 	Static,
 	Mutable,
 	Dynamic

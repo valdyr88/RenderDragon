@@ -472,6 +472,7 @@
     <ClInclude Include="descriptors\pipeline_state_desc.h" />
     <ClInclude Include="descriptors\render_pass_desc.h" />
     <ClInclude Include="descriptors\shader_desc.h" />
+    <ClInclude Include="descriptors\shader_parser.h" />
     <ClInclude Include="descriptors\texture_desc.h" />
     <ClInclude Include="descriptors\uniform_buffer_desc.h" />
     <ClInclude Include="descriptors\vertex_buffer_desc.h" />
@@ -482,6 +483,7 @@
     <ClInclude Include="objects\base\pipeline_state.h" />
     <ClInclude Include="objects\base\render_pass.h" />
     <ClInclude Include="objects\base\shader.h" />
+    <ClInclude Include="objects\base\shader_resource_manager.h" />
     <ClInclude Include="objects\base\texture.h" />
     <ClInclude Include="objects\base\uniform_buffer.h" />
     <ClInclude Include="objects\base\vertex_buffer.h" />
@@ -499,10 +501,12 @@
     <ClInclude Include="objects\opengl4\texture.h" />
     <ClInclude Include="objects\opengl4\uniform_buffer.h" />
     <ClInclude Include="objects\opengl4\vertex_buffer.h" />
+    <ClInclude Include="utils\containers.h" />
     <ClInclude Include="utils\log.h" />
     <ClInclude Include="utils\platform.h" />
     <ClInclude Include="utils\platform_defines.h" />
     <ClInclude Include="utils\pointers.h" />
+    <ClInclude Include="utils\singleton.h" />
     <ClInclude Include="utils\strings.h" />
     <ClInclude Include="utils\types\types.h" />
     <ClInclude Include="utils\types\vectypes.h" />
@@ -515,6 +519,7 @@
     <ClCompile Include="objects\pipeline_state.cpp" />
     <ClCompile Include="objects\render_pass.cpp" />
     <ClCompile Include="objects\shader.cpp" />
+    <ClCompile Include="objects\shader_resource_manager.cpp" />
     <ClCompile Include="objects\texture.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />
     <ClCompile Include="utils\platform.cpp" />

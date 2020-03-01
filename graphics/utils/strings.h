@@ -26,8 +26,8 @@ namespace str{
 		}
 	*/
 
-	template<typename Type> inline size_t strleng(const Type* str){ if(str == NULL) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i); return i; }
-	inline size_t cstrleng(const char* str){ if(str == NULL) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i); return i; }
+	template<typename Type> inline size_t strleng(const Type* str){ if(str == nullptr) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i); return i; }
+	inline size_t cstrleng(const char* str){ if(str == nullptr) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i); return i; }
 
 	template<typename Type> inline ::std::string to_std_string(Type* str){
 
@@ -44,7 +44,7 @@ namespace str{
 	}
 
 	template<typename Type1, typename Type2> inline bool copystr(const Type1* source, Type2* dest, size_t dest_len){
-		if(source == NULL || dest == NULL) return false;
+		if(source == nullptr || dest == nullptr) return false;
 
 		size_t i = 0; for(; source[i] != 0 && i < dest_len - 1; ++i){ dest[i] = (Type2)source[i]; }
 		dest[i] = 0;
@@ -54,13 +54,13 @@ namespace str{
 
 	template<typename Type2, typename Type1> inline Type2* mkstr(const Type1* source)
 	{
-		if(source == NULL) return NULL;
+		if(source == nullptr) return nullptr;
 
 		size_t size = strleng(source);
 		Type2* outstr = __new Type2[size + 1];
 
 		if(copystr(source, outstr, size + 1) == false){
-			__release_array(outstr); return NULL;
+			__release_array(outstr); return nullptr;
 		}
 
 		return outstr;
@@ -94,10 +94,10 @@ namespace str{
 		}
 	}
 
-	template<typename Type1, typename Type2> inline Type2* find_first_occurence(Type1* String, Type2* MainString, size_t strlenString = 0)
+	template<typename Type1, typename Type2> inline Type2* find_first_occurence(Type1* String, Type2* MainString, size_t strlenString = 0, size_t* out_position = nullptr)
 	{
-		if(MainString == NULL) return NULL;
-		if(String == NULL) return MainString;
+		if(MainString == nullptr) return nullptr;
+		if(String == nullptr) return MainString;
 
 		size_t charsFound = 0; if(strlenString == 0) strlenString = strleng(String);
 
@@ -106,27 +106,29 @@ namespace str{
 			if(MainString[i] == String[0]){
 				Type2* ptr = &MainString[i];
 				for(charsFound = 0; charsFound <= strlenString; ++charsFound){
-					if(ptr[charsFound] != String[charsFound])
+					if(ptr[charsFound] != String[charsFound]){
+						if(out_position != nullptr)* out_position = i;
 						break;
+					}
 				}
 				if(charsFound == strlenString) return ptr;
 				else charsFound = 0;
 			}
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	template<typename Type1, typename Type2> inline Type2* skip_string_in_string(Type1* StringToSkip, Type2* MainString, bool SearchJustFromBegining)
 	{
-		if(MainString == NULL) return NULL;
-		if(StringToSkip == NULL) return MainString;
+		if(MainString == nullptr) return nullptr;
+		if(StringToSkip == nullptr) return MainString;
 
 		Type2* outPtr = MainString; size_t strlenString = strleng(StringToSkip);
 		Type2* firstOccurencePtr = find_first_occurence(StringToSkip, MainString);
 
 		if(SearchJustFromBegining == true){
-			if(firstOccurencePtr != MainString) return NULL;
+			if(firstOccurencePtr != MainString) return nullptr;
 			else return (firstOccurencePtr + strlenString + 1);
 		}
 		else{ return (firstOccurencePtr + strlenString + 1); }
@@ -147,10 +149,10 @@ namespace str{
 		return false;
 	}
 
-	//Copies next tag from string Line into outTag. Returns number of copied and skipped wChars. outLine is a pointer to wChar* that points to Line[copied + skipped] or NULL if copied + skipped > strlen(Line);
+	//Copies next tag from string Line into outTag. Returns number of copied and skipped wChars. outLine is a pointer to wChar* that points to Line[copied + skipped] or nullptr if copied + skipped > strlen(Line);
 	template<typename Type> inline size_t get_next_tag_from_string(Type* Line, Type* Delimiters, Type* outTag, int lenTag, Type** outLine){
-		if(Line == NULL) return -1;
-		size_t l = 0; size_t i = 0; --lenTag; outTag[0] = 0; *outLine = NULL;
+		if(Line == nullptr) return -1;
+		size_t l = 0; size_t i = 0; --lenTag; outTag[0] = 0; *outLine = nullptr;
 
 		for(i = 0; Line[i] != 0; ++i){
 
@@ -171,10 +173,10 @@ namespace str{
 		return i;
 	}
 
-	//Copies next tag from string Line into outTag. Tags starting with StringDelimiter are treated as whole tags without the StringDelimiter removed. Returns number of copied and skipped wChars. outLine is a pointer to wChar* that points to Line[copied + skipped] or NULL if copied + skipped > strlen(Line);
+	//Copies next tag from string Line into outTag. Tags starting with StringDelimiter are treated as whole tags without the StringDelimiter removed. Returns number of copied and skipped wChars. outLine is a pointer to wChar* that points to Line[copied + skipped] or nullptr if copied + skipped > strlen(Line);
 	template<typename Type> inline size_t get_next_tag_from_string(Type* Line, Type* Delimiters, Type* StringDelimiters, Type* outTag, int lenTag, Type** outLine){
-		if(Line == NULL) return -1;
-		size_t l = 0; size_t i = 0; --lenTag; outTag[0] = 0; *outLine = NULL;
+		if(Line == nullptr) return -1;
+		size_t l = 0; size_t i = 0; --lenTag; outTag[0] = 0; *outLine = nullptr;
 		bool StringDelimiterOpen = false;
 
 		for(i = 0; Line[i] != 0; ++i){
@@ -326,7 +328,7 @@ namespace str{
 				++i;
 			}
 
-		} while(Str != NULL && i < maxElements);
+		} while(Str != nullptr && i < maxElements);
 		return i;
 	}
 
@@ -375,7 +377,7 @@ namespace str{
 	}
 
 	template<typename Type1, typename Type2> inline bool string_has_substring(Type1* string, Type2* substring){
-		return find_first_occurence(substring, string) != NULL;
+		return find_first_occurence(substring, string) != nullptr;
 	}
 
 
@@ -391,7 +393,7 @@ namespace str{
 	*/
 	inline bool print_to_string(char* out_string, size_t len_out_string, char* format, ...){
 
-		if(out_string == NULL) return false; if(len_out_string == 0) return false;
+		if(out_string == nullptr) return false; if(len_out_string == 0) return false;
 
 		va_list argList;
 		va_start(argList, format);
@@ -405,7 +407,7 @@ namespace str{
 
 	inline bool print_to_string(wchar_t* out_string, size_t len_out_string, wchar_t* format, ...){
 
-		if(out_string == NULL) return false; if(len_out_string == 0) return false;
+		if(out_string == nullptr) return false; if(len_out_string == 0) return false;
 
 		va_list argList;
 		va_start(argList, format);
@@ -425,7 +427,7 @@ namespace str{
 	}
 
 	template<typename Type> inline bool shift_string(Type* string, size_t size, int location, int shift){
-		if(string == NULL) return false;
+		if(string == nullptr) return false;
 		int start = location + shift;
 		if(start < 0){ return false; }
 
@@ -439,7 +441,7 @@ namespace str{
 	}
 
 	template<typename Type1, typename Type2> bool container_has_string(::std::list<Type1>& container, Type2* string){
-		if(string == NULL) return false;
+		if(string == nullptr) return false;
 
 		for(uint i = 0; i < container.size(); ++i){
 			Type1* container_string = &container[i];
@@ -449,11 +451,11 @@ namespace str{
 	}
 
 	template<typename Type1, typename Type2> inline size_t strleng(const Type1* str, Type2* delimiters){
-		size_t i = 0; for(i = 0; str[i] != NULL && string_contains_char(delimiters, str[i]) == false; ++i); return i;
+		size_t i = 0; for(i = 0; str[i] != nullptr && string_contains_char(delimiters, str[i]) == false; ++i); return i;
 	}
 
 	template<typename Type1, typename Type2> inline void get_file_extension(const Type1* path, Type2* dest_str, size_t dest_leng){
-		if(dest_str == NULL || path == NULL || dest_leng == 0) return;
+		if(dest_str == nullptr || path == nullptr || dest_leng == 0) return;
 		int strlength = (int)strleng(path);
 
 		for(int i = strlength - 1; i >= 0; --i){

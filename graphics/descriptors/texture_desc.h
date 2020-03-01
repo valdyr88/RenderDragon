@@ -28,7 +28,7 @@ struct STextureDesc{
 	uint32 usageFlags = 0x00000000;
 	bool bGenMipmaps = true; //no comparing
 
-	bool operator == (const STextureDesc& other){
+	bool operator == (const STextureDesc& other) const{
 		return valueType == other.valueType &&
 			format == other.format &&
 			type == other.type &&
@@ -37,7 +37,7 @@ struct STextureDesc{
 			depth == other.depth &&
 			usageFlags == other.usageFlags;
 	}
-	bool operator != (const STextureDesc& other){ return !(*this == other); }
+	bool operator != (const STextureDesc& other) const{ return !(*this == other); }
 
 	STextureDesc& operator = (const STextureDesc& other){
 		type = other.type;

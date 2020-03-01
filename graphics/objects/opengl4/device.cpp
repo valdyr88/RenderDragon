@@ -237,8 +237,8 @@ SharedPtr<CFramebuffer> GPUDevice::CreateFramebuffer(const SRenderPassDesc& desc
 }
 //SharedPtr<CShader> GPUDevice::CreateShaderModule(const SShaderDesc& desc);
 //SharedPtr<CShaderResource> GPUDevice::CreateShaderResrouce(const SShaderResourceDesc& desc);
-SharedPtr<CSampler> GPUDevice::CreateSampler(const SShaderResourceDesc& sr, const SSamplerDesc& desc){
-	auto obj = SharedPtr<CSampler>(new CSampler(this, sr, desc));
+SharedPtr<CSampler> GPUDevice::CreateSampler(const SSamplerDesc& desc){
+	auto obj = SharedPtr<CSampler>(new CSampler(this, desc));
 	objects.emplace_back(obj);
 	return obj;
 }

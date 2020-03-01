@@ -10,8 +10,8 @@
 #define NewShared std::make_shared
 
 #define __new new
-#define __release_ptr(x) if(x != 0){ delete x; x = nullptr; }
-#define __release_array(x) if(x != 0){ delete[] x; x = nullptr; }
+#define __release_ptr(x) if((x) != nullptr){ delete (x); (x) = nullptr; }
+#define __release_array(x) if((x) != nullptr){ delete[] (x); (x) = nullptr; }
 
 #include "types/types.h"
 

@@ -16,7 +16,7 @@ struct SAttachmentDesc {
 	ELoadStoreOp stencilLoadOp = ELoadStoreOp::Clear;
 	ELoadStoreOp stencilStoreOp = ELoadStoreOp::Store;
 
-	bool operator == (const SAttachmentDesc& other){
+	bool operator == (const SAttachmentDesc& other) const{
 		return format == other.format &&
 				valueType == other.valueType &&
 				usageFlags == other.usageFlags &&
@@ -26,7 +26,7 @@ struct SAttachmentDesc {
 				stencilLoadOp == other.stencilLoadOp &&
 				stencilStoreOp == other.stencilStoreOp;
 	}
-	bool operator != (const SAttachmentDesc& other){ return !(*this == other); }
+	bool operator != (const SAttachmentDesc& other) const{ return !(*this == other); }
 
 	SAttachmentDesc& operator = (const SAttachmentDesc& other) {
 		format = other.format;
@@ -47,7 +47,7 @@ struct SRenderPassDesc {
 	SAttachmentDesc Attachments[RD_MAX_RENDER_ATTACHMENTS];
 	SAttachmentDesc DepthStencil;
 
-	bool operator == (const SRenderPassDesc& other){
+	bool operator == (const SRenderPassDesc& other) const{
 		if(NofAttachments != other.NofAttachments) return false;
 		for(uint i = 0; i < NofAttachments; ++i){
 			auto& thisAtt = Attachments[i];
@@ -57,7 +57,7 @@ struct SRenderPassDesc {
 		if(DepthStencil != other.DepthStencil) return false;
 		return true;
 	}
-	bool operator != (const SRenderPassDesc& other){ return !(*this == other); }
+	bool operator != (const SRenderPassDesc& other) const{ return !(*this == other); }
 
 	SRenderPassDesc& operator = (const SRenderPassDesc& other){
 		NofAttachments = other.NofAttachments;

@@ -3,6 +3,8 @@
 #include "device.h"
 #include "texture.h"
 
+//ToDo: loading of different images with stb image library
+
 bool CTexture::ApplySampler(const SSamplerDesc& s){
 	if(device == nullptr) return false;
 	if(sampler == s) return true;
@@ -34,7 +36,6 @@ bool CTexture::Create(const STextureRawData& ptr){
 		device->gl.TexParameteri(target, GL_TEXTURE_MIN_FILTER, glenum(sampler.minFilter, sampler.mipFilter));
 		device->gl.TexParameteri(target, GL_TEXTURE_MAG_FILTER, glenum(sampler.magFilter, ETextureFiltering::None));
 		
-		//ToDo: bug, width/height/depth need to lower depending on mip level (i)!
 		if(ptr.slices != nullptr){
 			switch(descriptor.type)
 			{

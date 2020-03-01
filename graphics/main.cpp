@@ -1,6 +1,38 @@
 #include "include.h"
+#include "descriptors/shader_parser.h"
+
+const char* include_list[] = 
+{
+	"Shaders/include/functions.glsl",
+	"Shaders/include/defines.glsl",
+	"Shaders/error_shader.glsl",
+	nullptr
+};
+
+struct CNekiSingletonData{
+	int b = 0;
+};
 
 int main(){
+
+	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
+	for(uint i = 0; include_list[i] != nullptr; ++i)
+		srcList->add(include_list[i], getFileStringContents(include_list[i]));
+
+	CNekiSingletonData* nekisingle = CSingleton<CNekiSingletonData>::get();
+	nekisingle->b = 1;
+
+
+	CShaderDefines* globalDefines = CSingleton<CShaderDefines>::get();
+	globalDefines->add("DEBUG", "1");
+	globalDefines->add("HDR_ENABLE", "true");
+	globalDefines->add("NEKIDEFINE", "0x001");
+
+	TestIncludes("Shaders/simple.ps.glsl");
+
+
+
+
 
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
@@ -14,10 +46,12 @@ int main(){
 
 	dev->InitContextOnWindow(window);
 	
-	SShaderResourceDesc desc = {
+	SShaderResourceBindingDesc desc = {
+		0, 0, "name",
 		EShaderResourceType::UniformBuffer,
-		EShaderResourceUpdateType::Dynamic,
-		0x00000000
+		0x00000000,
+		EShaderResourceUsageType::Dynamic,
+		0
 	};
 
 	struct UBStruct{
@@ -34,7 +68,7 @@ int main(){
 		{ EValueType::float32, EValueSize::scalar, 1, "intensity"}
 	};
 
-	auto shub = CUniformBuffer<UBStruct>::CreateUniformBuffer(dev.get(), desc, "UBStruct",
+	auto shub = CUniformBuffer<UBStruct>::CreateUniformBuffer(dev.get(), "UBStruct",
 				{
 					{ EValueType::float32, EValueSize::vec4, 1, "color"},
 					{ EValueType::float32, EValueSize::scalar, 1, "time"},
@@ -51,13 +85,13 @@ int main(){
 	ub.setUniform("color", vec4(0.1f, 0.7f, 0.8f, 1.0f));
 	ub.setUniform("color", 1.2f);
 
-	SShaderResourceDesc srdesc(EShaderResourceType::Texture);
+	SShaderResourceBindingDesc srdesc(0, 0, "name", EShaderResourceType::Texture, EShaderStage::FragmentShader);
 	{
-		srdesc.stages = EShaderStage::VertexShader | EShaderStage::FragmentShader;
+		srdesc.shaderStages = EShaderStage::VertexShader | EShaderStage::FragmentShader;
 		srdesc.type = EShaderResourceType::Texture;
-		srdesc.updateType = EShaderResourceUpdateType::Static;
+		srdesc.usage = EShaderResourceUsageType::Static;
 	};
-	SharedPtr<CShaderResource> sr = SharedPtr<CShaderResource>(new CShaderResource(dev.get(), srdesc));
+	SharedPtr<CShaderResource> sr = SharedPtr<CShaderResource>(new CShaderResource(dev.get(), EShaderResourceType::Texture));
 
 	SShaderDesc fsdesc;
 	{
@@ -137,6 +171,30 @@ int main(){
 	}
 
 	auto framebuffer = dev->CreateFramebuffer(rpdesc, { texture });
+	
+	auto srm = dev->GetShaderResourceManager();
+	auto reset = srm.GetResourceSetDesc({
+		{0, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{0, 1, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{0, 2, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+	});
+
+	auto reset2 = srm.GetResourceSetDesc({
+		{1, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{1, 1, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{1, 2, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+	});
+
+	ASSERT(reset.get() == reset2.get());
+
+	CTextureView tv(dev.get(), texture);
+	shub;
+	SSamplerDesc smpldsc;
+	CSampler sm(dev.get(), smpldsc);
+
+	auto resrc = reset->GetResourceSetWith({ &tv, shub.get(), &sm });
+
+	resrc->getDescriptor();
 
 	MainPlatformLoop();
 	

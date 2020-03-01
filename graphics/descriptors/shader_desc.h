@@ -6,40 +6,11 @@
 #include "../utils/pointers.h"
 #include "../utils/types/types.h"
 #include "../utils/types/vectypes.h"
+#include "../utils/strings.h"
 #include "graphics_enums.h"
 #include "graphic_object.h"
 
 class GPUDevice;
-
-struct SShaderResourceDesc{
-	EShaderResourceType type;
-	EShaderResourceUpdateType updateType = EShaderResourceUpdateType::Static;
-	uint stages = 0x00000000; //bitflag of EShaderStage
-
-	uint operator |= (EShaderStage& stage){ stages |= stage; return stages; }
-	uint operator | (EShaderStage& stage){ return stages | stage; }
-	uint operator |= (uint stage){ stages |= stage; return stages; }
-	uint operator | (uint stage){ return stages | stage; }
-
-	SShaderResourceDesc(EShaderResourceType t, EShaderResourceUpdateType ut = EShaderResourceUpdateType::Static, uint s = 0x00000000) :
-		type(t), updateType(ut), stages(s) {}
-	SShaderResourceDesc(const SShaderResourceDesc& other) :
-		type(other.type), updateType(other.updateType), stages(other.stages){}
-
-	bool operator == (const SShaderResourceDesc& other){
-		return type == other.type &&
-			updateType == other.updateType &&
-			stages == other.stages;
-	}
-	bool operator != (const SShaderResourceDesc& other){ return !(*this == other); }
-
-	SShaderResourceDesc& operator = (const SShaderResourceDesc& other){
-		type = other.type;
-		updateType = other.updateType;
-		stages = other.stages;
-		return *this;
-	}
-};
 
 struct SSamplerDesc{
 	ETextureWrapping uWrapping = ETextureWrapping::Wrap;
@@ -49,7 +20,7 @@ struct SSamplerDesc{
 	ETextureFiltering magFilter = ETextureFiltering::Linear;
 	ETextureFiltering mipFilter = ETextureFiltering::Linear;
 
-	bool operator == (const SSamplerDesc& other){
+	bool operator == (const SSamplerDesc& other) const{
 		return uWrapping == other.uWrapping &&
 			vWrapping == other.wWrapping &&
 			wWrapping == other.wWrapping &&
@@ -57,7 +28,7 @@ struct SSamplerDesc{
 			magFilter == other.magFilter &&
 			mipFilter == other.mipFilter;
 	}
-	bool operator != (const SSamplerDesc& other){ return !(*this == other); }
+	bool operator != (const SSamplerDesc& other) const{ return !(*this == other); }
 
 	SSamplerDesc& operator = (const SSamplerDesc& other){
 		uWrapping = other.uWrapping;
@@ -70,15 +41,17 @@ struct SSamplerDesc{
 	}
 };
 
+//-----------------------------------------------------------------------------------
+
 class CShaderResource : public CGraphicObject{
 protected:
-	SShaderResourceDesc resourceDescriptor;
-public:
-	CShaderResource(GPUDevice* dev, const SShaderResourceDesc& desc) : 
-		CGraphicObject(dev), resourceDescriptor(desc){}
-	const SShaderResourceDesc getDescriptor(){ return resourceDescriptor; }
+	EShaderResourceType type;
 
-	const auto& getResourceDescriptor(){ return resourceDescriptor; }
+	CShaderResource() = delete;
+public:
+	CShaderResource(GPUDevice* dev, const EShaderResourceType& t) :
+		CGraphicObject(dev), type(t){}
+	const EShaderResourceType getResourceType(){ return type; }
 };
 
 
@@ -95,9 +68,11 @@ struct SShaderDesc{
 class CSampler : public CShaderResource{
 protected:
 	SSamplerDesc descriptor;
+
+	CSampler() = delete;
 public:
-	CSampler(GPUDevice* dev, const SShaderResourceDesc& sr, const SSamplerDesc& desc) :
-		CShaderResource(dev, sr), descriptor(desc){}
+	CSampler(GPUDevice* dev, const SSamplerDesc& desc) :
+		CShaderResource(dev, EShaderResourceType::Sampler), descriptor(desc){}
 
 	const auto& getDescriptor(){ return descriptor; }
 };
@@ -108,18 +83,22 @@ class CTextureView : public CShaderResource{
 protected:
 	SharedPtr<CTexture> texture;
 	SharedPtr<CSampler> sampler;
-public:
-	CTextureView(GPUDevice* dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx) :
-		CShaderResource(dev, sr), texture(tx), sampler(nullptr){}
 
-	CTextureView(GPUDevice* dev, const SShaderResourceDesc& sr, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
-		CShaderResource(dev, sr), texture(tx), sampler(s){}
+	CTextureView() = delete;
+public:
+	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx) :
+		CShaderResource(dev, EShaderResourceType::Texture), texture(tx), sampler(nullptr){}
+
+	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
+		CShaderResource(dev, EShaderResourceType::CombinedTexSampler), texture(tx), sampler(s){}
 };
 
 class IUniformBuffer : public CShaderResource{
 protected:
+
+	IUniformBuffer() = delete;
 public:
-	IUniformBuffer(GPUDevice* dev, const SShaderResourceDesc& sr) : CShaderResource(dev, sr){}
+	IUniformBuffer(GPUDevice* dev) : CShaderResource(dev, EShaderResourceType::UniformBuffer){}
 
 	virtual bool setUniform(const char* name, float value){ LOG_ERR("not implemented!"); return false; }
 	virtual bool setUniform(const char* name, vec2 value){ LOG_ERR("not implemented!"); return false; }

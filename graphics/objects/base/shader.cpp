@@ -9,7 +9,7 @@ IUniformBuffer* CShader::getUniformBuffer(uint bindPoint)
 	for(auto it = resources.begin(); it != resources.end(); ++it){
 		auto& resource = *it;
 		if(resource.first == bindPoint){
-			if(resource.second->getDescriptor().type == EShaderResourceType::UniformBuffer)
+			if(resource.second->getResourceType() == EShaderResourceType::UniformBuffer)
 				return (IUniformBuffer*) resource.second.get();
 			else
 				return nullptr;

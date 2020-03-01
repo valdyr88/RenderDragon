@@ -21,13 +21,13 @@ struct SUniformMap
 
 	SUniformMap(){ type = EValueType::float32; size = EValueSize::scalar; count = 1; name = ""; offset = 0; };
 
-	bool operator ==(const SUniformMap& other){
+	bool operator ==(const SUniformMap& other) const{
 		return type == other.type &&
 			size == other.size &&
 			count == other.count &&
 			name == other.name;
 	}
-	bool operator !=(const SUniformMap& other){ return !(*this == other); }
+	bool operator !=(const SUniformMap& other) const{ return !(*this == other); }
 
 	SUniformMap& operator =(SUniformMap& other){
 		type = other.type;

@@ -17,6 +17,7 @@
 #include "texture.h"
 #include "uniform_buffer.h"
 #include "vertex_buffer.h"
+#include "shader_resource_manager.h"
 
 #include "glinclude.h"
 
@@ -75,7 +76,7 @@ public:
 	SharedPtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTexture = nullptr);
 	//SharedPtr<CShader> CreateShaderModule(const SShaderDesc& desc);
 	//SharedPtr<CShaderResource> CreateShaderResrouce(const SShaderResourceDesc& desc);
-	SharedPtr<CSampler> CreateSampler(const SShaderResourceDesc& sr, const SSamplerDesc& desc);
+	SharedPtr<CSampler> CreateSampler(const SSamplerDesc& desc);
 	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count);
 	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count);
 	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data);

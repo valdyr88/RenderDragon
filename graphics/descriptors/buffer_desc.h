@@ -8,11 +8,11 @@ struct SBufferDesc{
 	EBufferType type;
 	uint32 size;
 
-	bool operator == (const SBufferDesc& other){
+	bool operator == (const SBufferDesc& other) const{
 		return type == other.type &&
 			size == other.size;
 	}
-	bool operator != (const SBufferDesc& other){ return !(*this == other); }
+	bool operator != (const SBufferDesc& other) const{ return !(*this == other); }
 
 	SBufferDesc operator =(const SBufferDesc& other){
 		type = other.type;

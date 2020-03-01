@@ -22,6 +22,8 @@ public:
 	CShader(GPUDevice* dev, const SShaderDesc& desc) :
 		CGraphicObject(dev), descriptor(desc){}
 
+	const auto& getDescriptor(){ return descriptor; }
+
 	virtual ~CShader() = default;
 
 	friend class CShaderProgram;

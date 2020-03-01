@@ -21,8 +21,8 @@ public:
 
 	const auto& getDescriptor(){ return descriptor; }
 
-	bool operator == (CPipelineState& other) { return descriptor == other.descriptor; }
-	bool operator == (SPipelineStateDesc& desc) { return descriptor == desc; }
+	bool operator == (CPipelineState& other) const{ return descriptor == other.descriptor; }
+	bool operator == (SPipelineStateDesc& desc) const{ return descriptor == desc; }
 
 	bool bind();
 

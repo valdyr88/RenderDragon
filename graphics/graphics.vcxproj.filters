@@ -171,6 +171,18 @@
     <ClInclude Include="utils\strings.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
+    <ClInclude Include="utils\singleton.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="descriptors\shader_parser.h">
+      <Filter>Header Files\descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\containers.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\base\shader_resource_manager.h">
+      <Filter>Header Files\objects\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -201,6 +213,9 @@
       <Filter>Source Files\objects</Filter>
     </ClCompile>
     <ClCompile Include="objects\texture.cpp">
+      <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\shader_resource_manager.cpp">
       <Filter>Source Files\objects</Filter>
     </ClCompile>
   </ItemGroup>

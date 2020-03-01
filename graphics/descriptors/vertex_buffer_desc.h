@@ -13,13 +13,13 @@ struct SVertexAttribute{
 	std::string name = "";
 	bool bIsNormalized = false;
 
-	bool operator == (SVertexAttribute& other){
+	bool operator == (SVertexAttribute& other) const{
 		return type == other.type &&
 			count == other.count &&
 			bIsNormalized == other.bIsNormalized &&
 			name == other.name;
 	}
-	bool operator != (SVertexAttribute& other){ return !(*this == other); }
+	bool operator != (SVertexAttribute& other) const{ return !(*this == other); }
 
 	SVertexAttribute& operator = (const SVertexAttribute& other){
 		type = other.type;
