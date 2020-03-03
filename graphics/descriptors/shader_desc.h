@@ -2,6 +2,7 @@
 #define SHADER_DESC_H
 
 #include <list>
+#include <vector>
 #include "../utils/log.h"
 #include "../utils/pointers.h"
 #include "../utils/types/types.h"
@@ -11,6 +12,65 @@
 #include "graphic_object.h"
 
 class GPUDevice;
+//-----------------------------------------------------------------------------------
+
+struct SShaderResourceBindingDesc{
+	uint32 setNumber = 0;
+	uint32 bindPoint = 0;
+	std::string name = "";
+
+	EShaderResourceType type;
+	EShaderResourceUsageType usage = EShaderResourceUsageType::Static;
+	uint32 shaderStages = 0x00000000; //bitflag of EShaderStage
+	uint32 count = 0;
+
+	uint operator |= (EShaderStage& stage){ shaderStages |= stage; return shaderStages; }
+	uint operator | (EShaderStage& stage){ return shaderStages | stage; }
+	uint operator |= (uint stage){ shaderStages |= stage; return shaderStages; }
+	uint operator | (uint stage){ return shaderStages | stage; }
+
+	SShaderResourceBindingDesc(uint32 setNum, uint32 bindPt, std::string nam,
+							   EShaderResourceType t, uint s, EShaderResourceUsageType ut = EShaderResourceUsageType::Static, uint32 cnt = 1) :
+		setNumber(setNum), bindPoint(bindPt), name(nam),
+		type(t), shaderStages(s), usage(ut), count(cnt) {}
+	SShaderResourceBindingDesc(const SShaderResourceBindingDesc& other) :
+		type(other.type), usage(other.usage), shaderStages(other.shaderStages),
+		count(other.count), name(other.name), bindPoint(other.bindPoint), setNumber(other.setNumber){}
+
+	//Note: this operator doesn't check setNumber.
+	bool operator == (const SShaderResourceBindingDesc& other) const{
+		return type == other.type &&
+			usage == other.usage &&
+			shaderStages == other.shaderStages &&
+			count == other.count &&
+			//setNumber == other.setNumber && //this is a check without set number.
+			bindPoint == other.bindPoint &&
+			name == other.name;
+	}
+	//Note: this operator doesn't check setNumber.
+	bool operator != (const SShaderResourceBindingDesc& other) const{ return !(*this == other); }
+
+	SShaderResourceBindingDesc& operator = (const SShaderResourceBindingDesc& other){
+		type = other.type;
+		usage = other.usage;
+		shaderStages = other.shaderStages;
+		count = other.count;
+		setNumber = other.setNumber;
+		bindPoint = other.bindPoint;
+		name = other.name;
+		return *this;
+	}
+};
+
+//-----------------------------------------------------------------------------------
+
+struct SShaderDesc{
+	EShaderStage stage = EShaderStage::FragmentShader;
+	std::string source = "";
+	std::vector<SShaderResourceBindingDesc> bindings;
+};
+
+//-----------------------------------------------------------------------------------
 
 struct SSamplerDesc{
 	ETextureWrapping uWrapping = ETextureWrapping::Wrap;
@@ -42,6 +102,8 @@ struct SSamplerDesc{
 };
 
 //-----------------------------------------------------------------------------------
+// shader resources
+//-----------------------------------------------------------------------------------
 
 class CShaderResource : public CGraphicObject{
 protected:
@@ -54,16 +116,6 @@ public:
 	const EShaderResourceType getResourceType(){ return type; }
 };
 
-
-struct SShaderDesc{
-	EShaderStage stage = EShaderStage::FragmentShader;
-	std::string source = "";
-	std::list<std::pair<uint, SharedPtr<CShaderResource>>> resources;
-};
-
-//-----------------------------------------------------------------------------------
-// actual resources (api abstracted)
-//-----------------------------------------------------------------------------------
 
 class CSampler : public CShaderResource{
 protected:
@@ -145,5 +197,7 @@ public:
 	virtual void Upload() = 0;
 	virtual bool isShared() = 0;
 };
+
+//-----------------------------------------------------------------------------------
 
 #endif //SHADER_DESC_H

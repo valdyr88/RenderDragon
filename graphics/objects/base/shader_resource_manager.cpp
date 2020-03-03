@@ -1,5 +1,6 @@
 #ifdef RD_API_BASE
 
+#include <algorithm>    // std::sort
 #include "../../utils/log.h"
 #include "../../utils/containers.h"
 #include "device.h"
@@ -7,9 +8,16 @@
 
 //---------------------------------------------------------------------------
 
-bool CheckNotInList(uint pt, std::list<uint>& points){
+template <typename type>
+bool CheckNotInList(type pt, std::list<type>& points){
 	for(auto it = points.begin(); it != points.end(); ++it)
 		if(pt == *it) return false;
+	return true;
+}
+template <typename type, typename containerType>
+bool CheckInContainer(const type& pt, containerType& points, bool(*check)(const type& a, type& b)){
+	for(auto it = points.begin(); it != points.end(); ++it)
+		if(check(pt, *it) == false) return false;
 	return true;
 }
 
@@ -18,12 +26,12 @@ void CShaderResourceSet::CreateBindings(const std::vector<CShaderResource*>& bin
 	ASSERT(binds.size() != 0);
 	ASSERT(descriptor.bindingDescs.size() == binds.size());
 
-	std::list<uint> bindPoints;
+	std::list<uint32> bindPoints;
 
 	for(uint i = 0; i < binds.size(); ++i){
 		auto& desc = descriptor.bindingDescs[i];
 
-		ASSERT(CheckNotInList(desc.bindPoint, bindPoints));
+		ASSERT(CheckNotInList<uint32>(desc.bindPoint, bindPoints));
 		ASSERT(desc.type == binds[i]->getResourceType());
 		
 		bindPoints.emplace_back(desc.bindPoint);
@@ -38,51 +46,125 @@ void CShaderResourceSet::CreateBindings(const std::vector<CShaderResource*>& bin
 
 //---------------------------------------------------------------------------
 
-bool CShaderResourceSetDesc::CheckValidity(){
-	std::list<uint> bindPoints;
-	ASSERT(bindingDescs.size() != 0);
-	if(bindingDescs.size() == 0) return false;
+bool CShaderResourceSetDesc::CheckValidity(const std::vector<SShaderResourceBindingDesc>& desc, bool bAssert){
+	if(bAssert) ASSERT(desc.size() != 0);
+	if(desc.size() == 0) return false;
 
-	uint setNumber = bindingDescs[0].setNumber;
+	uint setNumber = desc[0].setNumber;
+	std::list<uint32> bindPoints;
+	std::list<std::string> bindPointNames;
 
-	for(uint i = 0; i < bindingDescs.size(); ++i){
-		bool checkBindPoint = CheckNotInList(bindingDescs[i].bindPoint, bindPoints);
-		bool sameSetNumber = setNumber == bindingDescs[i].setNumber;
+	for(uint i = 0; i < desc.size(); ++i){
+		bool checkBindPoint = CheckNotInList<uint32>(desc[i].bindPoint, bindPoints);
+		bool checkBindPointName = CheckNotInList<std::string>(desc[i].name, bindPointNames);
+		bool sameSetNumber = setNumber == desc[i].setNumber;
 
-		ASSERT(checkBindPoint);
+		if(bAssert) ASSERT(checkBindPoint);
 		if(checkBindPoint == false) return false;
-		ASSERT(sameSetNumber);
+		if(bAssert) ASSERT(sameSetNumber);
 		if(sameSetNumber == false) return false;
 
-		bindPoints.emplace_back(bindingDescs[i].bindPoint);
+		bindPoints.emplace_back(desc[i].bindPoint);
+		bindPointNames.emplace_back(desc[i].name);
 	}
 
 	return true;
 }
 
 SharedPtr<CShaderResourceSet> CShaderResourceSetDesc::
-	CreateResourceSet(std::vector<CShaderResource*>& resrs)
+	CreateResourceSet(std::vector<CShaderResource*>& resources)
 {
 	ASSERT(device != nullptr);
+	ASSERT(bindingDescs.size() == resources.size());
 
-	SharedPtr<CShaderResourceSet> reset = device->CreateShaderResourceSet(this, resrs);
+	SharedPtr<CShaderResourceSet> reset = device->CreateShaderResourceSet(this, resources);
 	cachedResourceSets.emplace_back(reset);
 
 	return reset;
 }
 
 SharedPtr<CShaderResourceSet> CShaderResourceSetDesc::
-	GetResourceSetWith(std::vector<CShaderResource*> resrs)
+	GetResourceSetWith(std::vector<CShaderResource*> resources)
 {
 	ASSERT(device != nullptr);
+	ASSERT(bindingDescs.size() == resources.size());
 
 	for(auto it = cachedResourceSets.begin(); it != cachedResourceSets.end(); ++it){
 		auto& reset = *it->get();
-		if(reset == resrs)
+		if(reset == resources)
 			return *it;
 	}
 
-	return CreateResourceSet(resrs);
+	return CreateResourceSet(resources);
+}
+
+std::vector<SShaderResourceBindingDesc> CShaderResourceSetDesc::
+	merge(const std::vector<SShaderResourceBindingDesc>& a, const std::vector<SShaderResourceBindingDesc>& b)
+{
+	using SResDesc = SShaderResourceBindingDesc;
+	{
+		bool aValid = CShaderResourceSetDesc::CheckValidity(a);
+		bool bValid = CShaderResourceSetDesc::CheckValidity(b);
+
+		if(aValid == false && bValid == false) return std::vector<SResDesc>();
+		if(aValid == false) return b;
+		if(bValid == false) return a;
+
+		if(a.size() == 0) return b;
+		if(b.size() == 0) return a;
+		if(a[0].setNumber != b[0].setNumber){
+			LOG_ERR("setNumbers for two SShaderResourceBindingDesc arrays are not the same");
+			return a;
+		}
+	}
+
+	std::vector<SResDesc> merged(a);
+	
+	for(auto it = b.begin(); it != b.end(); ++it){
+		auto& desc = *it;
+
+		//check if same to skip
+		bool add = CheckInContainer<SResDesc, std::vector<SResDesc>>(desc, merged,
+			[](const SResDesc& a, SResDesc& b){
+				if(a == b) return false;
+				return true;
+			}
+		);
+		if(add == false) continue;//skip
+
+		add = CheckInContainer<SResDesc, std::vector<SResDesc>>(desc, merged,
+			[](const SResDesc& a/*desc*/, SResDesc& b/*elem from merged*/)
+			{
+				//if shaderStages are different, check if everything else is same and then merge shaderStage bits
+				if(a.shaderStages != b.shaderStages){
+					SResDesc test(a); test.shaderStages = b.shaderStages;
+					if(test == b){
+						b.shaderStages |= a.shaderStages; //change b directly (b is a reference to elem in merged)
+						return false; //no need to add since b is already in merged
+					}
+				}
+				//if bindPoint is the same and other is not then it's error
+				if(a.bindPoint == b.bindPoint){
+					LOG_ERR("bindPoint is the same but other resource info is different");
+					return false;
+				}
+				//if name is same the and other is not then it's error
+				if(a.name == b.name){
+					LOG_ERR("name is the same but other resource info is different");
+					return false;
+				}
+				
+				return true;
+			}
+		);
+		if(add == false) continue;//skip
+
+		merged.emplace_back(desc);
+	}
+
+	std::sort(merged.begin(), merged.end(), [](SResDesc& a, SResDesc& b){ return a.bindPoint < b.bindPoint; });
+
+	return std::move(merged);
 }
 
 //---------------------------------------------------------------------------

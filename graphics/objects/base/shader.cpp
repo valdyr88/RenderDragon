@@ -4,7 +4,7 @@
 
 IUniformBuffer* CShader::getUniformBuffer(uint bindPoint)
 {
-	auto& resources = descriptor.resources;
+	/*auto& resources = descriptor.resources;
 
 	for(auto it = resources.begin(); it != resources.end(); ++it){
 		auto& resource = *it;
@@ -14,7 +14,8 @@ IUniformBuffer* CShader::getUniformBuffer(uint bindPoint)
 			else
 				return nullptr;
 		}
-	}
+	}*/
+	//ToDo: implement this
 	return nullptr;
 }
 

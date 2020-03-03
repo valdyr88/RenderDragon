@@ -13,54 +13,6 @@
 
 //---------------------------------------------------------------------------
 
-struct SShaderResourceBindingDesc{
-	uint32 setNumber = 0;
-	uint32 bindPoint = 0;
-	std::string name = "";
-
-	EShaderResourceType type;
-	EShaderResourceUsageType usage = EShaderResourceUsageType::Static;
-	uint32 shaderStages = 0x00000000; //bitflag of EShaderStage
-	uint32 count = 0;
-	
-	uint operator |= (EShaderStage& stage){ shaderStages |= stage; return shaderStages; }
-	uint operator | (EShaderStage& stage){ return shaderStages | stage; }
-	uint operator |= (uint stage){ shaderStages |= stage; return shaderStages; }
-	uint operator | (uint stage){ return shaderStages | stage; }
-
-	SShaderResourceBindingDesc(uint32 setNum, uint32 bindPt, std::string nam,
-		EShaderResourceType t, uint s, EShaderResourceUsageType ut = EShaderResourceUsageType::Static, uint32 cnt = 1) :
-		setNumber(setNum), bindPoint(bindPt), name(nam),
-		type(t), shaderStages(s), usage(ut), count(cnt) {}
-	SShaderResourceBindingDesc(const SShaderResourceBindingDesc& other) :
-		type(other.type), usage(other.usage), shaderStages(other.shaderStages),
-		count(other.count), name(other.name), bindPoint(other.bindPoint), setNumber(other.setNumber){}
-
-	//Note: this operator doesn't check setNumber.
-	bool operator == (const SShaderResourceBindingDesc& other) const{
-		return type == other.type &&
-			usage == other.usage &&
-			shaderStages == other.shaderStages &&
-			count == other.count &&
-			//setNumber == other.setNumber && //this is a check without set number.
-			bindPoint == other.bindPoint &&
-			name == other.name;
-	}
-	//Note: this operator doesn't check setNumber.
-	bool operator != (const SShaderResourceBindingDesc& other) const{ return !(*this == other); }
-
-	SShaderResourceBindingDesc& operator = (const SShaderResourceBindingDesc& other){
-		type = other.type;
-		usage = other.usage;
-		shaderStages = other.shaderStages;
-		count = other.count;
-		setNumber = other.setNumber;
-		bindPoint = other.bindPoint;
-		name = other.name;
-		return *this;
-	}
-};
-
 class CShaderResourceBinding : public CGraphicObject{
 protected:
 	SShaderResourceBindingDesc descriptor;
@@ -134,8 +86,6 @@ protected:
 	SharedPtr<CShaderResourceSet>
 		CreateResourceSet(std::vector<CShaderResource*>&);
 
-	bool CheckValidity();
-
 public:
 	SharedPtr<CShaderResourceSet>
 		GetResourceSetWith(std::vector<CShaderResource*>);
@@ -143,7 +93,7 @@ public:
 	CShaderResourceSetDesc(GPUDevice* dev, const std::vector<SShaderResourceBindingDesc>& binds)
 		: CGraphicObject(dev), bindingDescs(binds)
 	{
-		CheckValidity();
+		CShaderResourceSetDesc::CheckValidity(bindingDescs, true);
 	}
 
 	bool operator == (const CShaderResourceSetDesc& other) const{
@@ -162,6 +112,9 @@ public:
 	}
 	bool operator != (const CShaderResourceSetDesc& other) const{ return !(*this == other); }
 	bool operator != (const std::vector<SShaderResourceBindingDesc>& other) const{ return !(*this == other); }
+	
+	static bool CheckValidity(const std::vector<SShaderResourceBindingDesc>&, bool bAssert = false);
+	static std::vector<SShaderResourceBindingDesc> merge(const std::vector<SShaderResourceBindingDesc>& a, const std::vector<SShaderResourceBindingDesc>& b);
 
 	friend class CShaderResourceSet;
 };

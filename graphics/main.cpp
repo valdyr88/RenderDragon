@@ -97,10 +97,10 @@ int main(){
 	{
 		fsdesc.source = "neki fragment source";
 		fsdesc.stage = EShaderStage::FragmentShader;
-		fsdesc.resources = {
-			{0, sr },
-			{1, shub },
-			{2, sr }
+		fsdesc.bindings = {
+			{0, 1, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+			{0, 2, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+			{0, 3, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 }
 		};
 	};
 
@@ -108,10 +108,8 @@ int main(){
 	{
 		vsdesc.source = "neki vertex source";
 		vsdesc.stage = EShaderStage::VertexShader;
-		vsdesc.resources = {
-			{0, sr },
-			{1, shub },
-			{2, sr }
+		vsdesc.bindings = {
+			{0, 0, "vertexUniform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader, EShaderResourceUsageType::Static, 1 },
 		};
 	};
 
@@ -185,6 +183,28 @@ int main(){
 		{1, 2, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
 	});
 
+	//merge test
+	auto descSetA = std::vector<SShaderResourceBindingDesc>{
+		{ 0, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{ 0, 4, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{ 0, 5, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+	};
+	auto descSetB = std::vector<SShaderResourceBindingDesc>{
+		{ 0, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::VertexShader, EShaderResourceUsageType::Static, 1 },
+		{ 0, 4, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{ 0, 3, "sampler", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+	};
+	auto descSetC = std::vector<SShaderResourceBindingDesc>{
+		{ 0, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{ 0, 1, "nes", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+		{ 0, 2, "snes", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+	};
+
+	auto merged = CShaderResourceSetDesc::merge(descSetA, descSetB);
+	merged = CShaderResourceSetDesc::merge(merged, descSetC);
+
+	auto mergedSetDesc = srm.GetResourceSetDesc(merged);
+
 	ASSERT(reset.get() == reset2.get());
 
 	CTextureView tv(dev.get(), texture);
@@ -193,6 +213,8 @@ int main(){
 	CSampler sm(dev.get(), smpldsc);
 
 	auto resrc = reset->GetResourceSetWith({ &tv, shub.get(), &sm });
+	mergedSetDesc->GetResourceSetWith({ &tv, shub.get(), &sm });
+
 
 	resrc->getDescriptor();
 

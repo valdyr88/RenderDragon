@@ -7,6 +7,29 @@
 #include "../utils/types/vectypes.h"
 #include "graphics_enums.h"
 
+//-----------------------------------------------------------------------------------
+
+//ToDo: finish this
+struct SVertexAttributeDesc{
+	uint32 location = 0; //shader location
+	std::string name = "";
+
+	EValueType type = EValueType::float32;
+	EValueSize count = EValueSize::vec4;
+
+	uint32 binding = 0; //if separate VertexPointer, NormalPointer, TexCoordPointer etc
+	uint32 stride = 0; //if struct has Vertex/Normal/TexCoord then at what offset
+
+	bool operator == (SVertexAttributeDesc& other) const{}
+	bool operator != (SVertexAttributeDesc& other) const{ return !(*this == other); }
+	SVertexAttributeDesc& operator = (const SVertexAttributeDesc& other){}
+};
+
+struct SVertexInputDesc{
+	std::vector<SVertexAttributeDesc> attributes;
+};
+//-----------------------------------------------------------------------------------
+
 struct SVertexAttribute{
 	EValueType type = EValueType::float32;
 	EValueSize count = EValueSize::vec4;
