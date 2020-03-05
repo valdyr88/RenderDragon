@@ -67,7 +67,17 @@ struct SShaderResourceBindingDesc{
 struct SShaderDesc{
 	EShaderStage stage = EShaderStage::FragmentShader;
 	std::string source = "";
-	std::vector<SShaderResourceBindingDesc> bindings;
+	std::list<std::vector<SShaderResourceBindingDesc>> bindingSetsDesc;
+
+	SShaderDesc() = default;
+
+	SShaderDesc(EShaderStage s, std::string src, std::list<std::vector<SShaderResourceBindingDesc>> binds)
+		: stage(s), source(src), bindingSetsDesc(binds){
+		VerifyBindingDesc();
+	}
+
+protected:
+	bool VerifyBindingDesc();
 };
 
 //-----------------------------------------------------------------------------------

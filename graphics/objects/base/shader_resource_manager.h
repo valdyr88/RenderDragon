@@ -9,7 +9,6 @@
 #include "../../descriptors/shader_desc.h"
 #include "../../descriptors/graphics_enums.h"
 #include "../../descriptors/graphic_object.h"
-#include "shader.h"
 
 //---------------------------------------------------------------------------
 
@@ -36,7 +35,6 @@ public:
 
 	friend class CShaderResourceSet;
 };
-
 
 //---------------------------------------------------------------------------
 class CShaderResourceSetDesc;
@@ -76,6 +74,8 @@ public:
 
 	const auto& getDescriptor(){ return descriptor; }
 };
+
+class CShaderProgram;
 
 class CShaderResourceSetDesc : public CGraphicObject{
 protected:

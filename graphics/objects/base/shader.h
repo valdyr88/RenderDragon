@@ -11,6 +11,7 @@
 #include "../../descriptors/graphics_enums.h"
 #include "../../descriptors/shader_desc.h"
 #include "../../descriptors/graphic_object.h"
+#include "shader_resource_manager.h"
 
 class CShader : public CGraphicObject{
 protected:
@@ -32,20 +33,26 @@ public:
 
 class CShaderProgram : public CGraphicObject{
 protected:
-	SharedPtr<CShader> shader[EShaderStage::NumStages];
 	uint numStages;
+	SharedPtr<CShader> shader[EShaderStage::NumStages];
+	std::vector<SharedPtr<CShaderResourceSetDesc>> resourceSetDescs;
+
+	bool MergeShaderResourceSetDescs();
 public:
 
 	CShaderProgram(GPUDevice* dev, std::vector<SharedPtr<CShader>> shaders) :
-		CGraphicObject(dev){
+		CGraphicObject(dev)
+	{
 		numStages = 0;
-
+		
 		for(auto it = shaders.begin(); it != shaders.end(); ++it){
 			auto& sh = *it;
 			if(sh->descriptor.stage < EShaderStage::NumStages){
 				shader[sh->descriptor.stage] = sh; ++numStages;
 			}
 		}
+
+		MergeShaderResourceSetDescs();
 	}
 
 	uint getNofStages(){ return numStages; }

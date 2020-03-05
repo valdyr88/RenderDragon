@@ -519,6 +519,7 @@
     <ClCompile Include="objects\pipeline_state.cpp" />
     <ClCompile Include="objects\render_pass.cpp" />
     <ClCompile Include="objects\shader.cpp" />
+    <ClCompile Include="objects\shader_desc.cpp" />
     <ClCompile Include="objects\shader_resource_manager.cpp" />
     <ClCompile Include="objects\texture.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />

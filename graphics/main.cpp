@@ -97,10 +97,12 @@ int main(){
 	{
 		fsdesc.source = "neki fragment source";
 		fsdesc.stage = EShaderStage::FragmentShader;
-		fsdesc.bindings = {
-			{0, 1, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
-			{0, 2, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
-			{0, 3, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 }
+		fsdesc.bindingSetsDesc = {
+			{
+				{0, 1, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+				{0, 2, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
+				{0, 3, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 }
+			} 
 		};
 	};
 
@@ -108,8 +110,10 @@ int main(){
 	{
 		vsdesc.source = "neki vertex source";
 		vsdesc.stage = EShaderStage::VertexShader;
-		vsdesc.bindings = {
-			{0, 0, "vertexUniform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader, EShaderResourceUsageType::Static, 1 },
+		vsdesc.bindingSetsDesc = {
+			{
+				{0, 0, "vertexUniform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader, EShaderResourceUsageType::Static, 1 },
+			}
 		};
 	};
 
@@ -213,10 +217,39 @@ int main(){
 	CSampler sm(dev.get(), smpldsc);
 
 	auto resrc = reset->GetResourceSetWith({ &tv, shub.get(), &sm });
-	mergedSetDesc->GetResourceSetWith({ &tv, shub.get(), &sm });
 
+	//shader creation test
+	vsdesc.bindingSetsDesc = {
+		{
+			{0, 0, "A", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader},
+			{0, 1, "B", EShaderResourceType::Texture, EShaderStage::VertexShader},
+			{0, 2, "C", EShaderResourceType::Sampler, EShaderStage::VertexShader}
+		},
+		{
+			{1, 0, "E", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader },
+			{1, 1, "F", EShaderResourceType::Texture, EShaderStage::VertexShader},
+			{1, 2, "G", EShaderResourceType::Sampler, EShaderStage::VertexShader}
+		}
+	};
+	fsdesc.bindingSetsDesc = {
+		{
+			{0, 1, "B", EShaderResourceType::Texture, EShaderStage::FragmentShader},
+			{0, 2, "C", EShaderResourceType::Sampler, EShaderStage::FragmentShader},
+			{0, 3, "D", EShaderResourceType::Texture, EShaderStage::FragmentShader}
+		},
+		{
+			{1, 3, "H", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader },
+			{1, 4, "I", EShaderResourceType::Texture, EShaderStage::VertexShader},
+			{1, 5, "J", EShaderResourceType::Sampler, EShaderStage::VertexShader}
+		}
+	};
+
+	SharedPtr<CShader> VShader = NewShared<CShader>(dev.get(), vsdesc);
+	SharedPtr<CShader> FShader = NewShared<CShader>(dev.get(), fsdesc);
 
 	resrc->getDescriptor();
+
+	CShaderProgram program(dev.get(), {VShader, FShader});
 
 	MainPlatformLoop();
 	

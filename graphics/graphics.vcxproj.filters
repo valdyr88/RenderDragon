@@ -218,5 +218,8 @@
     <ClCompile Include="objects\shader_resource_manager.cpp">
       <Filter>Source Files\objects</Filter>
     </ClCompile>
+    <ClCompile Include="objects\shader_desc.cpp">
+      <Filter>Source Files\objects</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

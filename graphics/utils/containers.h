@@ -141,6 +141,20 @@ public:
 	auto find(Key key){ return elements.find(key); }
 };
 */
+
+template <typename type>
+bool CheckNotInList(type pt, std::list<type>& points){
+	for(auto it = points.begin(); it != points.end(); ++it)
+		if(pt == *it) return false;
+	return true;
+}
+template <typename type, typename containerType>
+bool CheckInContainer(const type& pt, containerType& points, bool(*check)(const type& a, type& b)){
+	for(auto it = points.begin(); it != points.end(); ++it)
+		if(check(pt, *it) == false) return false;
+	return true;
+}
+
 }
 
 #endif //CONTAINER_H
