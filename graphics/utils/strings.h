@@ -1,6 +1,7 @@
 #ifndef STRINGS_H
 #define STRINGS_H
 
+#include <list>
 #include <cstdarg>
 #include <string>
 //#include <string.h>
@@ -440,12 +441,12 @@ namespace str{
 		return true;
 	}
 
-	template<typename Type1, typename Type2> bool container_has_string(::std::list<Type1>& container, Type2* string){
-		if(string == nullptr) return false;
+	template<typename Type1, typename Type2> bool container_has_string(::std::list<Type1>& cnt, Type2* str){
+		if(str == nullptr) return false;
 
-		for(uint i = 0; i < container.size(); ++i){
-			Type1* container_string = &container[i];
-			if(str::compare_strings(container_string, string) == true){ return true; }
+		for(uint i = 0; i < cnt.size(); ++i){
+			Type1* container_string = &cnt[i];
+			if(str::compare_strings(container_string, str) == true){ return true; }
 		}
 		return false;
 	}

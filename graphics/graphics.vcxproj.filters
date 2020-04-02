@@ -183,6 +183,12 @@
     <ClInclude Include="objects\base\shader_resource_manager.h">
       <Filter>Header Files\objects\base</Filter>
     </ClInclude>
+    <ClInclude Include="utils\threads.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\opengl4\shader_resource_manager.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -219,6 +225,9 @@
       <Filter>Source Files\objects</Filter>
     </ClCompile>
     <ClCompile Include="objects\shader_desc.cpp">
+      <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\shader_parser.cpp">
       <Filter>Source Files\objects</Filter>
     </ClCompile>
   </ItemGroup>

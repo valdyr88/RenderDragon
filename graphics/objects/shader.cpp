@@ -38,7 +38,7 @@ bool CShaderProgram::MergeShaderResourceSetDescs(){
 					continue;
 
 				//check if there is already a setNum in mergedDescs
-				bool isAdded = !std::CheckInContainer<SRDescVector, std::list<SRDescVector>>(srcResDesc, mergedDescs,
+				bool isAdded = !stdex::CheckInContainer<SRDescVector, std::list<SRDescVector>>(srcResDesc, mergedDescs,
 					[](const SRDescVector& a, SRDescVector& b)
 					{
 						if(a[0].setNumber == b[0].setNumber){ //if already in list, merge
@@ -64,7 +64,7 @@ bool CShaderProgram::MergeShaderResourceSetDescs(){
 			for(auto n = it->begin(); n != it->end(); ++n){
 				if(names.size() == 0) break;
 
-				bool hasName = !std::CheckInContainer<std::string, std::list<std::string>>(n->name, names, 
+				bool hasName = !stdex::CheckInContainer<std::string, std::list<std::string>>(n->name, names,
 					[](const std::string& a, std::string& b){
 						if(a == b){
 							LOG_ERR("shader resource name <%s> is already used in another resource set", a.c_str());

@@ -6,6 +6,7 @@
 #endif
 
 #ifdef RD_API_OPENGL4
+#include "opengl4/shader_resource_manager.h"
 #endif
 
 #ifdef RD_API_WEBGL
@@ -31,7 +32,7 @@ bool SShaderDesc::VerifyBindingDesc(){
 		if(bCheck == false)
 			return false;
 
-		bCheck = std::CheckInContainer<uint32, std::list<uint32>>(setNumber, setNumbers,
+		bCheck = stdex::CheckInContainer<uint32, std::list<uint32>>(setNumber, setNumbers,
 				[](const uint32& a, uint32& b){
 					if(a == b) return false;
 					return true;

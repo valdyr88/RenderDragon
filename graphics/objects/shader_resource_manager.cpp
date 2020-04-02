@@ -7,6 +7,8 @@
 #endif
 
 #ifdef RD_API_OPENGL4
+#include "opengl4/device.h"
+#include "opengl4/shader_resource_manager.h"
 #include "opengl4/shader_resource_manager.cpp"
 #endif
 
@@ -36,7 +38,7 @@ void CShaderResourceSet::CreateBindings(const std::vector<CShaderResource*>& bin
 	for(uint i = 0; i < binds.size(); ++i){
 		auto& desc = descriptor.bindingDescs[i];
 
-		ASSERT(std::CheckNotInList<uint32>(desc.bindPoint, bindPoints));
+		ASSERT(stdex::CheckNotInList<uint32>(desc.bindPoint, bindPoints));
 		ASSERT(desc.type == binds[i]->getResourceType());
 
 		bindPoints.emplace_back(desc.bindPoint);
@@ -60,8 +62,8 @@ bool CShaderResourceSetDesc::CheckValidity(const std::vector<SShaderResourceBind
 	std::list<std::string> bindPointNames;
 
 	for(uint i = 0; i < desc.size(); ++i){
-		bool checkBindPoint = std::CheckNotInList<uint32>(desc[i].bindPoint, bindPoints);
-		bool checkBindPointName = std::CheckNotInList<std::string>(desc[i].name, bindPointNames);
+		bool checkBindPoint = stdex::CheckNotInList<uint32>(desc[i].bindPoint, bindPoints);
+		bool checkBindPointName = stdex::CheckNotInList<std::string>(desc[i].name, bindPointNames);
 		bool sameSetNumber = setNumber == desc[i].setNumber;
 
 		if(bAssert) ASSERT(checkBindPoint);
@@ -129,7 +131,7 @@ merge(const std::vector<SShaderResourceBindingDesc>& a, const std::vector<SShade
 		auto& desc = *it;
 
 		//check if same to skip
-		bool add = std::CheckInContainer<SResDesc, std::vector<SResDesc>>(desc, merged,
+		bool add = stdex::CheckInContainer<SResDesc, std::vector<SResDesc>>(desc, merged,
 			[](const SResDesc& a, SResDesc& b){
 				if(a == b) return false;
 				return true;
@@ -137,7 +139,7 @@ merge(const std::vector<SShaderResourceBindingDesc>& a, const std::vector<SShade
 		);
 		if(add == false) continue;//skip
 
-		add = std::CheckInContainer<SResDesc, std::vector<SResDesc>>(desc, merged,
+		add = stdex::CheckInContainer<SResDesc, std::vector<SResDesc>>(desc, merged,
 			[](const SResDesc& a/*desc*/, SResDesc& b/*elem from merged*/)
 			{
 				//if shaderStages are different, check if everything else is same and then merge shaderStage bits

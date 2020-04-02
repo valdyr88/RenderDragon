@@ -41,12 +41,18 @@ struct SMacroDefine{
 	void set(const char* Macro, const char* Value){ macro = Macro; value = Value; }
 	void set(std::string Macro, std::string Value){ macro = Macro; value = Value; }
 
+	SMacroDefine& operator =(const SMacroDefine& other){
+		macro = other.macro;
+		value = other.value;
+		return *this;
+	}
+
 	std::string construct(){ return "#define " + macro + " " + value; }
 };
 
 class CShaderDefines{
-	std::container<SMacroDefine> macros;
-
+	stdex::container<SMacroDefine> macros;
+	static std::string globalMacrosKeyword;
 public:
 	uint add(std::string Macro, std::string Value){
 		SMacroDefine& m = macros.add();
@@ -58,6 +64,14 @@ public:
 		return add(M, V);
 	}
 
+	std::string construct(){
+		std::string out = "";
+		for(uint i = 0; i < macros.size(); ++i){
+			out += macros[i].construct() + '\n';
+		}
+		return out;
+	}
+
 	const SMacroDefine& get(uint i){
 		return macros[i];
 	}
@@ -65,73 +79,23 @@ public:
 	~CShaderDefines(){
 		macros.clear();
 	}
-};
 
-inline std::string CShaderFileSource::parseForIncludes(std::string source, std::string srcFilePath, CShaderFileSource* includeFiles){
-	std::istringstream srcStream(source);
-	std::string output = "";
-
-	for(std::string line = ""; std::getline(srcStream, line); ){
-		auto cline = line.c_str();
-
-		size_t istartNo = 0;
-		auto istart = str::find_first_occurence("#include", cline, 0, &istartNo);
-
-		if(istart != nullptr)
-		{
-			size_t iNameStartNo = 0, iNameEndNo = 0;
-			str::find_first_occurence("\"", cline + istartNo, 0, &iNameStartNo); iNameStartNo += istartNo + 1;
-			str::find_first_occurence("\"", cline + iNameStartNo, 0, &iNameEndNo); iNameEndNo += iNameStartNo;
-
-			auto includeName = line.substr(iNameStartNo, iNameEndNo - iNameStartNo);
-			line = parseForIncludes(includeFiles->contents(includeName), includeName, includeFiles);
-		}
-
-		output += line + "\n";
+	CShaderDefines& operator =(const CShaderDefines& other){
+		macros.clear();
+		macros = other.macros;
+		return *this;
 	}
-	if(output == "")
-		output = source;
+	CShaderDefines& operator +=(const CShaderDefines& other){
+		macros += other.macros;
+		return *this;
+	}
 
-	return output;
-}
+	std::string insertInto(std::string source, std::string keyword = CShaderDefines::globalMacrosKeyword);
+};
+typedef CSingleton<CShaderDefines> ShaderGlobalDefines;
 
-inline std::string getFileStringContents(const char* fileName){
-	FILE* file = nullptr; fopen_s(&file, fileName, "rb");
-	if(file == nullptr) return "";
-	fseek(file, 0, SEEK_END);
-	size_t length = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	char* contents = __new char[length + 1];
-	fread(contents, 1, length, file);
-	contents[length] = '\0';
-	fclose(file); file = nullptr;
-
-	std::string rtn = "";
-	rtn += contents;
-
-	__release_array(contents);
-
-	return rtn;
-}
-
-inline bool printContentsToFile(const char* fileName, const char* contents, size_t length){
-	FILE* file = nullptr; fopen_s(&file, fileName, "wb");
-	if(file == nullptr) return false;
-	fwrite(contents, 1, length, file);
-	fclose(file); file = nullptr;
-	return true;
-}
-
-inline void TestIncludes(const char* fileName){
-
-	std::string source = getFileStringContents(fileName);
-	source = CShaderFileSource::parseForIncludes(source, fileName, CSingleton<CShaderFileSource>::get());
-
-	std::string outPath = fileName;
-	outPath += ".processed.glsl";
-
-	printContentsToFile(outPath.c_str(), source.c_str(), source.length());
-}
+bool printContentsToFile(const char* fileName, const char* contents, size_t length);
+std::string getFileStringContents(const char* fileName);
+std::string TestIncludes(const char* fileName);
 
 #endif //SHADER_PARSER_H

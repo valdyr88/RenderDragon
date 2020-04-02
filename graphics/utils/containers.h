@@ -7,14 +7,14 @@
 #include "pointers.h"
 #include "log.h"
 
-namespace std{
+namespace stdex{
 
 template <typename Type> class container{
 	std::vector<Type*> elements;
 public:
 	container(){}
 
-	Type& operator[](uint i){
+	Type& operator[](uint i) const{
 		if(i >= elements.size())
 			LOG_ERR("i >= elements.size()!");
 		return *elements[i];
@@ -48,7 +48,18 @@ public:
 		elements[i] = elements[j];
 		elements[j] = tmp;
 	}
-	uint size(){ return (uint)elements.size(); }
+	uint size() const{ return (uint)elements.size(); }
+
+	container<Type>& operator += (const container<Type>& other){
+		for(uint i = 0; i < other.size(); ++i){
+			this->add() = other[i];
+		}
+		return *this;
+	}
+	container<Type>& operator = (const container<Type>& other){
+		this->clear();
+		return this->operator+=(other);
+	}
 
 	void clear(){
 		for(auto it = elements.begin(); it != elements.end(); ++it)

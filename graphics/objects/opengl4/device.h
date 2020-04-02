@@ -43,8 +43,13 @@ protected:
 	CGLState gl;
 	std::list<SharedPtr<CGraphicObject>> objects;
 
+	template <typename type>
+	void addTrackedObject(SharedPtr<type>& obj);
+
 	SPipelineStateDesc pipelineState;
 	CFramebuffer* boundFramebuffer = nullptr;
+
+	CShaderResourceSetManager shaderResourceSetManager;
 
 	GPUDevice() = delete;
 
@@ -64,7 +69,7 @@ protected:
 
 public:
 
-	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){
+	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc), shaderResourceSetManager(this){
 		descriptor.api = EGraphicsAPI::OpenGL4;
 	}
 
@@ -82,6 +87,12 @@ public:
 	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data);
 
 	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear);
+
+	SharedPtr<CShaderResourceBinding> CreateShaderResourceBinding(const SShaderResourceBindingDesc& desc, CShaderResource* resource);
+	SharedPtr<CShaderResourceSetDesc> CreateShaderResourceSetDesc(const std::vector<SShaderResourceBindingDesc>& binds);
+	SharedPtr<CShaderResourceSet> CreateShaderResourceSet(const CShaderResourceSetDesc* desc, const std::vector<CShaderResource*>& rers);
+
+	auto& GetShaderResourceManager(){ return shaderResourceSetManager; }
 
 	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
 

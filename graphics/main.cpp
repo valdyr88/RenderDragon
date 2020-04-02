@@ -1,38 +1,10 @@
 #include "include.h"
-#include "descriptors/shader_parser.h"
 
-const char* include_list[] = 
-{
-	"Shaders/include/functions.glsl",
-	"Shaders/include/defines.glsl",
-	"Shaders/error_shader.glsl",
-	nullptr
-};
-
-struct CNekiSingletonData{
-	int b = 0;
-};
+void IncludeFileTesting();
 
 int main(){
 
-	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
-	for(uint i = 0; include_list[i] != nullptr; ++i)
-		srcList->add(include_list[i], getFileStringContents(include_list[i]));
-
-	CNekiSingletonData* nekisingle = CSingleton<CNekiSingletonData>::get();
-	nekisingle->b = 1;
-
-
-	CShaderDefines* globalDefines = CSingleton<CShaderDefines>::get();
-	globalDefines->add("DEBUG", "1");
-	globalDefines->add("HDR_ENABLE", "true");
-	globalDefines->add("NEKIDEFINE", "0x001");
-
-	TestIncludes("Shaders/simple.ps.glsl");
-
-
-
-
+	IncludeFileTesting();
 
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
@@ -255,3 +227,40 @@ int main(){
 	
 	return 0;
 }
+
+//---------------------------------------------------------------------------------
+#include "descriptors/shader_parser.h"
+
+const char* include_list[] =
+{
+	"Shaders/include/functions.glsl",
+	"Shaders/include/defines.glsl",
+	"Shaders/error_shader.glsl",
+	nullptr
+};
+
+void IncludeFileTesting(){
+
+	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
+	for(uint i = 0; include_list[i] != nullptr; ++i)
+		srcList->add(include_list[i], getFileStringContents(include_list[i]));
+
+	CShaderDefines* globalDefines = CSingleton<CShaderDefines>::get();
+	globalDefines->add("DEBUG", "1");
+	globalDefines->add("HDR_ENABLE", "true");
+	globalDefines->add("NEKIDEFINE", "0x001");
+
+	CShaderDefines defines2;
+	defines2.add("DEBUG_BUG", "123");
+	defines2.add("BLABLA_TADA", "DEBUG_BUG");
+	defines2.add("T", "1");
+
+	*globalDefines += defines2;
+	
+	auto source = TestIncludes("Shaders/simple.ps.glsl");
+	source = globalDefines->insertInto(source);
+
+	printContentsToFile("Shaders/simple.ps.glsl.processed.glsl", source.c_str(), source.length());
+}
+
+//---------------------------------------------------------------------------------

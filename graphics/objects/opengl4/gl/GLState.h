@@ -1440,7 +1440,7 @@ inline GLenum glenum(const EFrontFace& v){
 	{
 		case EFrontFace::Clockwise: return (GLenum)GL_CW;
 		case EFrontFace::CounterClockwise: return (GLenum)GL_CCW;
-		default: (GLenum)GL_NONE;
+		default: return (GLenum)GL_NONE;
 	}
 }
 inline GLenum glenum(const EComparisonOp& v){
