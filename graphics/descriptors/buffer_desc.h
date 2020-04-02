@@ -6,16 +6,19 @@
 
 struct SBufferDesc{
 	EBufferType type;
+	EShaderResourceUsageType usage = EShaderResourceUsageType::Static;
 	uint32 size;
 
 	bool operator == (const SBufferDesc& other) const{
 		return type == other.type &&
+			usage == other.usage &&
 			size == other.size;
 	}
 	bool operator != (const SBufferDesc& other) const{ return !(*this == other); }
 
 	SBufferDesc operator =(const SBufferDesc& other){
 		type = other.type;
+		usage = other.usage;
 		size = other.size;
 		return *this;
 	}

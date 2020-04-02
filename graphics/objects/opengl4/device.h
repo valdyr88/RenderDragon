@@ -105,6 +105,7 @@ public:
 	friend class CIndexBuffer;
 	friend class CTexture;
 	friend class CShader;
+	friend class CShaderProgram;
 	friend class CShaderResource;
 };
 

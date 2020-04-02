@@ -96,16 +96,19 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 }
 
 SGPUDeviceContext rdInitOpenGL_ARB(SWindow& window, const SGPUDeviceDesc& descriptor, SGPUDeviceContext& context, int GLVersion_Major, int GLVersion_Minor){
+
+#ifdef PLATFORM_WINDOWS
 	
 	if(glewInit() != GLEW_OK){ //to fetch OpenGL functions
 		LOG("glewInit() failed!"); }
+
+	auto hglrc = wglGetCurrentContext();
 
 	auto wglChoosePixelFormatARB = ( PFNWGLCHOOSEPIXELFORMATARBPROC) wglGetProcAddress("wglChoosePixelFormatARB");
 	auto wglCreateContextAttribsARB = ( PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
 
 	if(wglChoosePixelFormatARB == NULL || wglCreateContextAttribsARB == NULL){
 		LOG("wglChoosePixelFormatARB == NULL || wglCreateContextAttribsARB == NULL!\n"); }
-
 
 	int WGL_BUFFER_TYPE = 0; int WGL_BUFFER_TYPE_BOOL = 0;
 	switch(descriptor.swapchain.buffering)
@@ -193,6 +196,8 @@ SGPUDeviceContext rdInitOpenGL_ARB(SWindow& window, const SGPUDeviceDesc& descri
 	if(wglMakeCurrent(window.windowDeviceContext, context.context) == false){
 		DWORD error = GetLastError();
 		LOG("wglMakeCurrent(hdc, hglrc) == false!, error == 0x%08x\n", error); }
+
+#endif //PLATFORM_WINDOWS
 
 	return context;
 }

@@ -3,6 +3,7 @@
 
 #ifdef RD_API_OPENGL4
 
+#include "glinclude.h"
 #include "../../utils/pointers.h"
 #include "../../descriptors/buffer_desc.h"
 #include "../../descriptors/graphic_object.h"
@@ -10,17 +11,27 @@
 class CBuffer : public CGraphicObject{
 protected:
 	SBufferDesc descriptor;
+	GLuint id = 0;
+
+	bool Create(SRawData data);
+
 public:
-	CBuffer(GPUDevice* dev, const SBufferDesc& desc) :
-		CGraphicObject(dev), descriptor(desc){}
+	CBuffer(GPUDevice* dev, const SBufferDesc& desc, SRawData data = SRawData()) :
+		CGraphicObject(dev), descriptor(desc){
+		Create(data);
+	}
+
+	GLuint getId(){ return id; }
 
 	const auto& getDescriptor(){ return descriptor; }
 
 	EBufferType getType(){ return descriptor.type; }
 
-	void Upload(byte* pData, uint32 size, uint32 offset){};
+	void upload(byte* pData, uint32 size, uint32 offset){};
 	bool Map(uint32 start, uint32 size, byte** pOutMappedData){ return false; };
 	void Unmap(){};
+
+	void Release();
 
 	virtual ~CBuffer() = default;
 };

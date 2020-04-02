@@ -66,13 +66,14 @@ struct SShaderResourceBindingDesc{
 
 struct SShaderDesc{
 	EShaderStage stage = EShaderStage::FragmentShader;
+	std::string name = "";
 	std::string source = "";
 	std::list<std::vector<SShaderResourceBindingDesc>> bindingSetsDesc;
 
 	SShaderDesc() = default;
 
-	SShaderDesc(EShaderStage s, std::string src, std::list<std::vector<SShaderResourceBindingDesc>> binds)
-		: stage(s), source(src), bindingSetsDesc(binds){
+	SShaderDesc(EShaderStage s, std::string n, std::string src, std::list<std::vector<SShaderResourceBindingDesc>> binds)
+		: stage(s), name(n), source(src), bindingSetsDesc(binds){
 		VerifyBindingDesc();
 	}
 
@@ -204,7 +205,7 @@ public:
 	virtual bool setUniform(const char* name, uint count, ivec3* value){ LOG_ERR("not implemented!"); return false; }
 	virtual bool setUniform(const char* name, uint count, ivec4* value){ LOG_ERR("not implemented!"); return false; }
 	
-	virtual void Upload() = 0;
+	virtual void upload() = 0;
 	virtual bool isShared() = 0;
 };
 

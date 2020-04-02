@@ -86,6 +86,7 @@ inline uint count(EValueSize s){
 	}
 	return 0;
 }
+inline uint componentCount(EValueSize s){ return count(s); }
 
 const uint64 uint64_max = ((uint64)(0xffffffffffffffff));
 const int64 int64_max = ((int64)(0x7fffffffffffffff));

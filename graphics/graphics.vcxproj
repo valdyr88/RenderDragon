@@ -515,6 +515,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="objects\buffer.cpp" />
     <ClCompile Include="objects\device.cpp" />
     <ClCompile Include="objects\framebuffer.cpp" />
     <ClCompile Include="objects\opengl4\gl\GLState.cpp" />
@@ -526,6 +527,7 @@
     <ClCompile Include="objects\shader_resource_manager.cpp" />
     <ClCompile Include="objects\texture.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />
+    <ClCompile Include="objects\vertex_buffer.cpp" />
     <ClCompile Include="utils\platform.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

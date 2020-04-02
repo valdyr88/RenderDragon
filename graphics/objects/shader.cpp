@@ -24,7 +24,7 @@ bool CShaderProgram::MergeShaderResourceSetDescs(){
 	typedef std::vector<SShaderResourceBindingDesc> SRDescVector;
 	std::list<SRDescVector> mergedDescs;
 
-	for(uint s = 0; s < EShaderStage::NumStages; ++s){
+	for(uint s = 0; s < EShaderStage::NumShaderStages; ++s){
 		if(shader[s].get() == nullptr) continue;
 		auto& sh = shader[s];
 

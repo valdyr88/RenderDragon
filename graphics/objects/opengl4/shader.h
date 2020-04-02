@@ -17,11 +17,20 @@ class CShader : public CGraphicObject{
 protected:
 	SShaderDesc descriptor;
 
+	GLuint id = 0;
+	GLuint getId(){ return id; }
+
 	IUniformBuffer* getUniformBuffer(uint bindPoint);
+
+	std::string info_string;
+	bool CheckCompileStatus();
+	bool CompileShader();
 public:
 
 	CShader(GPUDevice* dev, const SShaderDesc& desc) :
-		CGraphicObject(dev), descriptor(desc){}
+		CGraphicObject(dev), descriptor(desc){
+		CompileShader();
+	}
 
 	const auto& getDescriptor(){ return descriptor; }
 
@@ -34,10 +43,16 @@ public:
 class CShaderProgram : public CGraphicObject{
 protected:
 	uint numStages;
-	SharedPtr<CShader> shader[EShaderStage::NumStages];
+	SharedPtr<CShader> shader[(uint)EShaderStage::NumShaderStages];
 	std::vector<SharedPtr<CShaderResourceSetDesc>> resourceSetDescs;
 
+	GLuint id = 0;
+	GLuint getId(){ return id; }
+
 	bool MergeShaderResourceSetDescs();
+	
+	bool CheckLinkStatus();
+	bool LinkProgram();
 public:
 
 	CShaderProgram(GPUDevice* dev, std::vector<SharedPtr<CShader>> shaders) :
@@ -47,12 +62,15 @@ public:
 
 		for(auto it = shaders.begin(); it != shaders.end(); ++it){
 			auto& sh = *it;
-			if(sh->descriptor.stage < EShaderStage::NumStages){
-				shader[sh->descriptor.stage] = sh; ++numStages;
+			if(sh->descriptor.stage < EShaderStage::NumShaderStages){
+				shader[getStageNumber(sh->descriptor.stage)] = sh; ++numStages;
 			}
 		}
 
 		MergeShaderResourceSetDescs();
+		if(LinkProgram() == false){
+			LOG_ERR("linking failed");
+		}
 	}
 
 	uint getNofStages(){ return numStages; }

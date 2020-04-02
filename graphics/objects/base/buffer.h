@@ -18,7 +18,7 @@ public:
 
 	EBufferType getType(){ return descriptor.type; }
 
-	void Upload(byte* pData, uint32 size, uint32 offset){};
+	void upload(byte* pData, uint32 size, uint32 offset){};
 	bool Map(uint32 start, uint32 size, byte** pOutMappedData){ return false; };
 	void Unmap(){};
 

@@ -1,22 +1,22 @@
 #include "include.h"
 
-void IncludeFileTesting();
+void IncludeFileTesting(GPUDevice* dev);
 
 int main(){
-
-	IncludeFileTesting();
 
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 	devdesc.swapchain.width = 1280;
 	devdesc.swapchain.height = 860;
 
+	UniquePtr<GPUDevice> dev = GPUDevice::CreateGPUDevice(devdesc);
+
 	SWindow window;
 	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
 
-	UniquePtr<GPUDevice> dev = GPUDevice::CreateGPUDevice(devdesc);
-
 	dev->InitContextOnWindow(window);
+
+	IncludeFileTesting(dev.get());
 	
 	SShaderResourceBindingDesc desc = {
 		0, 0, "name",
@@ -57,6 +57,8 @@ int main(){
 	ub.setUniform("color", vec4(0.1f, 0.7f, 0.8f, 1.0f));
 	ub.setUniform("color", 1.2f);
 
+	ub.upload();
+
 	SShaderResourceBindingDesc srdesc(0, 0, "name", EShaderResourceType::Texture, EShaderStage::FragmentShader);
 	{
 		srdesc.shaderStages = EShaderStage::VertexShader | EShaderStage::FragmentShader;
@@ -93,8 +95,7 @@ int main(){
 	auto vshader = SharedPtr<CShader>(new CShader(dev.get(), vsdesc));
 
 	auto shaderProgram = SharedPtr<CShaderProgram>(new CShaderProgram(dev.get(), { vshader,fshader }));
-
-
+	
 	SPipelineStateDesc psdesc;
 	{
 		psdesc.shader = shaderProgram;
@@ -239,7 +240,7 @@ const char* include_list[] =
 	nullptr
 };
 
-void IncludeFileTesting(){
+void IncludeFileTesting(GPUDevice* dev){
 
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)
@@ -261,6 +262,20 @@ void IncludeFileTesting(){
 	source = globalDefines->insertInto(source);
 
 	printContentsToFile("Shaders/simple.ps.glsl.processed.glsl", source.c_str(), source.length());
+
+	auto vsSource = TestIncludes("Shaders/simple.vs.glsl");
+	vsSource = globalDefines->insertInto(vsSource);
+
+	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, {});
+	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vs.glsl", vsSource, {});
+
+
+	SharedPtr<CShader> VShader = NewShared<CShader>(dev, vsdesc);
+	SharedPtr<CShader> FShader = NewShared<CShader>(dev, fsdesc);
+
+	CShaderProgram program(dev, { VShader, FShader });
+	
+	program.getNofStages();
 }
 
 //---------------------------------------------------------------------------------

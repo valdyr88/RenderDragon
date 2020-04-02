@@ -3,6 +3,7 @@
 
 #ifdef RD_API_OPENGL4
 
+#include "glinclude.h"
 #include "../../utils/pointers.h"
 #include "../../descriptors/vertex_buffer_desc.h"
 #include "../../descriptors/shader_desc.h"
@@ -11,12 +12,21 @@
 class CVertexBuffer : public CGraphicObject{
 protected:
 	SVertexFormat format;
-	UniquePtr<CBuffer> buffer;
+	std::vector<UniquePtr<CBuffer>> buffers;
 	uint32 count;
+	GLuint id = 0;
+
+	bool Create(std::vector<SRawData> data);
 public:
 
-	CVertexBuffer(GPUDevice* dev, const SVertexFormat& fmt, uint32 s) :
-		CGraphicObject(dev), format(fmt), count(s){}
+	CVertexBuffer(GPUDevice* dev, const SVertexFormat& fmt, uint32 c, std::vector<SRawData> data = std::vector<SRawData>()) :
+		CGraphicObject(dev), format(fmt), count(c){
+		Create(data);
+	}
+
+	GLuint getId(){ return id; }
+
+	void Release();
 
 	virtual ~CVertexBuffer() = default;
 };

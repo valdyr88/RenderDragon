@@ -19,6 +19,7 @@ struct SVertexAttributeDesc{
 
 	uint32 binding = 0; //if separate VertexPointer, NormalPointer, TexCoordPointer etc
 	uint32 stride = 0; //if struct has Vertex/Normal/TexCoord then at what offset
+	bool isNormalized = false;
 
 	bool operator == (SVertexAttributeDesc& other) const{}
 	bool operator != (SVertexAttributeDesc& other) const{ return !(*this == other); }
@@ -54,7 +55,7 @@ struct SVertexAttribute{
 };
 
 struct SVertexFormat{
-	std::vector<SVertexAttribute> attributes;
+	std::vector<SVertexAttributeDesc> attributes;
 	EAttributeLayout layout = EAttributeLayout::Interleaved;
 };
 

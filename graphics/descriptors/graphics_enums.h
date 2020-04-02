@@ -463,8 +463,26 @@ enum EShaderStage{
 	TaskShader = 1 << 11,
 	MeshShader = 1 << 12,
 
-	NumStages = 12
+	NumShaderStages = 13
 };
+inline uint getStageNumber(const EShaderStage t){
+	auto log2i = [](uint32 i){ uint32 r = 0; while((i >>= 1) != 0) ++r; return r; };
+
+	switch(t)
+	{
+		case EShaderStage::NumShaderStages: return (uint)EShaderStage::NumShaderStages;
+		default:
+			return (uint)log2i((uint32)t);
+	}
+}
+inline uint32 operator|(const EShaderStage a, const EShaderStage b){
+	return ((uint32)a) | ((uint32)b); }
+inline uint32 operator|(const uint32 a, const EShaderStage b){
+	return a | ((uint32)b); }
+inline uint32 operator|(const EShaderStage a, const uint32 b){
+	return ((uint32)a) | b; }
+inline uint32 operator|=(uint32& a, const EShaderStage b){
+	a = a | b;	return a; }
 
 enum class EShaderResourceType{
 	Texture,

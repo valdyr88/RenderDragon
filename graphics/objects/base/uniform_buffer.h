@@ -75,7 +75,7 @@ public:
 	virtual bool setUniform(const char* name, uint count, ivec3* value) override;
 	virtual bool setUniform(const char* name, uint count, ivec4* value) override;*/
 
-	virtual void Upload() override;
+	virtual void upload() override;
 	virtual bool isShared() override;
 
 	Type* operator->(){ return &data; }
@@ -159,7 +159,7 @@ template<typename Type> bool CUniformBuffer<Type>::setUniform(const char* name, 
 }
 
 template<typename Type> bool CUniformBuffer<Type>::isShared(){ return false; }
-template<typename Type> void CUniformBuffer<Type>::Upload(){}
+template<typename Type> void CUniformBuffer<Type>::upload(){}
 
 template<typename Type> void CUniformBuffer<Type>::CreateMapping(const std::vector<SUniformMap> maps){
 	

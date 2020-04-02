@@ -527,7 +527,7 @@ public:
 	forceinline GLState_prefix_func void DeleteShader(GLuint shader){
 		 glDeleteShader(shader); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void ShaderSource(GLuint shader, GLsizei count, GLchar** strings, GLint* lengths){
+	forceinline GLState_prefix_func void ShaderSource(GLuint shader, GLsizei count, const GLchar** strings, GLint* lengths){
 		 glShaderSource(shader,count,strings,lengths); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void CompileShader(GLuint shader){
@@ -547,6 +547,9 @@ public:
 	}
 	forceinline GLState_prefix_func void ValidateProgram(GLuint program){
 		 glValidateProgram(program); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetProgramiv(GLuint program, GLenum pname, GLint* params){
+		glGetProgramiv(program, pname, params); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void UseProgram(GLuint program){
 		 glUseProgram(program); GLS_OFR return;
@@ -1342,7 +1345,7 @@ inline EShaderStage GetShaderStage(CGLState::EGLShaderStage stage){
 		case CGLState::EGLShaderStage::EGL_FRAGMENT_SHADER: return EShaderStage::FragmentShader;
 		default: break;
 	}
-	return EShaderStage::NumStages;
+	return EShaderStage::NumShaderStages;
 }
 
 inline GLenum glenum(const EShaderStage& v){
@@ -1440,7 +1443,7 @@ inline GLenum glenum(const EFrontFace& v){
 	{
 		case EFrontFace::Clockwise: return (GLenum)GL_CW;
 		case EFrontFace::CounterClockwise: return (GLenum)GL_CCW;
-		default: return (GLenum)GL_NONE;
+		default: (GLenum)GL_NONE;
 	}
 }
 inline GLenum glenum(const EComparisonOp& v){
@@ -1653,5 +1656,17 @@ inline GLenum glenum(const EValueType& v){
 		default: return (GLenum)GL_NONE;
 	}
 }
+
+inline GLenum glenum(const EBufferType& t){
+	switch(t)
+	{
+		case EBufferType::Vertex: return (GLenum)GL_ARRAY_BUFFER;
+		case EBufferType::Index: return (GLenum)GL_ELEMENT_ARRAY_BUFFER;
+		case EBufferType::Uniform: return (GLenum)GL_UNIFORM_BUFFER;
+		case EBufferType::Staging: return (GLenum)GL_NONE;
+		default: return (GLenum)GL_NONE;
+	}
+}
+
 #endif //RD_API_OPENGL4
 #endif //GLSTATE_H
