@@ -2,6 +2,7 @@
 #define POINTERS_H
 
 #include <memory>
+#include <vector>
 #define SharedPtr std::shared_ptr
 #define WeakPtr std::weak_ptr
 #define UniquePtr std::unique_ptr
@@ -18,6 +19,14 @@
 struct SRawData{
 	byte* data = nullptr;
 	uint32 size = 0;
+
+	SRawData() : data(nullptr), size(0){}
+	SRawData(void* ptr, uint32 s) : data((byte*)ptr), size(s){}
+	template<typename type>
+	SRawData(std::vector<type>& darray){
+		data = (byte*)darray.data();
+		size = (uint32)(sizeof(type)*darray.size());
+	}
 };
 
 #define fill_memory(memory,size,value) { for(uint64 i = 0; i < size; ++i){ ((byte*)((void*)memory))[i] = value; } }

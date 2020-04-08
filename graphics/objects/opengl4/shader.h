@@ -47,7 +47,6 @@ protected:
 	std::vector<SharedPtr<CShaderResourceSetDesc>> resourceSetDescs;
 
 	GLuint id = 0;
-	GLuint getId(){ return id; }
 
 	bool MergeShaderResourceSetDescs();
 	
@@ -72,6 +71,8 @@ public:
 			LOG_ERR("linking failed");
 		}
 	}
+
+	GLuint getId(){ return id; }
 
 	uint getNofStages(){ return numStages; }
 	IUniformBuffer* getUniformBuffer(EShaderStage stage, uint bindPoint);

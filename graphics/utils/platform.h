@@ -44,10 +44,15 @@ struct SWindow{
 
 	void CreateProgramWindow(const char* name, int W, int H, int startX, int startY, uint style, bool showWindow);
 
+	bool SwapBackbuffer();
+
 	SWindow();
 	~SWindow();
 };
 
+void ProcessCallback(SWindow* window);
+void PlatfromLoopUpdate();
 void MainPlatformLoop();
+
 
 #endif //PLATFORM_H

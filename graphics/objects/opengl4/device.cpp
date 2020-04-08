@@ -44,7 +44,7 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 			stencil_buffer_bits = 0;
 			depth_buffer_bits = 8*sizeInBytes(descriptor.swapchain.depthType);
 			break;
-		case ETextureFormat::DepthStencil:
+		case ETextureFormat::depthStencil:
 			depth_buffer_bits = 8*sizeInBytes(descriptor.swapchain.depthType);
 			stencil_buffer_bits = 8*sizeInBytes(descriptor.swapchain.stencilType);
 			break;
@@ -202,14 +202,32 @@ SGPUDeviceContext rdInitOpenGL_ARB(SWindow& window, const SGPUDeviceDesc& descri
 	return context;
 }
 
-SGPUDeviceContext GPUDevice::InitOpenGL(SWindow& window){
+SGPUDeviceContext GPUDevice::InitOpenGL(SWindow& win){
+	window = win;
 	context = rdInitOpenGL(window, this->descriptor);
 	context = rdInitOpenGL_ARB(window, this->descriptor, context, 4, 0);
 	return context;
 }
 
-bool GPUDevice::InitContextOnWindow(SWindow& window){
-	context = this->InitOpenGL(window);
+bool GPUDevice::InitContextOnWindow(SWindow& win){
+	context = this->InitOpenGL(win);
+
+	SRenderPassDesc rpdesc;
+	{
+		rpdesc.attachments[0].format = descriptor.swapchain.format;
+		rpdesc.attachments[0].loadOp = ELoadStoreOp::Clear;
+		rpdesc.attachments[0].storeOp = ELoadStoreOp::Store;
+		rpdesc.nofAttachments = 1;
+		rpdesc.depthStencil.format = descriptor.swapchain.depthFormat;
+		rpdesc.depthStencil.loadOp = ELoadStoreOp::Clear;
+		rpdesc.depthStencil.storeOp = ELoadStoreOp::DontCare;
+		rpdesc.depthStencil.stencilLoadOp = ELoadStoreOp::Clear;
+		rpdesc.depthStencil.stencilStoreOp = ELoadStoreOp::DontCare;
+	}
+
+	swapchainRenderPass = SharedPtr<CRenderPass>(new CRenderPass(this, rpdesc));
+	swapchainFramebuffer = SharedPtr<CFramebuffer>(new CGLSwapchainFramebuffer(this, rpdesc));
+
 	return true;
 }
 
@@ -252,13 +270,13 @@ SharedPtr<CSampler> GPUDevice::CreateSampler(const SSamplerDesc& desc){
 	addTrackedObject(obj);
 	return obj;
 }
-SharedPtr<CVertexBuffer> GPUDevice::CreateVertexBuffer(const SVertexFormat& desc, uint32 count){
-	auto obj = SharedPtr<CVertexBuffer>(new CVertexBuffer(this, desc, count));
+SharedPtr<CVertexBuffer> GPUDevice::CreateVertexBuffer(const SVertexFormat& desc, uint32 count, std::vector<SRawData> data){
+	auto obj = SharedPtr<CVertexBuffer>(new CVertexBuffer(this, desc, count, data));
 	addTrackedObject(obj);
 	return obj;
 }
-SharedPtr<CIndexBuffer> GPUDevice::CreateIndexBuffer(EValueType type, uint32 count){
-	auto obj = SharedPtr<CIndexBuffer>(new CIndexBuffer(this, type, count));
+SharedPtr<CIndexBuffer> GPUDevice::CreateIndexBuffer(EValueType type, uint32 count, SRawData data){
+	auto obj = SharedPtr<CIndexBuffer>(new CIndexBuffer(this, type, count, data));
 	addTrackedObject(obj);
 	return obj;
 }
@@ -393,7 +411,12 @@ bool GPUDevice::setRasterizerState(const SRasterizerStateDesc& mode){
 		this->pipelineState.rasterizerDesc.fillMode = mode.fillMode;
 	}
 	if(mode.cullMode != this->pipelineState.rasterizerDesc.cullMode){
-		gl.CullFace(glenum(mode.cullMode));
+		if(mode.cullMode == ECullMode::None)
+			gl.DisableCullFace();
+		else{
+			gl.EnableCullFace();
+			gl.CullFace(glenum(mode.cullMode));
+		}
 		this->pipelineState.rasterizerDesc.cullMode = mode.cullMode;
 	}
 	if(mode.frontFace != this->pipelineState.rasterizerDesc.frontFace){
@@ -475,9 +498,8 @@ bool GPUDevice::setViewports(const SViewports& mode){
 
 
 bool GPUDevice::bindShaderProgram(SharedPtr<CShaderProgram>& shader){
-	//ToDo: implement this
-
-	LOG_ERR("not implemented!");
+	if(shader == nullptr) return false;
+	gl.UseProgram(shader->getId());
 	return true;
 }
 //------------------------------------------------------------------------------------
@@ -492,15 +514,15 @@ void GPUDevice::ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorV
 	bool depthStencilClear = false;
 	bool colorClear = false;
 
-	for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){
-		if(descriptor.Attachments[i].loadOp == ELoadStoreOp::Clear ||
-		   descriptor.Attachments[i].loadOp == ELoadStoreOp::DontCare){
+	for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS && i < descriptor.nofAttachments; ++i){
+		if(descriptor.attachments[i].loadOp == ELoadStoreOp::Clear ||
+		   descriptor.attachments[i].loadOp == ELoadStoreOp::DontCare){
 			attachmentClear[i] = true; colorClear = true; }
 		else
 			attachmentClear[i] = false;
 	}
-	if(descriptor.DepthStencil.loadOp == ELoadStoreOp::Clear ||
-	   descriptor.DepthStencil.loadOp == ELoadStoreOp::DontCare)
+	if(descriptor.depthStencil.loadOp == ELoadStoreOp::Clear ||
+	   descriptor.depthStencil.loadOp == ELoadStoreOp::DontCare)
 		depthStencilClear = true;
 	else
 		depthStencilClear = false;
@@ -529,6 +551,26 @@ void GPUDevice::bindFramebuffer(CFramebuffer* framebuffer){
 	if(boundFramebuffer == framebuffer) return;
 	gl.BindFramebuffer(GL_FRAMEBUFFER, framebuffer->getId());
 	boundFramebuffer = framebuffer;
+}
+
+bool GPUDevice::PresentFrame(){
+	gl.Flush();
+	window.SwapBackbuffer();
+	return true;
+}
+//------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------
+// Draw functions
+//------------------------------------------------------------------------------------
+bool GPUDevice::DrawIndexed(uint count){
+	if(boundVertexBuffer == nullptr) return false;
+	if(boundIndexBuffer == nullptr) return false;
+
+	if(count == 0) count = boundIndexBuffer->getCount();
+
+	gl.DrawElements(glenum(this->pipelineState.primitiveTopology), count, glenum(boundIndexBuffer->getType()), nullptr);
+	return true;
 }
 //------------------------------------------------------------------------------------
 

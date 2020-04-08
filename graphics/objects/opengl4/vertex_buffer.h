@@ -12,9 +12,10 @@
 class CVertexBuffer : public CGraphicObject{
 protected:
 	SVertexFormat format;
-	std::vector<UniquePtr<CBuffer>> buffers;
 	uint32 count;
 	GLuint id = 0;
+
+	std::vector<UniquePtr<CBuffer>> buffers;
 
 	bool Create(std::vector<SRawData> data);
 public:
@@ -24,23 +25,38 @@ public:
 		Create(data);
 	}
 
+	const SVertexFormat& getVertexFormat(){ return format; }
+
 	GLuint getId(){ return id; }
-
 	void Release();
-
 	virtual ~CVertexBuffer() = default;
+
+	bool Bind();
 };
 
 class CIndexBuffer : public CGraphicObject{
 protected:
 	EValueType type;
 	uint32 count;
+
+	UniquePtr<CBuffer> buffer;
+
+	bool Create(SRawData data);
 public:
 
-	CIndexBuffer(GPUDevice* dev, EValueType t, uint32 s) :
-		CGraphicObject(dev), type(t), count(s){}
+	CIndexBuffer(GPUDevice* dev, EValueType t, uint32 c, SRawData data = SRawData()) :
+		CGraphicObject(dev), type(t), count(c){
+		Create(data);
+	}
 
+	GLuint getId(){ return (buffer != nullptr)? buffer->getId() : 0; }
+	void Release();
 	virtual ~CIndexBuffer() = default;
+
+	uint32 getCount(){ return count; }
+	EValueType getType(){ return type; }
+
+	bool Bind();
 };
 
 #endif //RD_API_OPENGL4

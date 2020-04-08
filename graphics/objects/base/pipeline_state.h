@@ -24,7 +24,7 @@ public:
 	bool operator == (CPipelineState& other) const{ return descriptor == other.descriptor; }
 	bool operator == (SPipelineStateDesc& desc) const{ return descriptor == desc; }
 
-	bool bind(){ return true; }
+	bool Bind(){ return true; }
 
 	CShaderProgram* getShaderProgram() { return descriptor.shader.get(); }
 

@@ -3,7 +3,7 @@
 #include "pipeline_state.h"
 #include "device.h"
 
-bool CPipelineState::bind(){
+bool CPipelineState::Bind(){
 	if(device == nullptr) return false;
 	auto& gl = device->gl;
 

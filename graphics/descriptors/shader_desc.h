@@ -10,6 +10,7 @@
 #include "../utils/strings.h"
 #include "graphics_enums.h"
 #include "graphic_object.h"
+#include "vertex_buffer_desc.h"
 
 class GPUDevice;
 //-----------------------------------------------------------------------------------
@@ -69,6 +70,8 @@ struct SShaderDesc{
 	std::string name = "";
 	std::string source = "";
 	std::list<std::vector<SShaderResourceBindingDesc>> bindingSetsDesc;
+
+	SVertexFormat vertexFormat;
 
 	SShaderDesc() = default;
 
@@ -205,7 +208,7 @@ public:
 	virtual bool setUniform(const char* name, uint count, ivec3* value){ LOG_ERR("not implemented!"); return false; }
 	virtual bool setUniform(const char* name, uint count, ivec4* value){ LOG_ERR("not implemented!"); return false; }
 	
-	virtual void upload() = 0;
+	virtual void Upload() = 0;
 	virtual bool isShared() = 0;
 };
 

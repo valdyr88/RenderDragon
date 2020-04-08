@@ -44,6 +44,7 @@
 
 class CGLState{
 private:
+	GLState_prefix_var bool bIsInit = false;
 
 	GLState_prefix_var int MATRIX_MODE;
 	GLState_prefix_var int PUSH_MODELVIEW_MATRIX;
@@ -51,13 +52,13 @@ private:
 
 	GLState_prefix_var int PUSH_TEXTURE_MATRIX;
 	GLState_prefix_var int PUSH_ATTRIB_BITS;
-	GLState_prefix_var int ACTIVE_FRAMEBUFFER;
-	GLState_prefix_var int BIND_TEXTURE1D_ID;
-	GLState_prefix_var int BIND_TEXTURE2D_ID;
-	GLState_prefix_var int BIND_TEXTURE3D_ID;
-	GLState_prefix_var int ACTIVE_TEXTURE_ID;
-	GLState_prefix_var int DEPTH_FUNC;
-	GLState_prefix_var int BLEND_SRC, BLEND_DST, BLEND_SRC_ALPHA,BLEND_DST_ALPHA, BLEND_OP, BLEND_OP_ALPHA;
+	GLState_prefix_var GLuint ACTIVE_FRAMEBUFFER;
+	GLState_prefix_var GLuint BIND_TEXTURE1D_ID;
+	GLState_prefix_var GLuint BIND_TEXTURE2D_ID;
+	GLState_prefix_var GLuint BIND_TEXTURE3D_ID;
+	GLState_prefix_var GLuint ACTIVE_TEXTURE_ID;
+	GLState_prefix_var GLenum DEPTH_FUNC;
+	GLState_prefix_var GLenum BLEND_SRC, BLEND_DST, BLEND_SRC_ALPHA,BLEND_DST_ALPHA, BLEND_OP, BLEND_OP_ALPHA;
 	GLState_prefix_var bool VERTEX_ARRAY_ENABLED,NORMAL_ARRAY_ENABLED,TEXTURE_COORD_ARRAY_ENABLED,COLOR_ARRAY_ENABLED;
 	GLState_prefix_var bool LIGHTING_ENABLED,DEPTH_TEST_ENABLED, DEPTH_WRITE_ENABLED, DEPTH_CLAMP_ENABLED,ALPHA_TEST_ENABLED,STENCIL_TEST_ENABLED,BLEND_ENABLED,
 		TEXTURE1D_ENABLED,TEXTURE2D_ENABLED,TEXTURE3D_ENABLED,TEXTURECUBE_ENABLED, LINE_SMOOTH_ENABLED,
@@ -65,9 +66,13 @@ private:
 		CULL_FACE_ENABLED, SAMPLE_MASK_ENABLED, SAMPLE_COVERAGE_ENABLED, 
 		SAMPLE_ALPHA_TO_ONE_ENABLED, TEXTURECUBESEAMLESS_ENABLED,
 		POLYGON_OFFSET_FILL_ENABLED, POLYGON_OFFSET_LINE_ENABLED, POLYGON_OFFSET_POINT_ENABLED;
-	GLState_prefix_var int init;
+
 	GLState_prefix_var GLvoid* pVertexBuffer,*pNormalBuffer,*pTexCoordBuffer,*pColorBuffer;
-	GLState_prefix_var int program_link, previous_program_link;
+	GLState_prefix_var GLuint program_link, previous_program_link;
+	GLState_prefix_var GLuint bound_vertex_array;
+	GLState_prefix_var GLuint bound_read_framebuffer, bound_draw_framebuffer;
+
+	GLState_prefix_var bool vertex_attrib_array_enabled[RD_MAX_VERTEX_ATTRIBS];
 
 	class GLStateOnFuctionReturn{
 		CGLState* pState; const char* FunctionName;
@@ -555,11 +560,22 @@ public:
 		 glUseProgram(program); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void EnableVertexAttribArray(GLuint index){
-		 glEnableVertexAttribArray(index); GLS_OFR return;
+		 glEnableVertexAttribArray(index);
+		 if(index < RD_MAX_VERTEX_ATTRIBS)
+			 vertex_attrib_array_enabled[index] = true;
+		 GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DisableVertexAttribArray(GLuint index){
-		 glDisableVertexAttribArray(index); GLS_OFR return;
+		 glDisableVertexAttribArray(index);
+		 if(index < RD_MAX_VERTEX_ATTRIBS)
+			 vertex_attrib_array_enabled[index] = true;
+		 GLS_OFR return;
 	}
+	forceinline GLState_prefix_func bool IsVerexAttribArrayEnabled(GLuint index){
+		if(index >= RD_MAX_VERTEX_ATTRIBS) return false;
+		return vertex_attrib_array_enabled[index];
+	}
+
 	forceinline GLState_prefix_func void DrawElements(GLenum mode,GLsizei count, GLenum type, void* indices){
 		 glDrawElements(mode,count,type,indices); GLS_OFR return;
 	}
@@ -571,6 +587,15 @@ public:
 	}
 	forceinline GLState_prefix_func void VertexAttribLPointer(GLuint index, GLint size, GLenum type, GLsizei stride, GLvoid* pointer){
 		 glVertexAttribLPointer(index, size, type, stride, pointer); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void VertexAttribFormat(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride){
+		glVertexAttribFormat(index,size,type,normalized,stride); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void VertexAttribBinding(GLuint attribindex, GLint bindingindex){
+		glVertexAttribBinding(attribindex,bindingindex); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void BindVertexBuffer(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride){
+		glBindVertexBuffer(bindingindex, buffer, offset, stride); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void Flush(){
 		 glFlush(); GLS_OFR return;
@@ -907,10 +932,10 @@ public:
 	forceinline GLState_prefix_func void BindBuffer(GLenum target, GLuint buffer){
 		 glBindBuffer(target,buffer); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BindAttribLocation(GLuint program, GLuint index, GLchar* name){
+	forceinline GLState_prefix_func void BindAttribLocation(GLuint program, GLuint index, const GLchar* name){
 		 glBindAttribLocation(program,index,name); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BindAttribLocationARB(GLhandleARB programObj, GLuint index, GLchar* name){
+	forceinline GLState_prefix_func void BindAttribLocationARB(GLhandleARB programObj, GLuint index, const GLchar* name){
 		 glBindAttribLocationARB(programObj,index,name); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindBufferARB(GLenum target, GLuint buffer){
@@ -932,7 +957,13 @@ public:
 		 glBindBufferRangeEXT(target,index,buffer,offset,size); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindFramebuffer(GLenum target, GLuint framebuffer){
-		 glBindFramebuffer(target,framebuffer); GLS_OFR return;
+		 glBindFramebuffer(target,framebuffer); 
+		 switch(target){
+			 case GL_DRAW_FRAMEBUFFER: bound_draw_framebuffer = framebuffer; break;
+			 case GL_READ_FRAMEBUFFER: bound_read_framebuffer = framebuffer; break;
+			 case GL_FRAMEBUFFER: bound_draw_framebuffer = bound_read_framebuffer = framebuffer; break;
+		 }
+		 GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindFramebufferEXT(GLenum mode, GLuint framebuffer){
 		 glBindFramebufferEXT(mode,framebuffer); GLS_OFR return;
@@ -958,13 +989,13 @@ public:
 	forceinline GLState_prefix_func void BindBuffersRange(GLenum target, GLuint first, GLsizei count, GLuint* buffers, GLintptr* offsets, GLsizeiptr* sizes){
 		 glBindBuffersRange(target,first,count,buffers,offsets,sizes); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BindFragDataLocation(GLuint program, GLuint colorNumber, GLchar* name){
+	forceinline GLState_prefix_func void BindFragDataLocation(GLuint program, GLuint colorNumber, const GLchar* name){
 		 glBindFragDataLocation(program,colorNumber,name); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BindFragDataLocationEXT(GLuint program, GLuint colorNumber, GLchar* name){
+	forceinline GLState_prefix_func void BindFragDataLocationEXT(GLuint program, GLuint colorNumber, const GLchar* name){
 		 glBindFragDataLocationEXT(program, colorNumber, name); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BindFragDataLocationIndexed(GLuint program, GLuint colorNumber, GLuint index, GLchar* name){
+	forceinline GLState_prefix_func void BindFragDataLocationIndexed(GLuint program, GLuint colorNumber, GLuint index, const GLchar* name){
 		 glBindFragDataLocationIndexed(program,colorNumber,index,name); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func GLuint BindParameterEXT(GLenum value){
@@ -1046,7 +1077,7 @@ public:
 		glGenVertexArrays(n,arrays); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindVertexArray(GLuint array){
-		glBindVertexArray(array); GLS_OFR return;
+		glBindVertexArray(array); bound_vertex_array = array; GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void DeleteVertexArrays(GLsizei n, GLuint* arrays){
 		glDeleteVertexArrays(n, arrays); GLS_OFR return;
@@ -1072,19 +1103,19 @@ public:
 	forceinline GLState_prefix_func GLhandleARB CreateShaderObjectARB(GLenum type){
 		 auto rtn = glCreateShaderObjectARB(type); GLS_OFR return rtn;
 	}
-	forceinline GLState_prefix_func GLuint CreateShaderProgramEXT(GLenum type, GLchar* string){
+	forceinline GLState_prefix_func GLuint CreateShaderProgramEXT(GLenum type, const GLchar* string){
 		 auto rtn = glCreateShaderProgramEXT(type, string); GLS_OFR return rtn;
 	}
-	forceinline GLState_prefix_func GLuint CreateShaderProgramv(GLenum type, GLsizei count, GLchar** strings){
+	forceinline GLState_prefix_func GLuint CreateShaderProgramv(GLenum type, GLsizei count, const GLchar** strings){
 		 auto rtn = glCreateShaderProgramv(type, count, strings); GLS_OFR return rtn;
 	}
-	forceinline GLState_prefix_func GLuint GetUniformBlockIndex(GLuint program, GLchar* uniformBlockName){
+	forceinline GLState_prefix_func GLuint GetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName){
 		 auto rtn = glGetUniformBlockIndex(program,uniformBlockName); GLS_OFR return rtn;
 	}
 	forceinline GLState_prefix_func void UniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding){
 		 glUniformBlockBinding(program, uniformBlockIndex, uniformBlockBinding); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func GLuint GetProgramResourceIndex(GLuint program, GLenum programInterface, GLchar* name){
+	forceinline GLState_prefix_func GLuint GetProgramResourceIndex(GLuint program, GLenum programInterface, const GLchar* name){
 		 auto rtn = glGetProgramResourceIndex(program, programInterface, name); GLS_OFR return rtn;
 	}
 	forceinline GLState_prefix_func void ShaderStorageBlockBinding(GLuint program, GLuint storageBlockIndex, GLuint storageBlockBinding){
@@ -1374,7 +1405,7 @@ inline GLenum glenum(const EPrimitiveTopology& v){
 		case EPrimitiveTopology::TriangleFan: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLE_FAN;
 		case EPrimitiveTopology::TriangleListAdjacency: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLES_ADJACENCY;
 		case EPrimitiveTopology::TriangleStripAdjacency: return (GLenum)CGLState::EGLDrawMode::EGL_TRIANGLES_STRIP_ADJACENCY;
-		default: (GLenum)GL_NONE;
+		default: return (GLenum)GL_NONE;
 	}
 }
 inline GLenum glenum(const EBlendFactor& v){
@@ -1443,7 +1474,7 @@ inline GLenum glenum(const EFrontFace& v){
 	{
 		case EFrontFace::Clockwise: return (GLenum)GL_CW;
 		case EFrontFace::CounterClockwise: return (GLenum)GL_CCW;
-		default: (GLenum)GL_NONE;
+		default: return (GLenum)GL_NONE;
 	}
 }
 inline GLenum glenum(const EComparisonOp& v){
@@ -1564,7 +1595,7 @@ inline GLenum glenum(const ETextureFormat& v){
 		case ETextureFormat::RGB: return (GLenum)GL_RGB;
 		case ETextureFormat::RGBA: return (GLenum)GL_RGBA;
 		case ETextureFormat::Depth: return (GLenum)GL_DEPTH;
-		case ETextureFormat::DepthStencil: return (GLenum)GL_DEPTH_STENCIL;
+		case ETextureFormat::depthStencil: return (GLenum)GL_DEPTH_STENCIL;
 		case ETextureFormat::RGBE: return (GLenum)GL_RGBA;
 		default: return (GLenum)GL_NONE;
 	}
@@ -1665,6 +1696,44 @@ inline GLenum glenum(const EBufferType& t){
 		case EBufferType::Uniform: return (GLenum)GL_UNIFORM_BUFFER;
 		case EBufferType::Staging: return (GLenum)GL_NONE;
 		default: return (GLenum)GL_NONE;
+	}
+}
+
+inline GLenum glenumRead(const EShaderResourceUsageType& usage){
+	switch(usage)
+	{
+		case EShaderResourceUsageType::Static: return (GLenum)GL_STATIC_READ;
+		case EShaderResourceUsageType::Stream: return (GLenum)GL_STREAM_READ;
+		case EShaderResourceUsageType::Dynamic: return (GLenum)GL_DYNAMIC_READ;
+		default: return GL_NONE;
+	}
+}
+inline GLenum glenumCopy(const EShaderResourceUsageType& usage){
+	switch(usage)
+	{
+		case EShaderResourceUsageType::Static: return (GLenum)GL_STATIC_COPY;
+		case EShaderResourceUsageType::Stream: return (GLenum)GL_STREAM_COPY;
+		case EShaderResourceUsageType::Dynamic: return (GLenum)GL_DYNAMIC_COPY;
+		default: return GL_NONE;
+	}
+}
+inline GLenum glenumDraw(const EShaderResourceUsageType& usage){
+	switch(usage)
+	{
+		case EShaderResourceUsageType::Static: return (GLenum)GL_STATIC_DRAW;
+		case EShaderResourceUsageType::Stream: return (GLenum)GL_STREAM_DRAW;
+		case EShaderResourceUsageType::Dynamic: return (GLenum)GL_DYNAMIC_DRAW;
+		default: return GL_NONE;
+	}
+}
+
+inline GLenum glenum(const EShaderResourceUsageType& u, const EShaderResourceAccessType& a){
+	switch(a)
+	{
+		case EShaderResourceAccessType::Read: return glenumRead(u);
+		case EShaderResourceAccessType::Copy: return glenumCopy(u);
+		case EShaderResourceAccessType::Draw: return glenumDraw(u);
+		default: return GL_NONE;
 	}
 }
 

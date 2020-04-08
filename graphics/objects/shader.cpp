@@ -79,7 +79,7 @@ bool CShaderProgram::MergeShaderResourceSetDescs(){
 		}
 	}
 	
-	auto SRManager = device->GetShaderResourceManager();
+	auto SRManager = device->getShaderResourceManager();
 
 	for(auto it = mergedDescs.begin(); it != mergedDescs.end(); ++it){
 		auto setDesc = SRManager.GetResourceSetDesc(*it);

@@ -36,7 +36,7 @@ bool CShader::CompileShader(){
 	auto& gl = device->gl;
 
 	const GLchar* src = descriptor.source.c_str();
-	GLint length = descriptor.source.length();
+	GLint length = (GLint)descriptor.source.length();
 
 	id = gl.CreateShader(glenum(descriptor.stage));
 	gl.ShaderSource(id, 1, &src, &length);
@@ -91,6 +91,14 @@ bool CShaderProgram::LinkProgram(){
 	for(uint i = 0; i < EShaderStage::NumShaderStages; ++i){
 		if(shader[i] != nullptr)
 			gl.AttachShader(id, shader[i]->getId());
+	}
+	auto& vs = shader[getStageNumber(EShaderStage::VertexShader)];
+	if(vs != nullptr){
+		auto& format = vs->getDescriptor().vertexFormat;
+		for(uint i = 0; i < format.attributes.size(); ++i){
+			auto& att = format.attributes[i];
+			gl.BindAttribLocation(id, att.binding, att.name.c_str());
+		}
 	}
 	gl.LinkProgram(id);
 

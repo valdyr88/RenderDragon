@@ -3,6 +3,7 @@
 
 #define RD_MAX_RENDER_ATTACHMENTS 8
 #define RD_MAX_VIEWPORTS RD_MAX_RENDER_ATTACHMENTS
+#define RD_MAX_VERTEX_ATTRIBS 32
 
 enum class EGraphicsAPI{
 	Base,
@@ -125,14 +126,14 @@ enum class ETextureFormat {
 	RGB,
 	RGBA,
 	Depth,
-	DepthStencil,
+	depthStencil,
 	RGBE,
 };
 inline bool isDepthFormat(const ETextureFormat& format){
 	return format == ETextureFormat::Depth ||
-		format == ETextureFormat::DepthStencil; }
+		format == ETextureFormat::depthStencil; }
 inline bool isStencilFormat(const ETextureFormat& format){
-	return format == ETextureFormat::DepthStencil; }
+	return format == ETextureFormat::depthStencil; }
 inline uint8 count(const ETextureFormat& format){
 	switch(format)
 	{
@@ -142,7 +143,7 @@ inline uint8 count(const ETextureFormat& format){
 		case ETextureFormat::RGB:return 3;
 		case ETextureFormat::RGBA:return 4;
 		case ETextureFormat::Depth:return 1;
-		case ETextureFormat::DepthStencil:return 2;
+		case ETextureFormat::depthStencil:return 2;
 	}
 	return 0;
 }
@@ -276,7 +277,7 @@ inline ETextureFormat getFormat(const ETypedTextureFormat& format){
 		case ETypedTextureFormat::R32_uint: return ETextureFormat::R;
 		case ETypedTextureFormat::R32_sint: return ETextureFormat::R;
 		case ETypedTextureFormat::Depth24_unorm: return ETextureFormat::Depth;
-		case ETypedTextureFormat::Depth24_unorm_Stencil8_uint: return ETextureFormat::DepthStencil;
+		case ETypedTextureFormat::Depth24_unorm_Stencil8_uint: return ETextureFormat::depthStencil;
 		case ETypedTextureFormat::R8G8_typeless: return ETextureFormat::RG;
 		case ETypedTextureFormat::R8G8_unorm: return ETextureFormat::RG;
 		case ETypedTextureFormat::R8G8_uint: return ETextureFormat::RG;
@@ -492,9 +493,15 @@ enum class EShaderResourceType{
 };
 
 enum class EShaderResourceUsageType{
-	Static,
-	Mutable,
-	Dynamic
+	Static, //The data store contents will be modified once and used many times.
+	Stream, //The data store contents will be modified once and used at most a few times.
+	Dynamic //The data store contents will be modified repeatedlyand used many times.
+};
+
+enum class EShaderResourceAccessType{
+	Read, //The data store contents are modified by reading data from the GPU, and used to return that data when queried by the application. Means the data will be read by the client's application (GPU to CPU)
+	Copy, //The data store contents are modified by reading data from the GPU, and used as the source for GPU drawing and image specification commands. Means the data will be used both drawing and reading (GPU to GPU)
+	Draw //The data store contents are modified by the application, and used as the source for GPU drawing and image specification commands. Means the data will be sent to GPU in order to draw (CPU to GPU)
 };
 
 enum class EAttributeLayout{

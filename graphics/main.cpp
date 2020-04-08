@@ -1,11 +1,9 @@
 #include "include.h"
 
-void IncludeFileTesting(GPUDevice* dev);
-
-int main(){
+int main_old(){
 
 	SGPUDeviceDesc devdesc;
-	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
+	devdesc.swapchain.depthFormat = ETextureFormat::depthStencil;
 	devdesc.swapchain.width = 1280;
 	devdesc.swapchain.height = 860;
 
@@ -15,9 +13,7 @@ int main(){
 	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
 
 	dev->InitContextOnWindow(window);
-
-	IncludeFileTesting(dev.get());
-	
+		
 	SShaderResourceBindingDesc desc = {
 		0, 0, "name",
 		EShaderResourceType::UniformBuffer,
@@ -57,7 +53,7 @@ int main(){
 	ub.setUniform("color", vec4(0.1f, 0.7f, 0.8f, 1.0f));
 	ub.setUniform("color", 1.2f);
 
-	ub.upload();
+	ub.Upload();
 
 	SShaderResourceBindingDesc srdesc(0, 0, "name", EShaderResourceType::Texture, EShaderStage::FragmentShader);
 	{
@@ -102,7 +98,7 @@ int main(){
 		psdesc.blendDesc.alphaToCoverageEnable = true;
 	}
 	auto pipeline = dev->CreatePipelineState(psdesc);
-	pipeline->bind();
+	pipeline->Bind();
 
 
 	STextureDesc txdesc;
@@ -136,18 +132,18 @@ int main(){
 
 	SRenderPassDesc rpdesc;
 	{
-		rpdesc.NofAttachments = 1;
-		rpdesc.Attachments[0].valueType = EValueType::uint8;
-		rpdesc.Attachments[0].format = ETextureFormat::RGBA;
-		rpdesc.Attachments[0].loadOp = ELoadStoreOp::Load;
-		rpdesc.Attachments[0].storeOp = ELoadStoreOp::Store;
-		rpdesc.Attachments[0].usageFlags = ETextureUsage::ColorAttachment | ETextureUsage::ShaderResource;
-		rpdesc.Attachments[0].sampleCount = 1;
+		rpdesc.nofAttachments = 1;
+		rpdesc.attachments[0].valueType = EValueType::uint8;
+		rpdesc.attachments[0].format = ETextureFormat::RGBA;
+		rpdesc.attachments[0].loadOp = ELoadStoreOp::Load;
+		rpdesc.attachments[0].storeOp = ELoadStoreOp::Store;
+		rpdesc.attachments[0].usageFlags = ETextureUsage::ColorAttachment | ETextureUsage::ShaderResource;
+		rpdesc.attachments[0].sampleCount = 1;
 	}
 
 	auto framebuffer = dev->CreateFramebuffer(rpdesc, { texture });
 	
-	auto srm = dev->GetShaderResourceManager();
+	auto srm = dev->getShaderResourceManager();
 	auto reset = srm.GetResourceSetDesc({
 		{0, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
 		{0, 1, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
@@ -240,7 +236,74 @@ const char* include_list[] =
 	nullptr
 };
 
-void IncludeFileTesting(GPUDevice* dev){
+UniquePtr<CVertexBuffer> CreateVertexBuffer(GPUDevice* dev)
+{
+	SVertexFormat fmt;
+	fmt.attributes = {
+		{ "vertex", 0, EValueType::float32, EValueSize::vec3 },
+		{ "normal", 1, EValueType::float32, EValueSize::vec3, 0, true },
+		{ "texCoord", 2, EValueType::float32, EValueSize::vec2 }
+	};
+	fmt.layout = EAttributeLayout::Contiguous;
+
+	std::vector<vec3> vertex = { vec3(-1.0f, -1.0f, 0.01f), vec3(-1.0f, 1.0f, 0.01f), vec3(1.0f, 1.0f, 0.01f), vec3(1.0f, -1.0f, 0.01f) };
+	std::vector<vec3> normal = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f) };
+	std::vector<vec2> txCoord = { vec2(0.0f, 0.0f), vec2(0.0f, 1.0f), vec2(1.0f, 1.0f), vec2(1.0f, 0.0f) };
+
+	auto vertexBuffer = UniquePtr<CVertexBuffer>(new CVertexBuffer(dev, fmt, (uint)vertex.size(), { SRawData(vertex), SRawData(normal), SRawData(txCoord) }));
+
+	return vertexBuffer;
+}
+UniquePtr<CVertexBuffer> CreateVertexBufferInterleaved(GPUDevice* dev)
+{
+	SVertexFormat fmt;
+	fmt.attributes = {
+		{ "vertex", 0, EValueType::float32, EValueSize::vec3 },
+		{ "normal", 1, EValueType::float32, EValueSize::vec3, 0, true },
+		{ "texCoord", 2, EValueType::float32, EValueSize::vec2 }
+	};
+	fmt.layout = EAttributeLayout::Interleaved;
+
+	struct vertex{
+		vec3 position;
+		vec3 normal;
+		vec2 txCoord;
+
+		vertex(vec3 pos, vec3 norm, vec2 tx) : position(pos), normal(norm), txCoord(tx){}
+	};
+
+	std::vector<vertex> vertices = { vertex(vec3(-1.0f, -1.0f, 0.01f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 0.0f)),
+									 vertex(vec3(-1.0f,  1.0f, 0.01f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 1.0f)),
+									 vertex(vec3( 1.0f,  1.0f, 0.01f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 1.0f)),
+									 vertex(vec3( 1.0f, -1.0f, 0.01f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 0.0f)) };
+
+	auto vertexBuffer = UniquePtr<CVertexBuffer>(new CVertexBuffer(dev, fmt, (uint)vertices.size(), { SRawData(vertices) }));
+
+	return vertexBuffer;
+}
+UniquePtr<CIndexBuffer> CreateIndexBuffer(GPUDevice* dev)
+{
+	std::vector<uint16> data = { 0, 1, 2, 2, 3, 0 };
+	auto indexBuffer = UniquePtr<CIndexBuffer>(new CIndexBuffer(dev, EValueType::uint16, (uint)data.size(), data));
+	return indexBuffer;
+}
+
+int main(){
+
+	SGPUDeviceDesc devdesc;
+	devdesc.swapchain.depthFormat = ETextureFormat::depthStencil;
+	devdesc.swapchain.width = 200;
+	devdesc.swapchain.height = 200;
+
+	UniquePtr<GPUDevice> device = GPUDevice::CreateGPUDevice(devdesc);
+
+	SWindow window;
+	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
+
+	device->InitContextOnWindow(window);
+
+	auto vertexBuffer = CreateVertexBufferInterleaved(device.get());
+	auto indexBuffer = CreateIndexBuffer(device.get());
 
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)
@@ -257,25 +320,67 @@ void IncludeFileTesting(GPUDevice* dev){
 	defines2.add("T", "1");
 
 	*globalDefines += defines2;
-	
+
 	auto source = TestIncludes("Shaders/simple.ps.glsl");
 	source = globalDefines->insertInto(source);
 
 	printContentsToFile("Shaders/simple.ps.glsl.processed.glsl", source.c_str(), source.length());
 
-	auto vsSource = TestIncludes("Shaders/simple.vs.glsl");
+	auto vsSource = TestIncludes("Shaders/simple.vnt.vs.glsl");
 	vsSource = globalDefines->insertInto(vsSource);
 
 	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, {});
-	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vs.glsl", vsSource, {});
+	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vnt.vs.glsl", vsSource, {});
+	vsdesc.vertexFormat = vertexBuffer->getVertexFormat();
 
+	SharedPtr<CShader> VShader = NewShared<CShader>(device.get(), vsdesc);
+	SharedPtr<CShader> FShader = NewShared<CShader>(device.get(), fsdesc);
+	SharedPtr<CShaderProgram> program = SharedPtr<CShaderProgram>(new CShaderProgram(device.get(), { VShader, FShader }));
 
-	SharedPtr<CShader> VShader = NewShared<CShader>(dev, vsdesc);
-	SharedPtr<CShader> FShader = NewShared<CShader>(dev, fsdesc);
-
-	CShaderProgram program(dev, { VShader, FShader });
+	auto renderPass = device->getSwapchainRenderPass();
+	auto framebuffer = device->getActiveSwapchainFramebuffer();
 	
-	program.getNofStages();
+	SPipelineStateDesc psdesc;
+	{
+		psdesc.shader = program;
+		psdesc.blendDesc.alphaToCoverageEnable = false;
+		psdesc.blendDesc.attachmentBlends[0].blendEnable = false;
+		psdesc.depthDesc.enable = false;
+		psdesc.primitiveTopology = EPrimitiveTopology::TriangleList;
+		psdesc.renderPass = renderPass;
+		psdesc.viewports.numViewports = 1;
+		psdesc.viewports.viewports[0].width = (float)device->getDescriptor().swapchain.width;
+		psdesc.viewports.viewports[0].height = (float)device->getDescriptor().swapchain.height;
+		psdesc.viewports.viewports[0].x = 0;
+		psdesc.viewports.viewports[0].y = 0;
+		psdesc.viewports.scissorTest->enable = false;
+		psdesc.rasterizerDesc.cullMode = ECullMode::None;
+		psdesc.rasterizerDesc.fillMode = EFillMode::Solid;
+		psdesc.rasterizerDesc.frontFace = EFrontFace::CounterClockwise;
+	}
+	auto pipeline = device->CreatePipelineState(psdesc);
+	
+	program->getNofStages();
+
+	while(true)
+	{
+		PlatfromLoopUpdate();
+		//----------------------------
+		renderPass->Begin(framebuffer.get(), SClearColorValues(vec4(0.5f,0.7f,1.0f,1.0f)));
+			pipeline->Bind();
+
+			device->BindVertexBuffer(vertexBuffer.get());
+			device->BindIndexBuffer(indexBuffer.get());
+
+			device->DrawIndexed();
+		renderPass->End();
+		//----------------------------
+		device->PresentFrame();
+
+		Sleep(100);
+	}
+
+	return 0;
 }
 
 //---------------------------------------------------------------------------------

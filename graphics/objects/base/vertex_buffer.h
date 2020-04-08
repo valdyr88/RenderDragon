@@ -18,7 +18,12 @@ public:
 	CVertexBuffer(GPUDevice* dev, const SVertexFormat& fmt, uint32 s) :
 		CGraphicObject(dev), format(fmt), count(s){}
 
+	const SVertexFormat& getVertexFormat(){ return format; }
+
+	void Release(){}
 	virtual ~CVertexBuffer() = default;
+
+	bool Bind(){ return false; }
 };
 
 class CIndexBuffer : public CGraphicObject{
@@ -31,6 +36,8 @@ public:
 		CGraphicObject(dev), type(t), count(s){}
 
 	virtual ~CIndexBuffer() = default;
+
+	bool Bind(){ return false; }
 };
 
 #endif //RD_API_BASE

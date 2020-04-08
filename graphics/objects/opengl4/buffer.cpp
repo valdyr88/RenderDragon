@@ -7,7 +7,7 @@ GLenum usageGLenum(const EShaderResourceUsageType& t){
 	switch(t)
 	{
 		case EShaderResourceUsageType::Static: return GL_STATIC_DRAW;
-		case EShaderResourceUsageType::Mutable: return GL_DYNAMIC_DRAW;
+		case EShaderResourceUsageType::Stream: return GL_STREAM_DRAW;
 		case EShaderResourceUsageType::Dynamic: return GL_DYNAMIC_DRAW;
 		default: return GL_STATIC_DRAW;
 	}
@@ -22,7 +22,16 @@ bool CBuffer::Create(SRawData data){
 	gl.GenBuffers(1, &id);
 
 	gl.BindBuffer(glenum(descriptor.type), id);
-	gl.BufferData(glenum(descriptor.type), data.size, data.data, usageGLenum(descriptor.usage));
+	gl.BufferData(glenum(descriptor.type), data.size, data.data, glenum(descriptor.usage, descriptor.access));
+
+	return true;
+}
+
+bool CBuffer::Bind(){
+	if(this->device == nullptr) return false;
+	auto& gl = device->gl;
+	gl.BindBuffer(glenum(descriptor.type), id);
+	return true;
 }
 
 void CBuffer::Release(){

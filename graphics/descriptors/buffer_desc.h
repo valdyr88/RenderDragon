@@ -7,6 +7,8 @@
 struct SBufferDesc{
 	EBufferType type;
 	EShaderResourceUsageType usage = EShaderResourceUsageType::Static;
+	EShaderResourceAccessType access = EShaderResourceAccessType::Draw;
+
 	uint32 size;
 
 	bool operator == (const SBufferDesc& other) const{

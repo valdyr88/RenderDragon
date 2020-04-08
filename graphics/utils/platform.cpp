@@ -202,6 +202,10 @@ void SWindow::CreateProgramWindow(const char* name, int W, int H, int startX, in
 	height = h;
 }
 
+bool SWindow::SwapBackbuffer(){
+	return SwapBuffers(this->windowDeviceContext);
+}
+
 void ProcessMessage(SWindow* window){
 
 }
@@ -226,10 +230,14 @@ void ProcessCallback(SWindow* window)
 		ProcessMessage(window);
 }
 
+void PlatfromLoopUpdate(){
+	for(auto it = windows.begin(); it != windows.end(); ++it)
+		ProcessCallback(*it);
+}
+
 void MainPlatformLoop(){
 	while(true){
-		for(auto it = windows.begin(); it != windows.end(); ++it)
-			ProcessCallback(*it);
+		PlatfromLoopUpdate();
 	}
 }
 

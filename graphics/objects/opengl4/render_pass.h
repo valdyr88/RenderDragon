@@ -26,13 +26,13 @@ public:
 	bool isCompatibleWith(SRenderPassDesc& other){ return descriptor == other; }
 	bool isCompatibleWith(CRenderPass& other){ return this->isCompatibleWith(other.descriptor); }
 
-	bool begin(CFramebuffer* fb, SClearColorValues clear = SClearColorValues());
+	bool Begin(CFramebuffer* fb, SClearColorValues clear = SClearColorValues());
 
-	void end(){
+	void End(){
 		boundFramebuffer = nullptr;
 	}
 
-	bool doAttachmentsNeedClearing();
+	bool DoAttachmentsNeedClearing();
 
 	virtual ~CRenderPass() = default;
 };

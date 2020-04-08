@@ -11,31 +11,51 @@
 
 //ToDo: finish this
 struct SVertexAttributeDesc{
-	uint32 location = 0; //shader location
 	std::string name = "";
+	uint32 binding = 0; //shader location && if separate VertexPointer, NormalPointer, TexCoordPointer etc
 
 	EValueType type = EValueType::float32;
 	EValueSize count = EValueSize::vec4;
 
-	uint32 binding = 0; //if separate VertexPointer, NormalPointer, TexCoordPointer etc
 	uint32 stride = 0; //if struct has Vertex/Normal/TexCoord then at what offset
-	bool isNormalized = false;
+	bool bIsNormalized = false;
 
-	bool operator == (SVertexAttributeDesc& other) const{}
+	SVertexAttributeDesc(std::string n, uint32 b, EValueType t, EValueSize c, uint32 s = 0, bool bNormalized = false) :
+		name(n), binding(b), type(t), count(c), stride(s), bIsNormalized(bNormalized){}
+
+	bool operator == (SVertexAttributeDesc& other) const{
+		return binding == other.binding &&
+			type == other.type &&
+			count == other.count &&
+			stride == other.stride &&
+			bIsNormalized == other.bIsNormalized &&
+			name == other.name;
+	}
 	bool operator != (SVertexAttributeDesc& other) const{ return !(*this == other); }
-	SVertexAttributeDesc& operator = (const SVertexAttributeDesc& other){}
+	SVertexAttributeDesc& operator = (const SVertexAttributeDesc& other){
+		binding = other.binding;
+		type = other.type;
+		count = other.count;
+		stride = other.stride;
+		bIsNormalized = other.bIsNormalized;
+		name = other.name;
+		return *this;
+	}
 };
-
+/*
 struct SVertexInputDesc{
 	std::vector<SVertexAttributeDesc> attributes;
-};
+}; */
 //-----------------------------------------------------------------------------------
-
+/*
 struct SVertexAttribute{
+	std::string name = "";
 	EValueType type = EValueType::float32;
 	EValueSize count = EValueSize::vec4;
-	std::string name = "";
 	bool bIsNormalized = false;
+
+	SVertexAttribute(std::string n, EValueType t, EValueSize c, bool bNormalized = false) :
+		name(n), type(t), count(c), bIsNormalized(bNormalized){}
 
 	bool operator == (SVertexAttribute& other) const{
 		return type == other.type &&
@@ -52,11 +72,12 @@ struct SVertexAttribute{
 		bIsNormalized = other.bIsNormalized;
 		return *this;
 	}
-};
+};*/
 
 struct SVertexFormat{
 	std::vector<SVertexAttributeDesc> attributes;
 	EAttributeLayout layout = EAttributeLayout::Interleaved;
+	uint32 stride = 0;
 };
 
 #endif //VERTEX_BUFFER_DESC_H

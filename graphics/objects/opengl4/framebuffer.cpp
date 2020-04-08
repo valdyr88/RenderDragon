@@ -18,13 +18,13 @@ bool CFramebuffer::CreateAndSetupAttachments(){
 	device->gl.BindFramebuffer(GL_FRAMEBUFFER, this->id);
 
 	for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){
-		if(this->Attachments[i] != nullptr){
-			GLenum textarget = (this->Attachments[i]->isTextureCubeMap() && i < 6)? GL_TEXTURE_CUBE_MAP_POSITIVE_X+i : GL_TEXTURE_2D;
-			device->gl.FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, textarget, this->Attachments[i]->getId(), 0);
+		if(this->attachments[i] != nullptr){
+			GLenum textarget = (this->attachments[i]->isTextureCubeMap() && i < 6)? GL_TEXTURE_CUBE_MAP_POSITIVE_X+i : GL_TEXTURE_2D;
+			device->gl.FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, textarget, this->attachments[i]->getId(), 0);
 		}
 	}
-	if(this->DepthStencil != nullptr){
-		device->gl.FramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL, GL_TEXTURE_2D, this->DepthStencil->getId(), 0);
+	if(this->depthStencil != nullptr){
+		device->gl.FramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL, GL_TEXTURE_2D, this->depthStencil->getId(), 0);
 	}
 
 	return true;

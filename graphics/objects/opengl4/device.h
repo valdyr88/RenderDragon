@@ -3,6 +3,7 @@
 
 #ifdef RD_API_OPENGL4
 
+#include <vector>
 #include "../../utils/types/types.h"
 #include "../../utils/platform_defines.h"
 #include "../../utils/platform.h"
@@ -40,14 +41,19 @@ class GPUDevice {
 protected:
 	SGPUDeviceDesc descriptor;
 	SGPUDeviceContext context;
+	SWindow window;
 	CGLState gl;
 	std::list<SharedPtr<CGraphicObject>> objects;
 
 	template <typename type>
 	void addTrackedObject(SharedPtr<type>& obj);
 
+	SharedPtr<CRenderPass> swapchainRenderPass;
+	SharedPtr<CFramebuffer> swapchainFramebuffer;
 	SPipelineStateDesc pipelineState;
 	CFramebuffer* boundFramebuffer = nullptr;
+	CVertexBuffer* boundVertexBuffer = nullptr;
+	CIndexBuffer* boundIndexBuffer = nullptr;
 
 	CShaderResourceSetManager shaderResourceSetManager;
 
@@ -73,6 +79,8 @@ public:
 		descriptor.api = EGraphicsAPI::OpenGL4;
 	}
 
+	const auto& getDescriptor(){ return descriptor; }
+
 	bool InitContextOnWindow(SWindow& window);
 
 	SharedPtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc);
@@ -82,17 +90,26 @@ public:
 	//SharedPtr<CShader> CreateShaderModule(const SShaderDesc& desc);
 	//SharedPtr<CShaderResource> CreateShaderResrouce(const SShaderResourceDesc& desc);
 	SharedPtr<CSampler> CreateSampler(const SSamplerDesc& desc);
-	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count);
-	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count);
+	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count, std::vector<SRawData> data = std::vector<SRawData>());
+	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count, SRawData data = SRawData());
 	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data);
 
 	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear);
+	void BindVertexBuffer(CVertexBuffer* vb){ boundVertexBuffer = vb; if(vb) vb->Bind(); }
+	void BindIndexBuffer(CIndexBuffer* ib){ boundIndexBuffer = ib; if(ib) ib->Bind(); }
+
+	bool DrawIndexed(uint count = 0);
+
+	bool PresentFrame();
+
+	SharedPtr<CRenderPass> getSwapchainRenderPass(){ return swapchainRenderPass; }
+	SharedPtr<CFramebuffer> getActiveSwapchainFramebuffer(){ return swapchainFramebuffer; }
 
 	SharedPtr<CShaderResourceBinding> CreateShaderResourceBinding(const SShaderResourceBindingDesc& desc, CShaderResource* resource);
 	SharedPtr<CShaderResourceSetDesc> CreateShaderResourceSetDesc(const std::vector<SShaderResourceBindingDesc>& binds);
 	SharedPtr<CShaderResourceSet> CreateShaderResourceSet(const CShaderResourceSetDesc* desc, const std::vector<CShaderResource*>& rers);
 
-	auto& GetShaderResourceManager(){ return shaderResourceSetManager; }
+	auto& getShaderResourceManager(){ return shaderResourceSetManager; }
 
 	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
 

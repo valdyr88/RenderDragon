@@ -17,8 +17,8 @@ class CTexture;
 class CFramebuffer : public CGraphicObject{
 protected:
 	SRenderPassDesc descriptor;
-	SharedPtr<CTexture> Attachments[RD_MAX_RENDER_ATTACHMENTS];
-	SharedPtr<CTexture> DepthStencil;
+	SharedPtr<CTexture> attachments[RD_MAX_RENDER_ATTACHMENTS];
+	SharedPtr<CTexture> depthStencil;
 	
 	GLuint id = 0;
 	GLuint getId(){ return id; }
@@ -27,12 +27,12 @@ protected:
 	virtual void Release() override;
 
 public:
-	CFramebuffer(GPUDevice* dev, const SRenderPassDesc desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr) :
+	CFramebuffer(GPUDevice* dev, const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr) :
 		CGraphicObject(dev), descriptor(desc) {
 		for(uint i = 0; i < textures.size() && i < RD_MAX_RENDER_ATTACHMENTS; ++i){
-			this->Attachments[i] = textures[i];
+			this->attachments[i] = textures[i];
 		}
-		DepthStencil = depthStencilTextures;
+		depthStencil = depthStencilTextures;
 
 		CreateAndSetupAttachments();
 	}
@@ -43,6 +43,18 @@ public:
 	bool isCompatibleWith(CRenderPass& rp){ return rp.isCompatibleWith(this->descriptor); }
 
 	virtual ~CFramebuffer() = default;
+
+	friend class GPUDevice;
+};
+
+class CGLSwapchainFramebuffer : public CFramebuffer{
+public:
+	CGLSwapchainFramebuffer(GPUDevice* dev, const SRenderPassDesc& desc) :
+		CFramebuffer(dev, desc, {}){
+		this->id = 0;
+	}
+
+	virtual ~CGLSwapchainFramebuffer() = default;
 
 	friend class GPUDevice;
 };

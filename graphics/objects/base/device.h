@@ -43,13 +43,20 @@ public:
 	UniquePtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count){ return nullptr; }
 	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data){ return nullptr; }
 
+	void BindVertexBuffer(CVertexBuffer* vb){ return; }
+	void BindIndexBuffer(CIndexBuffer* ib){ return; }
+
+	bool DrawIndexed(uint count = 0);
+
 	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear){}
+
+	bool PresentFrame();
 
 	UniquePtr<CShaderResourceBinding> CreateShaderResourceBinding(const SShaderResourceBindingDesc& desc, CShaderResource* resource);
 	UniquePtr<CShaderResourceSetDesc> CreateShaderResourceSetDesc(const std::vector<SShaderResourceBindingDesc>& binds);
 	UniquePtr<CShaderResourceSet> CreateShaderResourceSet(const CShaderResourceSetDesc* desc, const std::vector<CShaderResource*>& rers);
 
-	auto& GetShaderResourceManager(){ return shaderResourceSetManager; }
+	auto& getShaderResourceManager(){ return shaderResourceSetManager; }
 
 	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
 };

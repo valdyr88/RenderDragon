@@ -13,8 +13,6 @@ struct SAttachmentDesc {
 	uint8 sampleCount = 1;
 	ELoadStoreOp loadOp = ELoadStoreOp::Clear;
 	ELoadStoreOp storeOp = ELoadStoreOp::Store;
-	ELoadStoreOp stencilLoadOp = ELoadStoreOp::Clear;
-	ELoadStoreOp stencilStoreOp = ELoadStoreOp::Store;
 
 	bool operator == (const SAttachmentDesc& other) const{
 		return format == other.format &&
@@ -22,9 +20,7 @@ struct SAttachmentDesc {
 				usageFlags == other.usageFlags &&
 				sampleCount == other.sampleCount &&
 				loadOp == other.loadOp &&
-				storeOp == other.storeOp &&
-				stencilLoadOp == other.stencilLoadOp &&
-				stencilStoreOp == other.stencilStoreOp;
+				storeOp == other.storeOp;
 	}
 	bool operator != (const SAttachmentDesc& other) const{ return !(*this == other); }
 
@@ -35,6 +31,23 @@ struct SAttachmentDesc {
 		sampleCount = other.sampleCount;
 		loadOp = other.loadOp;
 		storeOp = other.storeOp;
+
+		return *this;
+	}
+};
+struct SDepthStencilAttachmentDesc : public SAttachmentDesc{
+	ELoadStoreOp stencilLoadOp = ELoadStoreOp::Clear;
+	ELoadStoreOp stencilStoreOp = ELoadStoreOp::Store;
+
+	bool operator == (const SDepthStencilAttachmentDesc& other) const{
+		return SAttachmentDesc::operator==(other) &&
+			stencilLoadOp == other.stencilLoadOp &&
+			stencilStoreOp == other.stencilStoreOp;
+	}
+	bool operator != (const SDepthStencilAttachmentDesc& other) const{ return !(*this == other); }
+
+	SDepthStencilAttachmentDesc& operator = (const SDepthStencilAttachmentDesc& other) {
+		SAttachmentDesc::operator=(other);
 		stencilLoadOp = other.stencilLoadOp;
 		stencilStoreOp = other.stencilStoreOp;
 
@@ -43,27 +56,27 @@ struct SAttachmentDesc {
 };
 
 struct SRenderPassDesc {
-	uint32 NofAttachments = 0;
-	SAttachmentDesc Attachments[RD_MAX_RENDER_ATTACHMENTS];
-	SAttachmentDesc DepthStencil;
+	uint32 nofAttachments = 0;
+	SAttachmentDesc attachments[RD_MAX_RENDER_ATTACHMENTS];
+	SDepthStencilAttachmentDesc depthStencil;
 
 	bool operator == (const SRenderPassDesc& other) const{
-		if(NofAttachments != other.NofAttachments) return false;
-		for(uint i = 0; i < NofAttachments; ++i){
-			auto& thisAtt = Attachments[i];
-			auto& othrAtt = other.Attachments[i];
+		if(nofAttachments != other.nofAttachments) return false;
+		for(uint i = 0; i < nofAttachments; ++i){
+			auto& thisAtt = attachments[i];
+			auto& othrAtt = other.attachments[i];
 			if(thisAtt != othrAtt) return false;
 		}
-		if(DepthStencil != other.DepthStencil) return false;
+		if(depthStencil != other.depthStencil) return false;
 		return true;
 	}
 	bool operator != (const SRenderPassDesc& other) const{ return !(*this == other); }
 
 	SRenderPassDesc& operator = (const SRenderPassDesc& other){
-		NofAttachments = other.NofAttachments;
-		for(uint i = 0; i < NofAttachments; ++i)
-			Attachments[i] = other.Attachments[i];
-		DepthStencil = other.DepthStencil;
+		nofAttachments = other.nofAttachments;
+		for(uint i = 0; i < nofAttachments; ++i)
+			attachments[i] = other.attachments[i];
+		depthStencil = other.depthStencil;
 
 		return *this;
 	}
