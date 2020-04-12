@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "uniform_buffer.h"
 
 #ifdef RD_API_OPENGL4
 
@@ -103,6 +104,11 @@ bool CShaderProgram::LinkProgram(){
 	gl.LinkProgram(id);
 
 	return CheckLinkStatus();
+}
+
+bool CShaderProgram::setUniformBuffer(uint set, uint binding, IUniformBuffer* ub){
+	if(ub == nullptr) return false;
+	return ub->Bind(set, binding);
 }
 
 #endif //RD_API_OPENGL4

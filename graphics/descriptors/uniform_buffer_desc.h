@@ -8,18 +8,18 @@
 
 struct SUniformMap
 {
-	EValueType type;
-	EValueSize size;
-	uint32 count;
-	std::string name;
-	uint32 offset;
+	std::string name = "";
+	EValueType type = EValueType::float32;
+	EValueSize size = EValueSize::vec4;
+	uint32 count = 1;
+	uint32 offset = 0;
 
-	SUniformMap(EValueType t, EValueSize s, uint32 c, const char* n) :
+	SUniformMap(const char* n, EValueType t, EValueSize s, uint32 c = 1) :
 		type(t), size(s), count(c), name(n) {
 		offset = 0;
 	}
 
-	SUniformMap(){ type = EValueType::float32; size = EValueSize::scalar; count = 1; name = ""; offset = 0; };
+	SUniformMap(){ type = EValueType::float32; size = EValueSize::vec4; count = 1; name = ""; offset = 0; }
 
 	bool operator ==(const SUniformMap& other) const{
 		return type == other.type &&
@@ -29,7 +29,7 @@ struct SUniformMap
 	}
 	bool operator !=(const SUniformMap& other) const{ return !(*this == other); }
 
-	SUniformMap& operator =(SUniformMap& other){
+	SUniformMap& operator =(const SUniformMap& other){
 		type = other.type;
 		size = other.size;
 		count = other.count;

@@ -10,25 +10,95 @@
 #include "../../descriptors/uniform_buffer_desc.h"
 #include "../../descriptors/shader_desc.h"
 #include "buffer.h"
+
 SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);
+	
+//-----------------------------------------------------------------------------------------------------------------------------------
+
+class IUniformBuffer : public CShaderResource{
+protected:
+	std::string name;
+	std::map<std::string, SUniformMap> mapping;
+	SharedPtr<CBuffer> buffer;
+
+	uint set = 0;
+	uint binding = 0;
+
+	void CreateMapping(const std::vector<SUniformMap> maps);
+	bool CreateBuffer(uint32 size);
+
+	bool Upload(byte* pData, uint32 size, uint32 offset = 0);
+
+	bool Bind(uint set, uint binding);
+
+	IUniformBuffer() = delete;
+public:
+	IUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap> maps)
+		: CShaderResource(dev, EShaderResourceType::UniformBuffer), name(bufferName)
+	{
+		CreateMapping(maps);
+	}
+
+	virtual bool setUniform(const char* name, float value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, vec2 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, vec3 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, vec4 value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual bool setUniform(const char* name, mat2 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, mat3 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, mat4 value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual bool setUniform(const char* name, mat2x3 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, mat3x2 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, mat4x3 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, mat3x4 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, mat4x2 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, mat2x4 value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual bool setUniform(const char* name, int value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, ivec2 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, ivec3 value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, ivec4 value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual bool setUniform(const char* name, uint count, float* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, vec2* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, vec3* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, vec4* value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual bool setUniform(const char* name, uint count, mat2* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, mat3* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, mat4* value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual bool setUniform(const char* name, uint count, mat2x3* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, mat3x2* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, mat4x3* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, mat3x4* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, mat4x2* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, mat2x4* value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual bool setUniform(const char* name, uint count, int* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, ivec2* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, ivec3* value){ LOG_ERR("not implemented!"); return false; }
+	virtual bool setUniform(const char* name, uint count, ivec4* value){ LOG_ERR("not implemented!"); return false; }
+
+	virtual void Upload() = 0;
+	virtual bool isShared() = 0;
+
+	friend class CShaderProgram;
+};
+
+//-----------------------------------------------------------------------------------------------------------------------------------
 
 template <typename Type> class CUniformBuffer : public IUniformBuffer{
 protected:
 	Type data;
-	std::map<std::string, SUniformMap> mapping;
-	std::string name;
-	SharedPtr<CBuffer> buffer;
 
 	template <typename UniformType> bool setUniform(const char* name, EValueType type, EValueSize size, uint32 count, UniformType& value);
-
-	void CreateMapping(const std::vector<SUniformMap> maps);
-	void CreateBuffer(uint32 size);
 public:
-
-	CUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap> maps) :
-		IUniformBuffer(dev), name(bufferName){
-		this->CreateMapping(maps);
-		this->CreateBuffer(sizeof(Type));
+	CUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap> maps = Type::desc)
+		: IUniformBuffer(dev, bufferName, maps)
+	{
+		CreateBuffer(sizeof(Type));
 	}
 	CUniformBuffer() = delete;
 
@@ -92,16 +162,15 @@ bool CUniformBuffer<Type>::setUniform(const char* name, EValueType type, EValueS
 	if(map.type != type) return false;
 
 	if(count == 1){
-		UniformType& loc = *( UniformType*) ((( byte*) &this->data) + map.offset);
+		UniformType& loc = *(UniformType*) (((byte*) &this->data) + map.offset);
 		loc = value;
 	}
 	else{
 		for(uint i = 0; i < count; ++i){
-			UniformType& loc = *((( UniformType*) ((( byte*) &this->data) + map.offset)) + i);
+			UniformType& loc = *(((UniformType*) (((byte*) &this->data) + map.offset)) + i);
 			loc = *((&value)+i);
 		}
 	}
-
 	return true;
 }
 
@@ -158,40 +227,15 @@ template<typename Type> bool CUniformBuffer<Type>::setUniform(const char* name, 
 }
 
 template<typename Type> bool CUniformBuffer<Type>::isShared(){ return false; }
-template<typename Type> void CUniformBuffer<Type>::Upload(){}
-
-template<typename Type> void CUniformBuffer<Type>::CreateMapping(const std::vector<SUniformMap> maps){
-	
-	uint offset = 0;
-	for(auto it = maps.begin(); it != maps.end(); ++it){
-		auto map = *it;
-		map.offset = offset;
-
-		mapping.emplace(it->name, map);
-
-		int bytesize = sizeInBytes(it->type);
-		bytesize = (bytesize < 4) ? 4 : bytesize;
-
-		offset += it->count * count(it->size) * bytesize;
-	}
-}
-
-template<typename Type> void CUniformBuffer<Type>::CreateBuffer(uint32 size){
-	if(device != nullptr){
-		SBufferDesc desc;
-		{
-			desc.type = EBufferType::Uniform;
-			desc.size = size;
-		};
-		//this->buffer = device->CreateBuffer(desc);
-		this->buffer = rdDeviceCreateBuffer(device, desc);
-	}
-}
 
 template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps){
 	return SharedPtr<CUniformBuffer<Type>>(new CUniformBuffer<Type>(dev, bufferName, maps));
 }
 
+template<typename Type> void CUniformBuffer<Type>::Upload(){
+	IUniformBuffer::Upload((byte*)&this->data, sizeof(Type));
+}
+//-----------------------------------------------------------------------------------------------------------------------------------
 
 #endif //RD_API_OPENGL4
 #endif //UNIFORM_BUFFER_H

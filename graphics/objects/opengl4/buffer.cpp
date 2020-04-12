@@ -19,10 +19,26 @@ bool CBuffer::Create(SRawData data){
 
 	auto& gl = device->gl;
 
+	if(data.data == nullptr)
+		data.size = descriptor.size;
+	else if(data.size == 0)
+		LOG_ERR("data != nullptr but size == 0");
+
 	gl.GenBuffers(1, &id);
 
 	gl.BindBuffer(glenum(descriptor.type), id);
 	gl.BufferData(glenum(descriptor.type), data.size, data.data, glenum(descriptor.usage, descriptor.access));
+
+	return true;
+}
+
+bool CBuffer::Upload(byte* pData, uint32 size, uint32 offset){
+	if(this->device == nullptr) return false;
+
+	auto& gl = device->gl;
+
+	gl.BindBuffer(glenum(descriptor.type), id);
+	gl.BufferSubData(glenum(descriptor.type), offset, size, pData);
 
 	return true;
 }

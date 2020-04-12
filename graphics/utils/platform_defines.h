@@ -9,6 +9,9 @@
 	#elif _WIN32
 		#define PLATFORM_32BIT
 	#endif
+
+	#define NOMINMAX
+
 #endif //PLATFORM_WINDOWS
 
 #ifdef __LINUX__

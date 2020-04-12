@@ -124,6 +124,7 @@ public:
 	friend class CShader;
 	friend class CShaderProgram;
 	friend class CShaderResource;
+	friend class IUniformBuffer;
 };
 
 SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);

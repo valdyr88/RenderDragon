@@ -1,5 +1,20 @@
 #include "include.h"
 
+struct UBStruct{
+	vec4 color;
+	float time;
+	float intensity;
+
+	static std::vector<SUniformMap> desc;
+};
+
+std::vector<SUniformMap> UBStruct::desc =
+	{
+		{ "color", EValueType::float32, EValueSize::vec4, 1},
+		{ "time", EValueType::float32, EValueSize::scalar, 1},
+		{ "intensity", EValueType::float32, EValueSize::scalar, 1}
+	};
+
 int main_old(){
 
 	SGPUDeviceDesc devdesc;
@@ -22,26 +37,20 @@ int main_old(){
 		0
 	};
 
-	struct UBStruct{
-		vec4 color;
-		float time;
-		float intensity;
-	};
-
-	SUniformMap m = { EValueType::float32, EValueSize::scalar, 1, "time" };
+	SUniformMap m = { "time", EValueType::float32, EValueSize::scalar, 1 };
 	std::vector<SUniformMap> v =
 	{
-		{ EValueType::float32, EValueSize::vec4, 1, "color"},
-		{ EValueType::float32, EValueSize::scalar, 1, "time"},
-		{ EValueType::float32, EValueSize::scalar, 1, "intensity"}
+		{ "color", EValueType::float32, EValueSize::vec4, 1},
+		{ "time", EValueType::float32, EValueSize::scalar, 1},
+		{ "intensity", EValueType::float32, EValueSize::scalar, 1}
 	};
 
 	auto shub = CUniformBuffer<UBStruct>::CreateUniformBuffer(dev.get(), "UBStruct",
-				{
-					{ EValueType::float32, EValueSize::vec4, 1, "color"},
-					{ EValueType::float32, EValueSize::scalar, 1, "time"},
-					{ EValueType::float32, EValueSize::scalar, 1, "intensity"}
-				} );
+	{
+		{ "color", EValueType::float32, EValueSize::vec4, 1},
+		{ "time", EValueType::float32, EValueSize::scalar, 1},
+		{ "intensity", EValueType::float32, EValueSize::scalar, 1}
+	} );
 	auto& ub = *shub.get();
 
 	ub->color = vec4(1.0f, 0.0f, 1.0f, 1.0f);
@@ -259,7 +268,7 @@ UniquePtr<CVertexBuffer> CreateVertexBufferInterleaved(GPUDevice* dev)
 	SVertexFormat fmt;
 	fmt.attributes = {
 		{ "vertex", 0, EValueType::float32, EValueSize::vec3 },
-		{ "normal", 1, EValueType::float32, EValueSize::vec3, 0, true },
+		{ "normal", 1, EValueType::float32, EValueSize::vec3, true },
 		{ "texCoord", 2, EValueType::float32, EValueSize::vec2 }
 	};
 	fmt.layout = EAttributeLayout::Interleaved;
@@ -288,6 +297,22 @@ UniquePtr<CIndexBuffer> CreateIndexBuffer(GPUDevice* dev)
 	return indexBuffer;
 }
 
+struct LightData{
+	vec3 position;
+	float intensity;
+
+	static std::vector<SUniformMap> desc;
+};
+
+std::vector<SUniformMap> LightData::desc = {
+	{"position", EValueType::float32, EValueSize::vec3 },
+	{"intensity", EValueType::float32, EValueSize::scalar }
+};
+
+UniquePtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
+	return UniquePtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(dev, "light"));
+}
+
 int main(){
 
 	SGPUDeviceDesc devdesc;
@@ -301,6 +326,9 @@ int main(){
 	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
 
 	device->InitContextOnWindow(window);
+
+	auto shpUniformBuffer = CreateUniformBuffer(device.get());
+	auto& ub = *shpUniformBuffer.get();
 
 	auto vertexBuffer = CreateVertexBufferInterleaved(device.get());
 	auto indexBuffer = CreateIndexBuffer(device.get());
@@ -361,6 +389,10 @@ int main(){
 	auto pipeline = device->CreatePipelineState(psdesc);
 	
 	program->getNofStages();
+	auto shader = pipeline->getShaderProgram();
+
+	float angle = 0.0f;
+	float dTime = 0.0f;
 
 	while(true)
 	{
@@ -368,6 +400,13 @@ int main(){
 		//----------------------------
 		renderPass->Begin(framebuffer.get(), SClearColorValues(vec4(0.5f,0.7f,1.0f,1.0f)));
 			pipeline->Bind();
+
+			ub->position = vec3(0.5f,0.5f,0.1f) + 0.1f*vec3(sinf(angle), cosf(angle),0.0f);
+			ub->intensity = 0.01f*(cosf(angle) * 0.5f + 0.5f);
+			ub.Upload();
+
+			//shader->setUniformBuffer("light", ub.get());
+			shader->setUniformBuffer(0, 2, &ub);
 
 			device->BindVertexBuffer(vertexBuffer.get());
 			device->BindIndexBuffer(indexBuffer.get());
@@ -377,7 +416,8 @@ int main(){
 		//----------------------------
 		device->PresentFrame();
 
-		Sleep(100);
+		angle += dTime;
+		Sleep(1); dTime = 10.0f / 1000.0f;
 	}
 
 	return 0;

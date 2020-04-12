@@ -13,6 +13,8 @@
 #include "../../descriptors/graphic_object.h"
 #include "shader_resource_manager.h"
 
+class IUniformBuffer;
+
 class CShader : public CGraphicObject{
 protected:
 	SShaderDesc descriptor;
@@ -72,10 +74,12 @@ public:
 		}
 	}
 
+	bool setUniformBuffer(uint set, uint binding, IUniformBuffer* ub);
+
 	GLuint getId(){ return id; }
 
 	uint getNofStages(){ return numStages; }
-	IUniformBuffer* getUniformBuffer(EShaderStage stage, uint bindPoint);
+	IUniformBuffer* getUniformBuffer(EShaderStage stage, uint binding);
 
 	virtual ~CShaderProgram() = default;
 

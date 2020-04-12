@@ -159,59 +159,6 @@ public:
 		CShaderResource(dev, EShaderResourceType::CombinedTexSampler), texture(tx), sampler(s){}
 };
 
-class IUniformBuffer : public CShaderResource{
-protected:
-
-	IUniformBuffer() = delete;
-public:
-	IUniformBuffer(GPUDevice* dev) : CShaderResource(dev, EShaderResourceType::UniformBuffer){}
-
-	virtual bool setUniform(const char* name, float value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, vec2 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, vec3 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, vec4 value){ LOG_ERR("not implemented!"); return false; }
-
-	virtual bool setUniform(const char* name, mat2 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, mat3 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, mat4 value){ LOG_ERR("not implemented!"); return false; }
-
-	virtual bool setUniform(const char* name, mat2x3 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, mat3x2 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, mat4x3 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, mat3x4 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, mat4x2 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, mat2x4 value){ LOG_ERR("not implemented!"); return false; }
-
-	virtual bool setUniform(const char* name, int value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, ivec2 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, ivec3 value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, ivec4 value){ LOG_ERR("not implemented!"); return false; }
-	
-	virtual bool setUniform(const char* name, uint count, float* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, vec2* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, vec3* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, vec4* value){ LOG_ERR("not implemented!"); return false; }
-
-	virtual bool setUniform(const char* name, uint count, mat2* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, mat3* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, mat4* value){ LOG_ERR("not implemented!"); return false; }
-
-	virtual bool setUniform(const char* name, uint count, mat2x3* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, mat3x2* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, mat4x3* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, mat3x4* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, mat4x2* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, mat2x4* value){ LOG_ERR("not implemented!"); return false; }
-
-	virtual bool setUniform(const char* name, uint count, int* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, ivec2* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, ivec3* value){ LOG_ERR("not implemented!"); return false; }
-	virtual bool setUniform(const char* name, uint count, ivec4* value){ LOG_ERR("not implemented!"); return false; }
-	
-	virtual void Upload() = 0;
-	virtual bool isShared() = 0;
-};
-
 //-----------------------------------------------------------------------------------
 
 #endif //SHADER_DESC_H

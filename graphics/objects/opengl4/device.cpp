@@ -513,11 +513,12 @@ void GPUDevice::ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorV
 	bool attachmentClear[RD_MAX_RENDER_ATTACHMENTS]; memset(attachmentClear, 0, sizeof(bool)* RD_MAX_RENDER_ATTACHMENTS);
 	bool depthStencilClear = false;
 	bool colorClear = false;
+	int colorClearCount = 0;
 
 	for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS && i < descriptor.nofAttachments; ++i){
 		if(descriptor.attachments[i].loadOp == ELoadStoreOp::Clear ||
 		   descriptor.attachments[i].loadOp == ELoadStoreOp::DontCare){
-			attachmentClear[i] = true; colorClear = true; }
+			attachmentClear[i] = true; colorClear = true; ++colorClearCount; }
 		else
 			attachmentClear[i] = false;
 	}
@@ -527,24 +528,32 @@ void GPUDevice::ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorV
 	else
 		depthStencilClear = false;
 
-	//ToDo: implement this, activate coresponding attachment with glDrawBuffers() and glDepthWrite(true/false) & glStencilWrite(true/false) and clear those attachments
-	LOG_WARN("not implemented completely!");
 	GLbitfield flags = 0;
 	
 	this->bindFramebuffer(fb);
 
-	if(colorClear == true){
-		gl.ClearColor(clear.color[0].r, clear.color[0].g, clear.color[0].b, clear.color[0].a);
-		flags |= GL_COLOR_BUFFER_BIT;
+	if(colorClearCount != descriptor.nofAttachments){
+		for(uint i = 0, d = 0; i < RD_MAX_RENDER_ATTACHMENTS && i < descriptor.nofAttachments; ++i){
+			if(attachmentClear[i] == true){
+				gl.ClearBufferfv(GL_COLOR, GL_COLOR_ATTACHMENT0+i, &clear.color[i].x);
+			}
+		}
+		if(depthStencilClear == true)
+			gl.ClearBufferfi(GL_DEPTH_STENCIL, 0, clear.depth, clear.stencil);
 	}
-	if(depthStencilClear == true){
-		gl.ClearDepth(clear.depth);
-		flags |= GL_DEPTH_BUFFER_BIT;
-		gl.ClearStencil(clear.stencil);
-		flags |= GL_STENCIL_BUFFER_BIT;
+	else{ //clear all
+		if(colorClear == true){
+			gl.ClearColor(clear.color[0].r, clear.color[0].g, clear.color[0].b, clear.color[0].a);
+			flags |= GL_COLOR_BUFFER_BIT;
+		}
+		if(depthStencilClear == true){
+			gl.ClearDepth(clear.depth);
+			flags |= GL_DEPTH_BUFFER_BIT;
+			gl.ClearStencil(clear.stencil);
+			flags |= GL_STENCIL_BUFFER_BIT;
+		}
+		gl.Clear(flags);
 	}
-
-	gl.Clear(flags);
 }
 
 void GPUDevice::bindFramebuffer(CFramebuffer* framebuffer){

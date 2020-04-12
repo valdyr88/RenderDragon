@@ -9,19 +9,18 @@
 
 //-----------------------------------------------------------------------------------
 
-//ToDo: finish this
 struct SVertexAttributeDesc{
 	std::string name = "";
-	uint32 binding = 0; //shader location && if separate VertexPointer, NormalPointer, TexCoordPointer etc
+	uint32 binding = 0;
 
 	EValueType type = EValueType::float32;
 	EValueSize count = EValueSize::vec4;
 
-	uint32 stride = 0; //if struct has Vertex/Normal/TexCoord then at what offset
 	bool bIsNormalized = false;
+	uint32 stride = 0;
 
-	SVertexAttributeDesc(std::string n, uint32 b, EValueType t, EValueSize c, uint32 s = 0, bool bNormalized = false) :
-		name(n), binding(b), type(t), count(c), stride(s), bIsNormalized(bNormalized){}
+	SVertexAttributeDesc(std::string n, uint32 b, EValueType t, EValueSize c, bool bNormalized = false, uint32 s = 0) :
+		name(n), binding(b), type(t), count(c), bIsNormalized(bNormalized), stride(s){}
 
 	bool operator == (SVertexAttributeDesc& other) const{
 		return binding == other.binding &&
@@ -42,42 +41,12 @@ struct SVertexAttributeDesc{
 		return *this;
 	}
 };
-/*
-struct SVertexInputDesc{
-	std::vector<SVertexAttributeDesc> attributes;
-}; */
-//-----------------------------------------------------------------------------------
-/*
-struct SVertexAttribute{
-	std::string name = "";
-	EValueType type = EValueType::float32;
-	EValueSize count = EValueSize::vec4;
-	bool bIsNormalized = false;
-
-	SVertexAttribute(std::string n, EValueType t, EValueSize c, bool bNormalized = false) :
-		name(n), type(t), count(c), bIsNormalized(bNormalized){}
-
-	bool operator == (SVertexAttribute& other) const{
-		return type == other.type &&
-			count == other.count &&
-			bIsNormalized == other.bIsNormalized &&
-			name == other.name;
-	}
-	bool operator != (SVertexAttribute& other) const{ return !(*this == other); }
-
-	SVertexAttribute& operator = (const SVertexAttribute& other){
-		type = other.type;
-		count = other.count;
-		name = other.name;
-		bIsNormalized = other.bIsNormalized;
-		return *this;
-	}
-};*/
 
 struct SVertexFormat{
 	std::vector<SVertexAttributeDesc> attributes;
 	EAttributeLayout layout = EAttributeLayout::Interleaved;
 	uint32 stride = 0;
 };
+//-----------------------------------------------------------------------------------
 
 #endif //VERTEX_BUFFER_DESC_H

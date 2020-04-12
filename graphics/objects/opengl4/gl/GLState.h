@@ -612,6 +612,18 @@ public:
 	forceinline GLState_prefix_func void ClearStencil(GLint stencil){
 		glClearStencil(stencil); GLS_OFR return;
 	}
+	forceinline GLState_prefix_func void ClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint* value){
+		glClearBufferiv(buffer, drawbuffer, value); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void ClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint* value){
+		glClearBufferuiv(buffer, drawbuffer, value); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void ClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat* value){
+		glClearBufferfv(buffer, drawbuffer, value); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void ClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil){
+		glClearBufferfi(buffer, drawbuffer, depth, stencil); GLS_OFR return;
+	}
 	forceinline GLState_prefix_func void Viewport(GLint x, GLint y, GLsizei width, GLsizei height){
 		 glViewport(x,y,width,height); GLS_OFR return;
 	}
@@ -1064,8 +1076,11 @@ public:
 	forceinline GLState_prefix_func void DeleteBuffers(GLsizei n, GLuint* buffers){
 		 glDeleteBuffers(n, buffers); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void BufferData(GLenum target, GLsizeiptr size, void* data, GLenum usage){
+	forceinline GLState_prefix_func void BufferData(GLenum target, GLsizeiptr size, const void* data, GLenum usage){
 		 glBufferData(target, size, data, usage); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void BufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void* data){
+		glBufferSubData(target, offset, size, data); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void CreateFramebuffers(GLsizei n, GLuint* framebuffers){
 		 glCreateFramebuffers(n, framebuffers); GLS_OFR return;
