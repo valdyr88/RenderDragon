@@ -333,6 +333,9 @@ int main(){
 	auto vertexBuffer = CreateVertexBufferInterleaved(device.get());
 	auto indexBuffer = CreateIndexBuffer(device.get());
 
+	STextureDesc txdesc;
+	CTexture texture(device.get(), txdesc, "Textures/TLWJP_p.png");
+
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)
 		srcList->add(include_list[i], getFileStringContents(include_list[i]));
@@ -404,9 +407,10 @@ int main(){
 			ub->position = vec3(0.5f,0.5f,0.1f) + 0.1f*vec3(sinf(angle), cosf(angle),0.0f);
 			ub->intensity = 0.01f*(cosf(angle) * 0.5f + 0.5f);
 			ub.Upload();
-
+			
 			//shader->setUniformBuffer("light", ub.get());
 			shader->setUniformBuffer(0, 2, &ub);
+			shader->setTexture(0, 2, &texture);
 
 			device->BindVertexBuffer(vertexBuffer.get());
 			device->BindIndexBuffer(indexBuffer.get());

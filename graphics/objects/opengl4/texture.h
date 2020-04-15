@@ -17,12 +17,18 @@ class CTexture : public CGraphicObject{
 protected:
 	STextureDesc descriptor;
 	UniquePtr<CTextureView> view;
+
+	uint set = 0;
+	uint binding = 0;
 	
 	GLuint id = 0;
 	GLuint getId(){ return id; }
 
 	bool Create(const STextureRawData& data);
+	bool Create(std::string& fileName);
 	virtual void Release() override;
+
+	bool Bind(uint set, uint binding);
 
 	SSamplerDesc sampler;
 	bool ApplySampler(const SSamplerDesc& desc);
@@ -30,6 +36,10 @@ public:
 	CTexture(GPUDevice* dev, const STextureDesc& desc, const STextureRawData& data) :
 		CGraphicObject(dev), descriptor(desc){
 		this->Create(data);
+	}
+	CTexture(GPUDevice* dev, const STextureDesc& desc, std::string fileName) :
+		CGraphicObject(dev), descriptor(desc){
+		Create(fileName);
 	}
 
 	const auto& getDescriptor(){ return descriptor; }
@@ -41,6 +51,7 @@ public:
 	virtual ~CTexture() = default;
 
 	friend class CFramebuffer;
+	friend class CShaderProgram;
 };
 
 #endif //RD_API_OPENGL4

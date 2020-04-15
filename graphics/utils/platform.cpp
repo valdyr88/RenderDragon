@@ -188,7 +188,7 @@ void SWindow::CreateProgramWindow(const char* name, int W, int H, int startX, in
 	strcpy_s(this->name, nameLen+1, name);
 
 	this->window = CreateWindow((LPCSTR)class_name, (LPCSTR) name, WS_OVERLAPPEDWINDOW, posX, posY,//450,
-								width, height, NULL, NULL, hInstance, NULL);
+								width+16, height+39, NULL, NULL, hInstance, NULL);
 	
 	this->windowDeviceContext = GetDC(this->window);
 
@@ -196,7 +196,7 @@ void SWindow::CreateProgramWindow(const char* name, int W, int H, int startX, in
 
 	ShowWindow(this->window, showWindow);
 
-	RECT rect; GetClientRect(this->window, &rect);
+	/**/RECT rect; GetClientRect(this->window, &rect);
 	long w = rect.right; long h = rect.bottom;
 	width = w;
 	height = h;
@@ -240,6 +240,66 @@ void MainPlatformLoop(){
 		PlatfromLoopUpdate();
 	}
 }
+
+const char* charmode(CFile::EFileMode mode){
+	switch(mode)
+	{
+		case CFile::EFileMode::ReadFormatted: return "r";
+		case CFile::EFileMode::ReadBinary: return "rb";
+		case CFile::EFileMode::WriteFormatted: return "w";
+		case CFile::EFileMode::WriteBinary: return "wb";
+	}
+	return "";
+}
+
+//---------------------------------------------------------------------------------------
+bool CFile::Open(std::string name, CFile::EFileMode mode){
+	if(file != nullptr) return false;
+	fopen_s(&file, name.c_str(), charmode(mode));
+	if(file == nullptr) return false;
+	return true;
+}
+
+bool CFile::ReadFormatted(const char* format, ...){
+	return false;
+}
+bool CFile::WriteFormatted(const char* format, ...){
+	return false;
+}
+
+bool CFile::Read(uint size, byte** out_data, uint* out_size){
+	if(file == nullptr) return false;
+	*out_size = (uint)fread_s(*out_data, size, 1, size, file);
+	return true;
+}
+bool CFile::Write(byte* data, uint size){
+	if(file == nullptr) return false;
+	return fwrite(data, size, 1, file) != 0;
+}
+
+bool CFile::isEOF(){
+	if(file == nullptr) return false;
+	return feof(file) != EOF;
+}
+
+uint CFile::getSize(){
+	if(file == nullptr) return 0;
+	if(size != 0) return size;
+
+	auto pos = ftell(file);
+	fseek(file, 0, SEEK_END);
+	size = ftell(file);
+	fseek(file, pos, SEEK_SET);
+
+	return size;
+}
+
+void CFile::Close(){
+	if(file != nullptr){
+		fclose(file); file = nullptr;
+	}
+}
+//---------------------------------------------------------------------------------------
 
 #endif //PLATFORM_WINDOWS
 //==========================================================================================

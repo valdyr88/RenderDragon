@@ -75,6 +75,7 @@ public:
 	}
 
 	bool setUniformBuffer(uint set, uint binding, IUniformBuffer* ub);
+	bool setTexture(uint set, uint binding, CTexture* tx);
 
 	GLuint getId(){ return id; }
 

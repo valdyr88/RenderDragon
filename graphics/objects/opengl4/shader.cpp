@@ -110,5 +110,9 @@ bool CShaderProgram::setUniformBuffer(uint set, uint binding, IUniformBuffer* ub
 	if(ub == nullptr) return false;
 	return ub->Bind(set, binding);
 }
+bool CShaderProgram::setTexture(uint set, uint binding, CTexture* tx){
+	if(tx == nullptr) return false;
+	return tx->Bind(set, binding);
+}
 
 #endif //RD_API_OPENGL4

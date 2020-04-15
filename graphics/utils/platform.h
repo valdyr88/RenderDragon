@@ -1,6 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#include <string>
 #include "types/types.h"
 #include "platform_defines.h"
 
@@ -54,5 +55,38 @@ void ProcessCallback(SWindow* window);
 void PlatfromLoopUpdate();
 void MainPlatformLoop();
 
+//---------------------------------------------------------------------------------------
+class CFile{
+public:
+	enum class EFileMode{
+		ReadFormatted,
+		ReadBinary,
+		WriteFormatted,
+		WriteBinary
+	};
 
+	CFile(){}
+	CFile(std::string name, EFileMode mode){
+		Open(name, mode); }
+	~CFile(){
+		Close(); }
+
+	bool Open(std::string name, EFileMode mode);
+
+	bool ReadFormatted(const char* format, ...);
+	bool WriteFormatted(const char* format, ...);
+
+	bool Read(uint size, byte** out_data, uint* out_size);
+	bool Write(byte* data, uint size);
+
+	bool isEOF();
+	uint getSize();
+
+	void Close();
+protected:
+	FILE* file = nullptr;
+	EFileMode mode = EFileMode::ReadBinary;
+	uint size = 0;
+};
+//---------------------------------------------------------------------------------------
 #endif //PLATFORM_H
