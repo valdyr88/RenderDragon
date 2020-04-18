@@ -1667,7 +1667,7 @@ inline GLenum glenum(const ETextureFiltering& f, const ETextureFiltering& mipf){
 				case ETextureFiltering::None:
 					return GL_LINEAR;
 				case ETextureFiltering::Nearest:
-					return GL_LINEAR_MIPMAP_LINEAR;
+					return GL_LINEAR_MIPMAP_NEAREST;
 				case ETextureFiltering::Linear:
 					return GL_LINEAR_MIPMAP_LINEAR;
 				case ETextureFiltering::Anisotropic:

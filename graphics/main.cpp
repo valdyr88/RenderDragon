@@ -239,9 +239,9 @@ int main_old(){
 
 const char* include_list[] =
 {
-	"Shaders/include/functions.glsl",
-	"Shaders/include/defines.glsl",
-	"Shaders/error_shader.glsl",
+	"data/Shaders/include/functions.glsl",
+	"data/Shaders/include/defines.glsl",
+	"data/Shaders/error_shader.glsl",
 	nullptr
 };
 
@@ -300,13 +300,15 @@ UniquePtr<CIndexBuffer> CreateIndexBuffer(GPUDevice* dev)
 struct LightData{
 	vec3 position;
 	float intensity;
+	float time;
 
 	static std::vector<SUniformMap> desc;
 };
 
 std::vector<SUniformMap> LightData::desc = {
 	{"position", EValueType::float32, EValueSize::vec3 },
-	{"intensity", EValueType::float32, EValueSize::scalar }
+	{"intensity", EValueType::float32, EValueSize::scalar },
+	{"time", EValueType::float32, EValueSize::scalar },
 };
 
 UniquePtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
@@ -317,13 +319,13 @@ int main(){
 
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::depthStencil;
-	devdesc.swapchain.width = 200;
-	devdesc.swapchain.height = 200;
+	devdesc.swapchain.width = 512;
+	devdesc.swapchain.height = 288;
 
 	UniquePtr<GPUDevice> device = GPUDevice::CreateGPUDevice(devdesc);
 
 	SWindow window;
-	window.CreateProgramWindow("Prozor", 200, 200, 20, 20, window.flags, true);
+	window.CreateProgramWindow("Prozor", devdesc.swapchain.width, devdesc.swapchain.height, 20, 20, window.flags, true);
 
 	device->InitContextOnWindow(window);
 
@@ -334,7 +336,15 @@ int main(){
 	auto indexBuffer = CreateIndexBuffer(device.get());
 
 	STextureDesc txdesc;
-	CTexture texture(device.get(), txdesc, "Textures/TLWJP_p.png");
+	SharedPtr<CTexture> texture = NewShared<CTexture>(device.get(), txdesc, "data/Textures/TLWJP_p.jpg");
+
+	SSamplerDesc smpldesc;
+	//smpldesc.magFilter = ETextureFiltering::Nearest;
+	//smpldesc.minFilter = ETextureFiltering::Nearest;
+	//smpldesc.mipFilter = ETextureFiltering::Nearest;
+	SharedPtr<CSampler> sampler = NewShared<CSampler>(device.get(), smpldesc);
+
+	CTextureView txView(device.get(), texture, sampler);
 
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)
@@ -352,12 +362,12 @@ int main(){
 
 	*globalDefines += defines2;
 
-	auto source = TestIncludes("Shaders/simple.ps.glsl");
+	auto source = TestIncludes("data/Shaders/simple.ps.glsl");
 	source = globalDefines->insertInto(source);
 
-	printContentsToFile("Shaders/simple.ps.glsl.processed.glsl", source.c_str(), source.length());
+	printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), source.length());
 
-	auto vsSource = TestIncludes("Shaders/simple.vnt.vs.glsl");
+	auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
 	vsSource = globalDefines->insertInto(vsSource);
 
 	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, {});
@@ -396,6 +406,7 @@ int main(){
 
 	float angle = 0.0f;
 	float dTime = 0.0f;
+	float time = 0.0f;
 
 	while(true)
 	{
@@ -404,13 +415,16 @@ int main(){
 		renderPass->Begin(framebuffer.get(), SClearColorValues(vec4(0.5f,0.7f,1.0f,1.0f)));
 			pipeline->Bind();
 
+			angle = 10.0f * time;
+
 			ub->position = vec3(0.5f,0.5f,0.1f) + 0.1f*vec3(sinf(angle), cosf(angle),0.0f);
 			ub->intensity = 0.01f*(cosf(angle) * 0.5f + 0.5f);
+			ub->time = time;
 			ub.Upload();
 			
 			//shader->setUniformBuffer("light", ub.get());
 			shader->setUniformBuffer(0, 2, &ub);
-			shader->setTexture(0, 2, &texture);
+			shader->setTexture(0, 0, &txView);
 
 			device->BindVertexBuffer(vertexBuffer.get());
 			device->BindIndexBuffer(indexBuffer.get());
@@ -420,8 +434,8 @@ int main(){
 		//----------------------------
 		device->PresentFrame();
 
-		angle += dTime;
-		Sleep(1); dTime = 10.0f / 1000.0f;
+		time += dTime;
+		Sleep(1); dTime = 1.0f / 1000.0f;
 	}
 
 	return 0;

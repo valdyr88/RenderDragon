@@ -32,21 +32,32 @@ bool rdLoadImageData(byte* in_image_data, uint in_size, type** out_image_data, u
 	return true;
 }
 
+//-----------------------------------------------------------------------------------
+// CTexture
+//-----------------------------------------------------------------------------------
+
 bool CTexture::ApplySampler(const SSamplerDesc& s){
 	if(device == nullptr) return false;
 	if(sampler == s) return true;
 
+	auto& gl = device->gl;
+
 	sampler = s;
 	GLenum target = glenum(descriptor.type);
 
-	device->gl.BindTexture(target, id);
-	device->gl.TexParameteri(target, GL_TEXTURE_WRAP_S, glenum(sampler.uWrapping));
-	device->gl.TexParameteri(target, GL_TEXTURE_WRAP_T, glenum(sampler.vWrapping));
-	device->gl.TexParameteri(target, GL_TEXTURE_WRAP_R, glenum(sampler.wWrapping));
-	device->gl.TexParameteri(target, GL_TEXTURE_MIN_FILTER, glenum(sampler.minFilter, sampler.mipFilter));
-	device->gl.TexParameteri(target, GL_TEXTURE_MAG_FILTER, glenum(sampler.magFilter, ETextureFiltering::None));
+	gl.BindTexture(target, id);
+	gl.TexParameteri(target, GL_TEXTURE_WRAP_S, glenum(sampler.uWrapping));
+	gl.TexParameteri(target, GL_TEXTURE_WRAP_T, glenum(sampler.vWrapping));
+	gl.TexParameteri(target, GL_TEXTURE_WRAP_R, glenum(sampler.wWrapping));
+	gl.TexParameteri(target, GL_TEXTURE_MIN_FILTER, glenum(sampler.minFilter, sampler.mipFilter));
+	gl.TexParameteri(target, GL_TEXTURE_MAG_FILTER, glenum(sampler.magFilter, ETextureFiltering::None));
+	gl.BindTexture(target, 0);
 
 	return true;
+}
+bool CTexture::ApplySampler(const CSampler* sampler){
+	if(sampler == nullptr) return false;
+	return this->ApplySampler(sampler->getDescriptor());
 }
 
 bool CTexture::Create(std::string& fileName){
@@ -65,6 +76,7 @@ bool CTexture::Create(std::string& fileName){
 		case EValueType::int8:
 		case EValueType::uint8:
 			rdLoadImageData<uint8>(data, size, &image_data, &image_size, &width, &height, &components);
+			descriptor.valueType = EValueType::uint8;
 			break;
 		case EValueType::int16:
 		case EValueType::uint16:
@@ -72,12 +84,14 @@ bool CTexture::Create(std::string& fileName){
 		case EValueType::int32:
 		case EValueType::uint32:
 			rdLoadImageData<uint16>(data, size, (uint16**)&image_data, &image_size, &width, &height, &components);
+			descriptor.valueType = EValueType::uint16;
 			break;
 		case EValueType::float16:
 		case EValueType::float24:
 		case EValueType::float32:
 		case EValueType::float64:
 			rdLoadImageData<float>(data, size, (float**)&image_data, &image_size, &width, &height, &components);
+			descriptor.valueType = EValueType::float32;
 			break;
 	}
 	
@@ -175,19 +189,36 @@ bool CTexture::Create(const STextureRawData& ptr){
 	return true;
 }
 
-bool CTexture::Bind(uint s, uint b){
-	if(this->device == nullptr) return false;
-	auto& gl = this->device->gl;
-	set = s; binding = b;
-
-	gl.ActiveTexture(GL_TEXTURE0 + b);
-	gl.BindTexture(glenum(descriptor.type), this->id);
-	return true;
-}
-
 void CTexture::Release(){
 	if(this->id != 0)
 		device->gl.DeleteTextures(1, &this->id);
 	this->id = 0;
 }
+
+//-----------------------------------------------------------------------------------
+// CTextureView
+//-----------------------------------------------------------------------------------
+
+bool CTextureView::Bind(uint s, uint b){
+	if(this->device == nullptr) return false;
+	if(this->texture == nullptr) return false;
+	auto& gl = this->device->gl;
+	set = s; binding = b;
+
+	if(this->sampler != nullptr)
+		this->texture->ApplySampler(this->sampler.get());
+
+	gl.ActiveTexture(GL_TEXTURE0 + b);
+	gl.BindTexture(glenum(this->texture->descriptor.type), this->texture->id);
+	return true;
+}
+//-----------------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------------
+// CSampler
+//-----------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------
+
 #endif //RD_API_OPENGL4

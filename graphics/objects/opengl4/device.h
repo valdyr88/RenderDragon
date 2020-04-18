@@ -118,6 +118,7 @@ public:
 	friend class CBuffer;
 	friend class CFramebuffer;
 	friend class CSampler;
+	friend class CTextureView;
 	friend class CVertexBuffer;
 	friend class CIndexBuffer;
 	friend class CTexture;

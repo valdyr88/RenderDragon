@@ -13,13 +13,48 @@
 
 class GPUDevice;
 
+//-----------------------------------------------------------------------------------
+
+class CSampler : public CShaderResource{
+protected:
+	SSamplerDesc descriptor;
+
+	CSampler() = delete;
+public:
+	CSampler(GPUDevice* dev, const SSamplerDesc& desc) :
+		CShaderResource(dev, EShaderResourceType::Sampler), descriptor(desc){}
+
+	const auto& getDescriptor() const{ return descriptor; }
+};
+
+class CTexture;
+class CTextureView : public CShaderResource{
+protected:
+	SharedPtr<CTexture> texture;
+	SharedPtr<CSampler> sampler;
+
+	uint set = 0;
+	uint binding = 0;
+
+	CTextureView() = delete;
+public:
+	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx) :
+		CShaderResource(dev, EShaderResourceType::Texture), texture(tx), sampler(nullptr){}
+
+	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
+		CShaderResource(dev, EShaderResourceType::CombinedTexSampler), texture(tx), sampler(s){}
+
+	bool Bind(uint set, uint binding);
+
+	friend class CShaderProgram;
+};
+
+//-----------------------------------------------------------------------------------
+
 class CTexture : public CGraphicObject{
 protected:
 	STextureDesc descriptor;
 	UniquePtr<CTextureView> view;
-
-	uint set = 0;
-	uint binding = 0;
 	
 	GLuint id = 0;
 	GLuint getId(){ return id; }
@@ -28,10 +63,9 @@ protected:
 	bool Create(std::string& fileName);
 	virtual void Release() override;
 
-	bool Bind(uint set, uint binding);
-
 	SSamplerDesc sampler;
 	bool ApplySampler(const SSamplerDesc& desc);
+	bool ApplySampler(const CSampler* s);
 public:
 	CTexture(GPUDevice* dev, const STextureDesc& desc, const STextureRawData& data) :
 		CGraphicObject(dev), descriptor(desc){
@@ -51,7 +85,8 @@ public:
 	virtual ~CTexture() = default;
 
 	friend class CFramebuffer;
-	friend class CShaderProgram;
+	friend class CTextureView;
+	friend class CSampler;
 };
 
 #endif //RD_API_OPENGL4

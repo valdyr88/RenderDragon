@@ -10,6 +10,38 @@
 #include "../../descriptors/graphic_object.h"
 #include "../../descriptors/shader_desc.h"
 
+//-----------------------------------------------------------------------------------
+
+class CSampler : public CShaderResource{
+protected:
+	SSamplerDesc descriptor;
+
+	CSampler() = delete;
+public:
+	CSampler(GPUDevice* dev, const SSamplerDesc& desc) :
+		CShaderResource(dev, EShaderResourceType::Sampler), descriptor(desc){}
+
+	const auto& getDescriptor(){ return descriptor; }
+};
+
+
+class CTexture;
+class CTextureView : public CShaderResource{
+protected:
+	SharedPtr<CTexture> texture;
+	SharedPtr<CSampler> sampler;
+
+	CTextureView() = delete;
+public:
+	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx) :
+		CShaderResource(dev, EShaderResourceType::Texture), texture(tx), sampler(nullptr){}
+
+	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
+		CShaderResource(dev, EShaderResourceType::CombinedTexSampler), texture(tx), sampler(s){}
+};
+
+//-----------------------------------------------------------------------------------
+
 class CTexture : public CGraphicObject{
 protected:
 	STextureDesc descriptor;

@@ -1,5 +1,6 @@
 #include "shader.h"
 #include "uniform_buffer.h"
+#include "texture.h"
 
 #ifdef RD_API_OPENGL4
 
@@ -110,7 +111,7 @@ bool CShaderProgram::setUniformBuffer(uint set, uint binding, IUniformBuffer* ub
 	if(ub == nullptr) return false;
 	return ub->Bind(set, binding);
 }
-bool CShaderProgram::setTexture(uint set, uint binding, CTexture* tx){
+bool CShaderProgram::setTexture(uint set, uint binding, CTextureView* tx){
 	if(tx == nullptr) return false;
 	return tx->Bind(set, binding);
 }

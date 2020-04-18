@@ -14,6 +14,7 @@
 #include "shader_resource_manager.h"
 
 class IUniformBuffer;
+class CTextureView;
 
 class CShader : public CGraphicObject{
 protected:
@@ -75,7 +76,7 @@ public:
 	}
 
 	bool setUniformBuffer(uint set, uint binding, IUniformBuffer* ub);
-	bool setTexture(uint set, uint binding, CTexture* tx);
+	bool setTexture(uint set, uint binding, CTextureView* tx);
 
 	GLuint getId(){ return id; }
 
