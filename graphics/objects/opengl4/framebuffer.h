@@ -42,6 +42,13 @@ public:
 	bool isCompatibleWith(SRenderPassDesc& rpdesc){ return this->descriptor == rpdesc; }
 	bool isCompatibleWith(CRenderPass& rp){ return rp.isCompatibleWith(this->descriptor); }
 
+	bool hasAttachment(CTexture* tx){
+		if(depthStencil.get() == tx) return true;
+		for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i)
+			if(attachments[i].get() == tx) return true;
+		return false;
+	}
+
 	virtual ~CFramebuffer() = default;
 
 	friend class GPUDevice;

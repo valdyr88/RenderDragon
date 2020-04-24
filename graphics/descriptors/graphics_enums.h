@@ -127,14 +127,14 @@ enum class ETextureFormat {
 	RGB,
 	RGBA,
 	Depth,
-	depthStencil,
+	DepthStencil,
 	RGBE,
 };
 inline bool isDepthFormat(const ETextureFormat& format){
 	return format == ETextureFormat::Depth ||
-		format == ETextureFormat::depthStencil; }
+		format == ETextureFormat::DepthStencil; }
 inline bool isStencilFormat(const ETextureFormat& format){
-	return format == ETextureFormat::depthStencil; }
+	return format == ETextureFormat::DepthStencil; }
 inline uint8 count(const ETextureFormat& format){
 	switch(format)
 	{
@@ -144,7 +144,7 @@ inline uint8 count(const ETextureFormat& format){
 		case ETextureFormat::RGB:return 3;
 		case ETextureFormat::RGBA:return 4;
 		case ETextureFormat::Depth:return 1;
-		case ETextureFormat::depthStencil:return 2;
+		case ETextureFormat::DepthStencil:return 2;
 	}
 	return 0;
 }
@@ -278,7 +278,7 @@ inline ETextureFormat getFormat(const ETypedTextureFormat& format){
 		case ETypedTextureFormat::R32_uint: return ETextureFormat::R;
 		case ETypedTextureFormat::R32_sint: return ETextureFormat::R;
 		case ETypedTextureFormat::Depth24_unorm: return ETextureFormat::Depth;
-		case ETypedTextureFormat::Depth24_unorm_Stencil8_uint: return ETextureFormat::depthStencil;
+		case ETypedTextureFormat::Depth24_unorm_Stencil8_uint: return ETextureFormat::DepthStencil;
 		case ETypedTextureFormat::R8G8_typeless: return ETextureFormat::RG;
 		case ETypedTextureFormat::R8G8_unorm: return ETextureFormat::RG;
 		case ETypedTextureFormat::R8G8_uint: return ETextureFormat::RG;

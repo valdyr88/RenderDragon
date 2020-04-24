@@ -189,6 +189,15 @@
     <ClInclude Include="objects\opengl4\shader_resource_manager.h">
       <Filter>Header Files\objects\opengl4</Filter>
     </ClInclude>
+    <ClInclude Include="objects\opengl4\mipmap_gen.h">
+      <Filter>Header Files\objects\opengl4</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\base\mipmap_gen.h">
+      <Filter>Header Files\objects\base</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\mipmap_gen.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="objects\shader.cpp">
@@ -235,6 +244,9 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\mipmap_gen.cpp">
+      <Filter>Source Files\objects</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

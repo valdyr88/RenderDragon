@@ -20,33 +20,53 @@ protected:
 	SSamplerDesc descriptor;
 
 	CSampler() = delete;
+	bool ApplySampler(GLenum target);
+	static bool ApplySampler(GPUDevice* device, GLenum target, const SSamplerDesc& desc);
 public:
 	CSampler(GPUDevice* dev, const SSamplerDesc& desc) :
 		CShaderResource(dev, EShaderResourceType::Sampler), descriptor(desc){}
 
 	const auto& getDescriptor() const{ return descriptor; }
+
+	friend class CTextureView;
+	friend class CTexture;
 };
 
 class CTexture;
 class CTextureView : public CShaderResource{
 protected:
+	STextureViewDesc descriptor;
 	SharedPtr<CTexture> texture;
 	SharedPtr<CSampler> sampler;
+
+	GLuint id = 0;
+	GLuint getId(){ return id; }
 
 	uint set = 0;
 	uint binding = 0;
 
+	bool Create();
 	CTextureView() = delete;
-public:
-	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx) :
-		CShaderResource(dev, EShaderResourceType::Texture), texture(tx), sampler(nullptr){}
 
-	CTextureView(GPUDevice* dev, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
-		CShaderResource(dev, EShaderResourceType::CombinedTexSampler), texture(tx), sampler(s){}
+	virtual void Release() override;
+public:
+	CTextureView(GPUDevice* dev, const STextureViewDesc& desc, SharedPtr<CTexture>& tx) :
+		CShaderResource(dev, EShaderResourceType::Texture), descriptor(desc), texture(tx), sampler(nullptr){
+		Create();
+	}
+
+	CTextureView(GPUDevice* dev, const STextureViewDesc& desc, SharedPtr<CTexture>& tx, SharedPtr<CSampler>& s) :
+		CShaderResource(dev, EShaderResourceType::CombinedTexSampler), descriptor(desc), texture(tx), sampler(s){
+		Create();
+	}
+
+	const auto& getDescriptor(){ return descriptor; }
 
 	bool Bind(uint set, uint binding);
 
 	friend class CShaderProgram;
+	friend class CSampler;
+	friend class CTexture;
 };
 
 //-----------------------------------------------------------------------------------
@@ -61,6 +81,7 @@ protected:
 
 	bool Create(const STextureRawData& data);
 	bool Create(std::string& fileName);
+	bool CreateView(SharedPtr<CTexture> tx);
 	virtual void Release() override;
 
 	SSamplerDesc sampler;
@@ -73,8 +94,13 @@ public:
 	}
 	CTexture(GPUDevice* dev, const STextureDesc& desc, std::string fileName) :
 		CGraphicObject(dev), descriptor(desc){
-		Create(fileName);
+		this->Create(fileName);
 	}
+
+	bool UpdateLevelData(const STextureSliceRawData& data);
+	bool AllocateMipmaps();
+
+	CTextureView* getView(){ return view.get(); }
 
 	const auto& getDescriptor(){ return descriptor; }
 	bool isTextureCubeMap(){ return descriptor.type == ETextureType::TextureCube; }
@@ -84,10 +110,14 @@ public:
 
 	virtual ~CTexture() = default;
 
+	friend class GPUDevice;
 	friend class CFramebuffer;
 	friend class CTextureView;
 	friend class CSampler;
 };
+
+
+//-----------------------------------------------------------------------------------
 
 #endif //RD_API_OPENGL4
 #endif //TEXTURE_H

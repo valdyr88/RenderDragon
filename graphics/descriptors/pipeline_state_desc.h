@@ -245,6 +245,10 @@ struct SSampleDesc {
 struct SViewport {
 	float x = 0.0f, y = 0.0f, width = 0.0f, height = 0.0f;
 
+	SViewport() : x(0.0f), y(0.0f), width(0.0f), height(0.0f){}
+	SViewport(float W, float H) : x(0.0f), y(0.0f), width(W), height(H){}
+	SViewport(float X, float Y, float W, float H) : x(X), y(Y), width(W), height(H){}
+
 	bool operator == (const SViewport& other) const {
 		return (x == other.x) && (y == other.y) && (width == other.width) && (height == other.height);
 	}
@@ -287,11 +291,13 @@ struct SScissorTest {
 };
 
 struct SViewports {
+	bool dynamicViewportEnable = false;
 	uint8 numViewports = 1;
 	SViewport viewports[RD_MAX_VIEWPORTS];
 	SScissorTest scissorTest[RD_MAX_VIEWPORTS];
 
 	bool operator == (const SViewports& other) const {
+		if(dynamicViewportEnable != other.dynamicViewportEnable) return false;
 		if (numViewports != other.numViewports) return false;
 		for (int i = 0; i < numViewports; ++i)
 			if (viewports[i] != other.viewports[i]) return false;
@@ -304,6 +310,7 @@ struct SViewports {
 	}
 
 	SViewports& operator = (const SViewports& other) {
+		dynamicViewportEnable = other.dynamicViewportEnable;
 		numViewports = other.numViewports;
 		for (int i = 0; i < numViewports; ++i) {
 			viewports[i] = other.viewports[i];

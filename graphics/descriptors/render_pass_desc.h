@@ -13,6 +13,8 @@ struct SAttachmentDesc {
 	uint8 sampleCount = 1;
 	ELoadStoreOp loadOp = ELoadStoreOp::Clear;
 	ELoadStoreOp storeOp = ELoadStoreOp::Store;
+	uint32 level = 0;
+	uint32 levelCount = 1;
 
 	bool operator == (const SAttachmentDesc& other) const{
 		return format == other.format &&
@@ -20,6 +22,8 @@ struct SAttachmentDesc {
 				usageFlags == other.usageFlags &&
 				sampleCount == other.sampleCount &&
 				loadOp == other.loadOp &&
+				/*level == other.level && //used by framebuffer to specify level attachment. RenderPass comparison should not compare this
+				levelCount == other.levelCount &&*/
 				storeOp == other.storeOp;
 	}
 	bool operator != (const SAttachmentDesc& other) const{ return !(*this == other); }
@@ -31,6 +35,8 @@ struct SAttachmentDesc {
 		sampleCount = other.sampleCount;
 		loadOp = other.loadOp;
 		storeOp = other.storeOp;
+		level = other.level;
+		levelCount = other.levelCount;
 
 		return *this;
 	}

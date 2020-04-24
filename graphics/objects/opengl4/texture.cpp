@@ -33,24 +33,37 @@ bool rdLoadImageData(byte* in_image_data, uint in_size, type** out_image_data, u
 }
 
 //-----------------------------------------------------------------------------------
-// CTexture
+// CSampler
+//-----------------------------------------------------------------------------------
+bool CSampler::ApplySampler(GPUDevice* device, GLenum target, const SSamplerDesc& descriptor){
+	if(device == nullptr) return false;
+	auto& gl = device->gl;
+	gl.TexParameteri(target, GL_TEXTURE_WRAP_S, glenum(descriptor.uWrapping));
+	gl.TexParameteri(target, GL_TEXTURE_WRAP_T, glenum(descriptor.vWrapping));
+	gl.TexParameteri(target, GL_TEXTURE_WRAP_R, glenum(descriptor.wWrapping));
+	gl.TexParameteri(target, GL_TEXTURE_MIN_FILTER, glenum(descriptor.minFilter, descriptor.mipFilter));
+	gl.TexParameteri(target, GL_TEXTURE_MAG_FILTER, glenum(descriptor.magFilter, ETextureFiltering::None));
+	return true;
+}
+
+bool CSampler::ApplySampler(GLenum target){
+	return CSampler::ApplySampler(this->device, target, this->descriptor);
+}
 //-----------------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------------
+// CTexture
+//-----------------------------------------------------------------------------------
 bool CTexture::ApplySampler(const SSamplerDesc& s){
 	if(device == nullptr) return false;
 	if(sampler == s) return true;
-
 	auto& gl = device->gl;
 
 	sampler = s;
 	GLenum target = glenum(descriptor.type);
 
 	gl.BindTexture(target, id);
-	gl.TexParameteri(target, GL_TEXTURE_WRAP_S, glenum(sampler.uWrapping));
-	gl.TexParameteri(target, GL_TEXTURE_WRAP_T, glenum(sampler.vWrapping));
-	gl.TexParameteri(target, GL_TEXTURE_WRAP_R, glenum(sampler.wWrapping));
-	gl.TexParameteri(target, GL_TEXTURE_MIN_FILTER, glenum(sampler.minFilter, sampler.mipFilter));
-	gl.TexParameteri(target, GL_TEXTURE_MAG_FILTER, glenum(sampler.magFilter, ETextureFiltering::None));
+	CSampler::ApplySampler(device, target, sampler);
 	gl.BindTexture(target, 0);
 
 	return true;
@@ -120,49 +133,56 @@ bool CTexture::Create(std::string& fileName){
 bool CTexture::Create(const STextureRawData& ptr){
 	if(device == nullptr) return false;
 	this->Release();
-
 	auto& gl = device->gl;
 
 	GLenum target = glenum(descriptor.type);
 
 	gl.GenTextures(1, &this->id);
 		gl.BindTexture(target, id);
-		gl.TexParameteri(target, GL_TEXTURE_WRAP_S, glenum(sampler.uWrapping));
-		gl.TexParameteri(target, GL_TEXTURE_WRAP_T, glenum(sampler.vWrapping));
-		gl.TexParameteri(target, GL_TEXTURE_WRAP_R, glenum(sampler.wWrapping));
-		gl.TexParameteri(target, GL_TEXTURE_MIN_FILTER, glenum(sampler.minFilter, sampler.mipFilter));
-		gl.TexParameteri(target, GL_TEXTURE_MAG_FILTER, glenum(sampler.magFilter, ETextureFiltering::None));
+		CSampler::ApplySampler(device, target, sampler);
+
+		uint numMips = ptr.numMips;
+		if(descriptor.bGenMipmaps == true)
+			numMips = rdCalcNumberOfMips(descriptor.width, descriptor.height, descriptor.depth);
 		
 		if(ptr.slices != nullptr){
 			switch(descriptor.type)
 			{
 				case ETextureType::Texture1D:
+					gl.TexStorage1D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width);
 					for(uint i = 0; i < ptr.numMips; ++i){
-						ivec3 dim = CalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage1D(target, i, glenum(descriptor.format), dim.x, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
+						//gl.TexImage1D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexSubImage1D(target, i, 0, dim.x, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
 				case ETextureType::Texture2D:
+					gl.TexStorage2D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height);
 					for(uint i = 0; i < ptr.numMips; ++i){
-						ivec3 dim = CalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage2D(target, i, glenum(descriptor.format), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
+						//gl.TexImage2D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexSubImage2D(target, i, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
 				case ETextureType::Texture3D:
+					gl.TexStorage3D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height, descriptor.depth);
 					for(uint i = 0; i < ptr.numMips; ++i){
-						ivec3 dim = CalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage3D(target, i, glenum(descriptor.format), dim.x, dim.y, dim.z, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
+						//gl.TexImage3D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, dim.z, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexSubImage3D(target, i, 0, 0, 0, dim.x, dim.y, dim.z, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
 				case ETextureType::TextureCube:
+					gl.TexStorage2D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height);
 					if(ptr.numSlices / ptr.numMips != 6){
 						LOG_ERR("wrong number of sides for cubemap (%d)!", ptr.numSlices / ptr.numMips); }
 					else{
 						uint i = 0;
 						for(uint side = 0; side < 6; ++side){
 							for(uint mip = 0; mip < ptr.numMips; ++mip){
-								ivec3 dim = CalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-								gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, glenum(descriptor.format), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+								ivec3 dim = rdCalcMipDimension(mip, descriptor.width, descriptor.height, descriptor.depth);
+								//gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+								gl.TexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 								++i;
 							}
 						}
@@ -186,6 +206,85 @@ bool CTexture::Create(const STextureRawData& ptr){
 		if(descriptor.bGenMipmaps)
 			gl.GenerateMipmap(target);
 
+		int immutable = false; gl.GetTextureParameteriv(this->id, GL_TEXTURE_IMMUTABLE_FORMAT, &immutable);
+		ASSERT(immutable);
+
+	return true;
+}
+
+bool CTexture::AllocateMipmaps(){
+	if(device == nullptr) return false;
+	if(id == 0) return false;
+	if(descriptor.bGenMipmaps == true) return true;
+	auto& gl = device->gl;
+
+	GLenum target = glenum(descriptor.type);
+
+	gl.BindTexture(target, id);
+	gl.GenerateMipmap(target);
+	descriptor.bGenMipmaps = true;
+	return true;
+}
+
+bool CTexture::CreateView(SharedPtr<CTexture> tx){
+	if(device == nullptr) return false;
+	if(this->id == 0) return false;
+
+	//SharedPtr<CTexture> tx = std::dynamic_pointer_cast<CTexture>(device->getTrackedObject(this));
+	if(tx == nullptr) return false;
+
+	STextureViewDesc vdesc; { vdesc = this->descriptor; }
+	view = UniquePtr<CTextureView>(new CTextureView(device, vdesc, tx));
+
+	return true;
+}
+
+bool CTexture::UpdateLevelData(const STextureSliceRawData& data){
+	if(device == nullptr) return false;
+	if(this->id == 0) return false;
+	auto& gl = device->gl;
+	
+	GLenum target = glenum(descriptor.type);
+	gl.BindTexture(target, id);
+
+	ivec3 dim = rdCalcMipDimension(data.mipLevel, descriptor.width, descriptor.height, descriptor.depth);
+	{
+		switch(descriptor.type)
+		{
+			case ETextureType::Texture1D:{
+					//gl.TexImage1D(target, data.mipLevel, glenum(descriptor.format), dim.x, 0, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+					gl.TexSubImage1D(target, data.mipLevel, 0, dim.x, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+				}
+				break;
+			case ETextureType::Texture2D:{
+					//gl.TexImage2D(target, data.mipLevel, glenum(descriptor.format), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+					gl.TexSubImage2D(target, data.mipLevel, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+				}
+				break;
+			case ETextureType::Texture3D:{
+					//gl.TexImage3D(target, data.mipLevel, glenum(descriptor.format), dim.x, dim.y, dim.z, 0, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+					gl.TexSubImage3D(target, data.mipLevel, 0, 0, 0, dim.x, dim.y, dim.z, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+				}
+				break;
+			case ETextureType::TextureCube:{
+					//gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + data.side, data.mipLevel, glenum(descriptor.format), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+					gl.TexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + data.side, data.mipLevel, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), data.data);
+				}
+				break;
+			case ETextureType::Texture1DArray:
+				LOG_ERR("not implemented!"); return false;
+				break;
+			case ETextureType::Texture2DArray:
+				LOG_ERR("not implemented!"); return false;
+				break;
+			case ETextureType::TextureCubeArray:
+				LOG_ERR("not implemented!"); return false;
+				break;
+			default:
+				LOG_ERR("texture of wrong type!"); return false;
+				break;
+		}
+	}
 	return true;
 }
 
@@ -198,27 +297,53 @@ void CTexture::Release(){
 //-----------------------------------------------------------------------------------
 // CTextureView
 //-----------------------------------------------------------------------------------
-
-bool CTextureView::Bind(uint s, uint b){
+bool CTextureView::Create(){
 	if(this->device == nullptr) return false;
 	if(this->texture == nullptr) return false;
 	auto& gl = this->device->gl;
-	set = s; binding = b;
 
-	if(this->sampler != nullptr)
-		this->texture->ApplySampler(this->sampler.get());
+	uint32 numMipLevels = (this->texture->descriptor.bGenMipmaps == false)? 1 
+						: glm::min(this->descriptor.numMipLevels, rdCalcNumberOfMips(this->descriptor.width, this->descriptor.height, this->descriptor.depth));
+	uint32 numLayers = (this->texture->descriptor.type != ETextureType::TextureCube)? 1 : 6; //glm::min(this->descriptor.numLayers, 1U);
 
-	gl.ActiveTexture(GL_TEXTURE0 + b);
-	gl.BindTexture(glenum(this->texture->descriptor.type), this->texture->id);
+	gl.GenTextures(1, &this->id);
+	gl.TextureView(this->id,
+				   glenum(this->descriptor.type),
+				   this->texture->id,
+				   glenumTypeless(this->descriptor.format, this->descriptor.valueType),
+				   this->descriptor.mipLevelBase,
+				   numMipLevels,
+				   this->descriptor.layerBase,
+				   numLayers);
+	if((CGLState::EGLError)gl.GetError() != CGLState::EGLError::EGL_NO_ERROR)
+		return false;
+
+	auto& sampler = (this->sampler != nullptr)? this->sampler->descriptor : this->texture->sampler;
+	GLenum target = glenum(this->descriptor.type);
+
+	gl.BindTexture(target, id);
+	CSampler::ApplySampler(device, target, sampler);
+
 	return true;
 }
-//-----------------------------------------------------------------------------------
 
+bool CTextureView::Bind(uint s, uint b){
+	if(this->device == nullptr) return false;
+	if(this->id == 0) return false;
+	auto& gl = this->device->gl;
+	set = s; binding = b;
 
-//-----------------------------------------------------------------------------------
-// CSampler
-//-----------------------------------------------------------------------------------
+	gl.ActiveTexture(GL_TEXTURE0 + b);
+	gl.BindTexture(glenum(this->descriptor.type), this->id);
 
+	return true;
+}
+
+void CTextureView::Release(){
+	if(this->id != 0)
+		device->gl.DeleteTextures(1, &this->id);
+	this->id = 0;
+}
 //-----------------------------------------------------------------------------------
 
 #endif //RD_API_OPENGL4

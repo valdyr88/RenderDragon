@@ -7,31 +7,47 @@
 #include "../utils/pointers.h"
 #include "graphics_enums.h"
 
-inline uint CalcNumberOfMips(uint w, uint h, uint d){
-	uint v = glm::max(w, h); v = glm::max(v, d);
-	uint num = ((uint)glm::ceil(log2(v))) + 1;
+inline uint rdCalcNumberOfMips(uint w, uint h, uint d){
+	uint v = glm::max(glm::max(w, h), d);
+	uint num = ((uint)glm::floor(log2(v))) + 1; //was std::ceil
 	return num;
 }
 
-inline ivec3 CalcMipDimension(uint level, uint baseW, uint baseH, uint baseD){
+inline ivec3 rdCalcMipDimension(uint level, uint baseW, uint baseH, uint baseD){
 	float divisor = pow(2.0f, (float)level);
 	vec3 dim = vec3((float)baseW,(float)baseH,(float)baseD) / divisor;
 	dim = glm::max(dim, glm::vec3(1.0f));
 	return ivec3((uint)dim.x, (uint)dim.y, (uint)dim.z);
 }
 
-struct STextureDesc{
+struct STextureFormatDesc{
 	ETextureType type = ETextureType::Texture2D;
 	ETextureFormat format = ETextureFormat::RGBA;
 	EValueType valueType = EValueType::uint8;
+
+	bool operator ==(const STextureFormatDesc& other) const{
+		return valueType == other.valueType &&
+			format == other.format &&
+			type == other.type;
+	}
+	bool operator != (const STextureFormatDesc& other) const{ return !(*this == other); }
+
+	STextureFormatDesc& operator = (const STextureFormatDesc& other){
+		type = other.type;
+		format = other.format;
+		valueType = other.valueType;
+
+		return *this;
+	}
+};
+
+struct STextureDesc : public STextureFormatDesc{
 	uint32 width = 0, height = 0, depth = 0;
 	uint32 usageFlags = 0x00000000;
 	bool bGenMipmaps = true; //no comparing
 
 	bool operator == (const STextureDesc& other) const{
-		return valueType == other.valueType &&
-			format == other.format &&
-			type == other.type &&
+		return STextureFormatDesc::operator==(other) &&
 			width == other.width &&
 			height == other.height &&
 			depth == other.depth &&
@@ -40,15 +56,52 @@ struct STextureDesc{
 	bool operator != (const STextureDesc& other) const{ return !(*this == other); }
 
 	STextureDesc& operator = (const STextureDesc& other){
-		type = other.type;
-		format = other.format;
-		valueType = other.valueType;
+		STextureFormatDesc::operator=(other);
 		width = other.width;
 		height = other.height;
 		depth = other.depth;
 		usageFlags = other.usageFlags;
 		bGenMipmaps = other.bGenMipmaps;
 
+		return *this;
+	}
+	STextureDesc& operator =(const STextureFormatDesc& other){
+		STextureFormatDesc::operator=(other);
+		return *this;
+	}
+};
+
+struct STextureViewDesc : public STextureDesc{
+	uint32 mipLevelBase = 0;
+	uint32 numMipLevels = 0xffffffff;
+	uint32 layerBase = 0;
+	uint32 numLayers = 0xffffffff;
+	
+	bool operator == (const STextureViewDesc& other) const{
+		return STextureDesc::operator==(other) &&
+			mipLevelBase == other.mipLevelBase &&
+			numMipLevels == other.numMipLevels &&
+			layerBase == other.layerBase &&
+			numLayers == other.numLayers;
+	}
+	bool operator != (const STextureViewDesc& other) const{ return !(*this == other); }
+
+	STextureViewDesc& operator = (const STextureViewDesc& other){
+		STextureDesc::operator=(other);
+		mipLevelBase = other.mipLevelBase;
+		numMipLevels = other.numMipLevels;
+		layerBase = other.layerBase;
+		numLayers = other.numLayers;
+
+		return *this;
+	}
+
+	STextureViewDesc& operator =(const STextureDesc& other){
+		STextureDesc::operator=(other);
+		return *this;
+	}
+	STextureViewDesc& operator =(const STextureFormatDesc& other){
+		STextureFormatDesc::operator=(other);
 		return *this;
 	}
 };
@@ -64,17 +117,15 @@ struct STextureRawData{
 	STextureSliceRawData* slices = nullptr;
 
 	STextureRawData(uint w, uint h, uint d, uint sides, bool hasMips = true){
-		numMips = (hasMips)? CalcNumberOfMips(w, h, d) : 1;
+		numMips = (hasMips)? rdCalcNumberOfMips(w, h, d) : 1;
 		numSlices = numMips*sides;
 		slices = __new STextureSliceRawData[numSlices];
 	}
+	STextureRawData(){}
 
 	~STextureRawData(){
 		__release_array(slices);
 	}
-
-private:
-	STextureRawData() = default;
 };
 
 #endif //TEXTURE_DESC_H

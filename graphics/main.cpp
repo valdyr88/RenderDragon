@@ -18,7 +18,7 @@ std::vector<SUniformMap> UBStruct::desc =
 int main_old(){
 
 	SGPUDeviceDesc devdesc;
-	devdesc.swapchain.depthFormat = ETextureFormat::depthStencil;
+	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 	devdesc.swapchain.width = 1280;
 	devdesc.swapchain.height = 860;
 
@@ -189,7 +189,8 @@ int main_old(){
 
 	ASSERT(reset.get() == reset2.get());
 
-	CTextureView tv(dev.get(), texture);
+	STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();
+	CTextureView tv(dev.get(), viewdesc, texture);
 	shub;
 	SSamplerDesc smpldsc;
 	CSampler sm(dev.get(), smpldsc);
@@ -318,7 +319,7 @@ UniquePtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
 int main(){
 
 	SGPUDeviceDesc devdesc;
-	devdesc.swapchain.depthFormat = ETextureFormat::depthStencil;
+	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 	devdesc.swapchain.width = 512;
 	devdesc.swapchain.height = 288;
 
@@ -344,7 +345,8 @@ int main(){
 	//smpldesc.mipFilter = ETextureFiltering::Nearest;
 	SharedPtr<CSampler> sampler = NewShared<CSampler>(device.get(), smpldesc);
 
-	CTextureView txView(device.get(), texture, sampler);
+	STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();
+	CTextureView txView(device.get(), viewdesc, texture, sampler);
 
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)

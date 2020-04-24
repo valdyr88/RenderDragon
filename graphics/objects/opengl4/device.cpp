@@ -44,7 +44,7 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 			stencil_buffer_bits = 0;
 			depth_buffer_bits = 8*sizeInBytes(descriptor.swapchain.depthType);
 			break;
-		case ETextureFormat::depthStencil:
+		case ETextureFormat::DepthStencil:
 			depth_buffer_bits = 8*sizeInBytes(descriptor.swapchain.depthType);
 			stencil_buffer_bits = 8*sizeInBytes(descriptor.swapchain.stencilType);
 			break;
@@ -206,6 +206,7 @@ SGPUDeviceContext GPUDevice::InitOpenGL(SWindow& win){
 	window = win;
 	context = rdInitOpenGL(window, this->descriptor);
 	context = rdInitOpenGL_ARB(window, this->descriptor, context, 4, 0);
+	initPipelineState();
 	return context;
 }
 
@@ -283,6 +284,7 @@ SharedPtr<CIndexBuffer> GPUDevice::CreateIndexBuffer(EValueType type, uint32 cou
 SharedPtr<CTexture> GPUDevice::CreateTexture(const STextureDesc& desc, const STextureRawData& data){
 	auto obj = SharedPtr<CTexture>(new CTexture(this, desc, data));
 	addTrackedObject(obj);
+	obj->CreateView(obj);
 	return obj;
 }
 SharedPtr<CShaderResourceBinding> GPUDevice::CreateShaderResourceBinding(const SShaderResourceBindingDesc& desc, CShaderResource* resource){
@@ -301,9 +303,76 @@ SharedPtr<CShaderResourceSet> GPUDevice::CreateShaderResourceSet(const CShaderRe
 	return obj;
 }
 
+SharedPtr<CGraphicObject> GPUDevice::getTrackedObject(CGraphicObject* ptr){
+	for(auto it = objects.begin(); it != objects.end(); ++it){
+		if((*it).get() == ptr)
+			return *it;
+	}
+	return nullptr;
+}
 //------------------------------------------------------------------------------------
 // gl state setting
 //------------------------------------------------------------------------------------
+
+
+void GPUDevice::initPipelineState(){
+	//setup different init values from the default ones so they will be set in set***State() functions
+	SPipelineStateDesc newpipelineState;
+
+	for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){
+		newpipelineState.blendDesc.attachmentBlends[i].blendOp = EBlendOperation::Subtract;
+		newpipelineState.blendDesc.attachmentBlends[i].blendEnable = false;
+		newpipelineState.blendDesc.attachmentBlends[i].blendOpAlpha = EBlendOperation::Subtract;
+		newpipelineState.blendDesc.attachmentBlends[i].srcBlend = EBlendFactor::Zero;
+		newpipelineState.blendDesc.attachmentBlends[i].dstBlend = EBlendFactor::Zero;
+		newpipelineState.blendDesc.attachmentBlends[i].srcBlendAlpha = EBlendFactor::Zero;
+		newpipelineState.blendDesc.attachmentBlends[i].dstBlendAlpha = EBlendFactor::Zero;
+	}
+	newpipelineState.depthDesc.depthFunc = EComparisonOp::Never;
+	newpipelineState.depthDesc.depthWriteEnable = true;
+	newpipelineState.depthDesc.enable = false;
+	newpipelineState.primitiveTopology = EPrimitiveTopology::TriangleListAdjacency;
+	newpipelineState.rasterizerDesc.cullMode = ECullMode::None;
+	newpipelineState.rasterizerDesc.frontFace = (EFrontFace)((int)EFrontFace::CounterClockwise+(int)(EFrontFace::Clockwise));
+	newpipelineState.rasterizerDesc.fillMode = EFillMode::Wireframe;
+	newpipelineState.rasterizerDesc.depthBias = 1;
+	newpipelineState.rasterizerDesc.depthBiasClamp = 0.1f;
+	newpipelineState.rasterizerDesc.slopeScaledDepthBias = 0.1f;
+	newpipelineState.rasterizerDesc.antialiasedLineEnable = true;
+	newpipelineState.rasterizerDesc.depthClampEnable = true;
+	newpipelineState.samplingDesc.count = 2;
+	newpipelineState.samplingDesc.sampleMask = 0;
+	newpipelineState.stencilDesc.backFace.stencilFailOp = EStencilOp::Dec;
+	newpipelineState.stencilDesc.backFace.stencilDepthFailOp = EStencilOp::Inc;
+	newpipelineState.stencilDesc.backFace.stencilPassOp = EStencilOp::Dec;
+	newpipelineState.stencilDesc.backFace.stencilFunc = EComparisonOp::Never;
+	newpipelineState.stencilDesc.backFace.referenceValue = 1;
+	newpipelineState.stencilDesc.backFace.ANDMask = 0;
+	newpipelineState.stencilDesc.backFace.writeMask = 0;
+	newpipelineState.stencilDesc.frontFace.stencilFailOp = EStencilOp::Dec;
+	newpipelineState.stencilDesc.frontFace.stencilDepthFailOp = EStencilOp::Inc;
+	newpipelineState.stencilDesc.frontFace.stencilPassOp = EStencilOp::Dec;
+	newpipelineState.stencilDesc.frontFace.stencilFunc = EComparisonOp::Never;
+	newpipelineState.stencilDesc.frontFace.referenceValue = 1;
+	newpipelineState.stencilDesc.frontFace.ANDMask = 0;
+	newpipelineState.stencilDesc.frontFace.writeMask = 0;
+	newpipelineState.stencilDesc.enable = true;
+	newpipelineState.stencilDesc.stencilReadMask = 0;
+	newpipelineState.stencilDesc.stencilWriteMask = 0;
+	newpipelineState.viewports.numViewports = 0;
+	for(uint i = 0; i < RD_MAX_VIEWPORTS; ++i){
+		newpipelineState.viewports.scissorTest[i].enable = true;
+	}
+	pipelineState = newpipelineState;
+	/*
+	this->setBlendState(newpipelineState.blendDesc);
+	this->setDepthState(newpipelineState.depthDesc);
+	this->setStencilState(newpipelineState.stencilDesc);
+	this->setPrimitiveTopology(newpipelineState.primitiveTopology);
+	this->setRasterizerState(newpipelineState.rasterizerDesc);
+	this->setSampleState(newpipelineState.samplingDesc);
+	this->setViewports(newpipelineState.viewports);*/
+}
 
 bool GPUDevice::setBlendState(const SBlendStateDesc& mode){
 	if(mode.independentBlendEnable == false){
@@ -359,7 +428,10 @@ bool GPUDevice::setDepthState(const SDepthStateDesc& mode){
 	}
 
 	if(mode.depthWriteEnable != this->pipelineState.depthDesc.depthWriteEnable){
-		gl.DepthMask(mode.depthWriteEnable);
+		if(mode.depthWriteEnable == true)
+			gl.DepthWriteEnable();
+		else
+			gl.DepthWriteDisable();
 		this->pipelineState.depthDesc.depthWriteEnable = mode.depthWriteEnable;
 	}
 
@@ -373,7 +445,7 @@ bool GPUDevice::setStencilState(const SStencilStateDesc& mode){
 		if(mode.enable == true)
 			gl.EnableStencilTest();
 		else
-			gl.EnableStencilTest();
+			gl.DisableStencilTest();
 		this->pipelineState.stencilDesc.enable = mode.enable;
 	}
 
@@ -381,14 +453,15 @@ bool GPUDevice::setStencilState(const SStencilStateDesc& mode){
 	   mode.backFace != this->pipelineState.stencilDesc.backFace){
 
 		if(mode.frontFace != mode.backFace){
-			gl.StencilFuncSeparate(glenum(mode.frontFace.stencilFunc), glenum(mode.backFace.stencilFunc), mode.frontFace.referenceValue, mode.frontFace.ANDMask);
+			gl.StencilFuncSeparate(GL_FRONT, glenum(mode.frontFace.stencilFunc), mode.frontFace.referenceValue, mode.frontFace.ANDMask);
+			gl.StencilFuncSeparate(GL_BACK, glenum(mode.backFace.stencilFunc), mode.backFace.referenceValue, mode.backFace.ANDMask);
 			gl.StencilMaskSeparate(GL_FRONT, mode.frontFace.writeMask);
 			gl.StencilMaskSeparate(GL_BACK, mode.backFace.writeMask);
 			gl.StencilOpSeparate(GL_FRONT, glenum(mode.frontFace.stencilFailOp), glenum(mode.frontFace.stencilDepthFailOp), glenum(mode.frontFace.stencilPassOp));
 			gl.StencilOpSeparate(GL_BACK, glenum(mode.backFace.stencilFailOp), glenum(mode.backFace.stencilDepthFailOp), glenum(mode.backFace.stencilPassOp));
 		}
 		else{
-			gl.StencilFuncSeparate(glenum(mode.frontFace.stencilFunc), glenum(mode.backFace.stencilFunc), mode.frontFace.referenceValue, mode.frontFace.ANDMask);
+			gl.StencilFuncSeparate(GL_FRONT_AND_BACK, glenum(mode.frontFace.stencilFunc), mode.frontFace.referenceValue, mode.frontFace.ANDMask);
 			gl.StencilMaskSeparate(GL_FRONT_AND_BACK, mode.frontFace.writeMask);
 			gl.StencilOpSeparate(GL_FRONT_AND_BACK, glenum(mode.frontFace.stencilFailOp), glenum(mode.frontFace.stencilDepthFailOp), glenum(mode.frontFace.stencilPassOp));
 		}
@@ -452,9 +525,25 @@ bool GPUDevice::setRasterizerState(const SRasterizerStateDesc& mode){
 
 bool GPUDevice::setSampleState(const SSampleDesc& mode){
 	if(mode == this->pipelineState.samplingDesc) return true;
-	//ToDo: implement this
 
-	LOG_ERR("not implemented!");
+	if(mode.count != this->pipelineState.samplingDesc.count){
+		if(mode.count <= 1)
+			gl.DisableMultisample();
+		else
+			gl.EnableMultisample();
+		this->pipelineState.samplingDesc.count = mode.count;
+	}
+
+	//ToDo: implement this
+	if(mode.sampleMask != this->pipelineState.samplingDesc.sampleMask){
+		if(mode.sampleMask == 0xffffffff)
+			gl.DisableSampleMask();
+		else
+			gl.EnableSampleMask();
+		gl.SampleMaski(0, mode.sampleMask);
+		this->pipelineState.samplingDesc.sampleMask = mode.sampleMask;
+	}
+	//LOG_ERR("not implemented!");
 	return true;
 }
 
@@ -496,6 +585,17 @@ bool GPUDevice::setViewports(const SViewports& mode){
 	return true;
 }
 
+bool GPUDevice::setDynamicViewports(const SViewports& mode){
+	if(this->pipelineState.viewports.dynamicViewportEnable == false) return false;
+	return this->setViewports(mode);
+}
+bool GPUDevice::setDynamicViewport(uint i, const SViewport& mode){
+	if(this->pipelineState.viewports.dynamicViewportEnable == false) return false;
+	if(i >= this->pipelineState.viewports.numViewports) return false;
+	this->pipelineState.viewports.viewports[i] = mode;
+	gl.ViewportIndexedf(i, mode.x, mode.y, mode.width, mode.height);
+	return true;
+}
 
 bool GPUDevice::bindShaderProgram(SharedPtr<CShaderProgram>& shader){
 	if(shader == nullptr) return false;

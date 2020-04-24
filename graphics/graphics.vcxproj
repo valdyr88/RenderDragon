@@ -500,6 +500,7 @@
     <ClInclude Include="objects\base\buffer.h" />
     <ClInclude Include="objects\base\device.h" />
     <ClInclude Include="objects\base\framebuffer.h" />
+    <ClInclude Include="objects\base\mipmap_gen.h" />
     <ClInclude Include="objects\base\pipeline_state.h" />
     <ClInclude Include="objects\base\render_pass.h" />
     <ClInclude Include="objects\base\shader.h" />
@@ -507,6 +508,7 @@
     <ClInclude Include="objects\base\texture.h" />
     <ClInclude Include="objects\base\uniform_buffer.h" />
     <ClInclude Include="objects\base\vertex_buffer.h" />
+    <ClInclude Include="objects\mipmap_gen.h" />
     <ClInclude Include="objects\opengl4\buffer.h" />
     <ClInclude Include="objects\opengl4\device.h" />
     <ClInclude Include="objects\opengl4\framebuffer.h" />
@@ -515,6 +517,7 @@
     <ClInclude Include="objects\opengl4\gl\glext.h" />
     <ClInclude Include="objects\opengl4\gl\GLState.h" />
     <ClInclude Include="objects\opengl4\gl\wglext.h" />
+    <ClInclude Include="objects\opengl4\mipmap_gen.h" />
     <ClInclude Include="objects\opengl4\pipeline_state.h" />
     <ClInclude Include="objects\opengl4\render_pass.h" />
     <ClInclude Include="objects\opengl4\shader.h" />
@@ -538,6 +541,7 @@
     <ClCompile Include="objects\buffer.cpp" />
     <ClCompile Include="objects\device.cpp" />
     <ClCompile Include="objects\framebuffer.cpp" />
+    <ClCompile Include="objects\mipmap_gen.cpp" />
     <ClCompile Include="objects\opengl4\gl\GLState.cpp" />
     <ClCompile Include="objects\pipeline_state.cpp" />
     <ClCompile Include="objects\render_pass.cpp" />

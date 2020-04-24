@@ -18,7 +18,7 @@ std::vector<SUniformMap> UBStruct::desc =
 int main_old(){
 
 	SGPUDeviceDesc devdesc;
-	devdesc.swapchain.depthFormat = ETextureFormat::depthStencil;
+	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 	devdesc.swapchain.width = 1280;
 	devdesc.swapchain.height = 860;
 
@@ -188,8 +188,9 @@ int main_old(){
 	auto mergedSetDesc = srm.GetResourceSetDesc(merged);
 
 	ASSERT(reset.get() == reset2.get());
-
-	CTextureView tv(dev.get(), texture);
+	
+	STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();
+	CTextureView tv(dev.get(), viewdesc, texture);
 	shub;
 	SSamplerDesc smpldsc;
 	CSampler sm(dev.get(), smpldsc);
@@ -236,6 +237,7 @@ int main_old(){
 
 //---------------------------------------------------------------------------------
 #include "graphics/descriptors/shader_parser.h"
+#include "graphics/objects/mipmap_gen.h"
 
 const char* include_list[] =
 {
@@ -315,10 +317,35 @@ UniquePtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
 	return UniquePtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(dev, "light"));
 }
 
-int main(){
+SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat vertexformat){
+	
+	CShaderDefines defines;
+	defines.add("type", "vec4");
+	defines.add("components", "rgba");
 
+	auto source = TestIncludes("graphics/shaders/mipmap_gen/downsamplers.ps.glsl");
+	source = defines.insertInto(source);
+
+	printContentsToFile("graphics/shaders/mipmap_gen/downsamplers.ps.glsl.processed.glsl", source.c_str(), source.length());
+
+	auto vsSource = TestIncludes("graphics/shaders/simple.vnt.vs.glsl");
+	vsSource = defines.insertInto(vsSource);
+
+	SShaderDesc fsdesc(EShaderStage::FragmentShader, "downsamplers.ps.glsl", source, {});
+	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vnt.vs.glsl", vsSource, {});
+	vsdesc.vertexFormat = vertexformat;
+
+	SharedPtr<CShader> VShader = NewShared<CShader>(dev, vsdesc);
+	SharedPtr<CShader> FShader = NewShared<CShader>(dev, fsdesc);
+	SharedPtr<CShaderProgram> program = SharedPtr<CShaderProgram>(new CShaderProgram(dev, { VShader, FShader }));
+	
+	return program;
+}
+
+int main()
+{
 	SGPUDeviceDesc devdesc;
-	devdesc.swapchain.depthFormat = ETextureFormat::depthStencil;
+	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 	devdesc.swapchain.width = 512;
 	devdesc.swapchain.height = 288;
 
@@ -339,12 +366,13 @@ int main(){
 	SharedPtr<CTexture> texture = NewShared<CTexture>(device.get(), txdesc, "data/Textures/TLWJP_p.jpg");
 
 	SSamplerDesc smpldesc;
-	smpldesc.magFilter = ETextureFiltering::Nearest;
+	/*smpldesc.magFilter = ETextureFiltering::Nearest;
 	smpldesc.minFilter = ETextureFiltering::Nearest;
-	smpldesc.mipFilter = ETextureFiltering::Nearest;
+	smpldesc.mipFilter = ETextureFiltering::Nearest;*/
 	SharedPtr<CSampler> sampler = NewShared<CSampler>(device.get(), smpldesc);
-
-	CTextureView txView(device.get(), texture, sampler);
+	
+	STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();
+	CTextureView txView(device.get(), viewdesc, texture, sampler);
 
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)
@@ -395,9 +423,11 @@ int main(){
 		psdesc.viewports.viewports[0].x = 0;
 		psdesc.viewports.viewports[0].y = 0;
 		psdesc.viewports.scissorTest->enable = false;
-		psdesc.rasterizerDesc.cullMode = ECullMode::None;
 		psdesc.rasterizerDesc.fillMode = EFillMode::Solid;
-		psdesc.rasterizerDesc.frontFace = EFrontFace::CounterClockwise;
+		/*psdesc.rasterizerDesc.cullMode = ECullMode::FrontFaces;
+		psdesc.rasterizerDesc.frontFace = EFrontFace::CounterClockwise;*/
+		psdesc.rasterizerDesc.cullMode = ECullMode::BackFaces;
+		psdesc.rasterizerDesc.frontFace = EFrontFace::Clockwise;
 	}
 	auto pipeline = device->CreatePipelineState(psdesc);
 	
@@ -408,9 +438,20 @@ int main(){
 	float dTime = 0.0f;
 	float time = 0.0f;
 
+	STextureFormatDesc txfmt;
+	{
+		txfmt.format = ETextureFormat::RGBA;
+		txfmt.valueType = EValueType::uint8;
+	}
+	auto mipshader = CreateMipmapShader(device.get(), CMipMapGen::getVertexFormat());
+	CMipMapGen mipmap(device.get(), mipshader, txfmt);
+
+	mipmap.Generate(texture);
+
 	while(true)
 	{
 		PlatfromLoopUpdate();
+
 		//----------------------------
 		renderPass->Begin(framebuffer.get(), SClearColorValues(vec4(0.5f,0.7f,1.0f,1.0f)));
 			pipeline->Bind();

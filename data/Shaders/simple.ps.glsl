@@ -27,5 +27,6 @@ void main(){
 
 	// FragColor = vec4(UV.x, UV.y, 1.0f, 1.0f);
 	// FragColor = vec4(lod,lod,lod,1.0f);
+	// FragColor = vec4(1.0,1.0,1.0,1.0f);
 	FragColor = color;
 }

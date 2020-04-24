@@ -47,6 +47,7 @@ protected:
 
 	template <typename type>
 	void addTrackedObject(SharedPtr<type>& obj);
+	SharedPtr<CGraphicObject> getTrackedObject(CGraphicObject* ptr);
 
 	SharedPtr<CRenderPass> swapchainRenderPass;
 	SharedPtr<CFramebuffer> swapchainFramebuffer;
@@ -73,6 +74,8 @@ protected:
 
 	void bindFramebuffer(CFramebuffer* framebuffer);
 
+	void initPipelineState();
+
 public:
 
 	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc), shaderResourceSetManager(this){
@@ -83,6 +86,9 @@ public:
 
 	bool InitContextOnWindow(SWindow& window);
 
+	bool setDynamicViewports(const SViewports& mode);
+	bool setDynamicViewport(uint i, const SViewport& mode);
+
 	SharedPtr<CPipelineState> CreatePipelineState(const SPipelineStateDesc& desc);
 	SharedPtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc);
 	SharedPtr<CBuffer> CreateBuffer(const SBufferDesc& desc);
@@ -92,7 +98,7 @@ public:
 	SharedPtr<CSampler> CreateSampler(const SSamplerDesc& desc);
 	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count, std::vector<SRawData> data = std::vector<SRawData>());
 	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count, SRawData data = SRawData());
-	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data);
+	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data = STextureRawData());
 
 	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear);
 	void BindVertexBuffer(CVertexBuffer* vb){ boundVertexBuffer = vb; if(vb) vb->Bind(); }

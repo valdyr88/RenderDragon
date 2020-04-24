@@ -489,19 +489,16 @@ public:
 			if(FunctionName != NULL)
 				LOG( "%s%s\n"), FunctionName, "()") );
 		#endif
-		bool print_tabs = false;
 		EGLError error = EGLError::EGL_NO_ERROR;
 
 		for(uint i = 0; i < ConsolePrintErrors_PreliminaryNofChecks; ++i){
 			error = (EGLError)GetError();
-			if(FunctionName != NULL && error != EGLError::EGL_NO_ERROR){ LOG( "%s%s\n", FunctionName, "()"); print_tabs = true; }
+			if(FunctionName != NULL && error != EGLError::EGL_NO_ERROR){ LOG( "%s%s", FunctionName, "()"); }
 			if(error != EGLError::EGL_NO_ERROR){ break; }
 		}
 
 		while(error != EGLError::EGL_NO_ERROR){
-			if(print_tabs){ LOG( "\t\t"); }
-
-			LOG_ERR( "GL error: %s\n", GetStringFromError(error));
+			LOG("\t""GL error: %s", GetStringFromError(error)); debugbreak;
 			error = (EGLError)GetError();
 		}
 	}
@@ -657,7 +654,12 @@ public:
 	forceinline GLState_prefix_func void PopAttrib(){
 		{  glPopAttrib(); --PUSH_ATTRIB_BITS; } GLS_OFR return;
 	}
-
+	forceinline GLState_prefix_func void SampleMaski(GLuint index, GLbitfield mask){
+		glSampleMaski(index, mask); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void SampleMask(GLbitfield mask){
+		for(uint i = 0; i < RD_MAX_RENDER_ATTACHMENTS; ++i){ glSampleMaski(i, mask); GLS_OFR } return;
+	}
 	forceinline GLState_prefix_func void DepthWriteEnable(){
 		glDepthMask(GL_TRUE); DEPTH_WRITE_ENABLED = true; GLS_OFR; return;
 	}
@@ -902,8 +904,8 @@ public:
 		glDepthFunc(func); DEPTH_FUNC = func; GLS_OFR return;
 	}
 	
-	forceinline GLState_prefix_func void StencilFuncSeparate(GLenum front, GLenum back, uint ref, uint mask){
-		glStencilFuncSeparate(front, back, ref, mask); GLS_OFR return;
+	forceinline GLState_prefix_func void StencilFuncSeparate(GLenum face, GLenum func, uint ref, uint mask){
+		glStencilFuncSeparate(face, func, ref, mask); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void StencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass){
 		glStencilOpSeparate(face, sfail, dpfail, dppass); GLS_OFR return;
@@ -1043,8 +1045,23 @@ public:
 	forceinline GLState_prefix_func GLuint BindTextureUnitParameterEXT(GLenum unit, GLenum value){
 		 auto rtn = glBindTextureUnitParameterEXT(unit,value); GLS_OFR return rtn;
 	}
+	forceinline GLState_prefix_func void TexStorage1D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width){
+		 glTexStorage1D(target,levels,internalformat,width); GLS_OFR return;
+	}
 	forceinline GLState_prefix_func void TexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height){
 		 glTexStorage2D(target,levels,internalformat,width,height); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void TexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth){
+		 glTexStorage3D(target,levels,internalformat,width,height,depth); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void TexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels){
+		glTexSubImage1D(target, level, xoffset, width, format, type, pixels); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void TexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels){
+		glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void TexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels){
+		glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void CopyImageSubData(GLuint srcName, GLenum srtTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth, GLsizei srcHeight, GLsizei srcDepth){
 		 glCopyImageSubData(srcName, srtTarget, srcLevel, srcX, srcY, srcZ, dstName, dstTarget, dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight, srcDepth); GLS_OFR return;
@@ -1174,6 +1191,35 @@ public:
 	}
 	forceinline GLState_prefix_func void TextureParameterf(GLuint texture, GLenum param, GLfloat val){
 		glTextureParameterf(texture, param, val); GLS_OFR return;
+	}
+
+	forceinline GLState_prefix_func void GetTexParameterfv(GLenum target, GLenum param, GLfloat* val){
+		glGetTexParameterfv(target, param, val); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetTexParameteriv(GLenum target, GLenum param, GLint* val){
+		glGetTexParameteriv(target, param, val); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetTexParameterIiv(GLenum target, GLenum param, GLint* val){
+		glGetTexParameterIiv(target, param, val); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetTexParameterIuiv(GLenum target, GLenum param, GLuint* val){
+		glGetTexParameterIuiv(target, param, val); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetTextureParameterfv(GLuint texture, GLenum param, GLfloat* val){
+		glGetTextureParameterfv(texture, param, val); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetTextureParameteriv(GLuint texture, GLenum param, GLint* val){
+		glGetTextureParameteriv(texture, param, val); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetTextureParameterIiv(GLuint texture, GLenum param, GLint* val){
+		glGetTextureParameterIiv(texture, param, val); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetTextureParameterIuiv(GLuint texture, GLenum param, GLuint* val){
+		glGetTextureParameterIuiv(texture, param, val); GLS_OFR return;
+	}
+
+	forceinline GLState_prefix_func void TextureView(GLuint texture, GLenum target, GLuint origtexture, GLenum internalformat, GLuint minlevel, GLuint numlevels, GLuint minlayer, GLuint numlayers){
+		glTextureView(texture, target, origtexture, internalformat, minlevel, numlevels, minlayer, numlayers); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void UseProgramObjectARB(GLint program){
 		{
@@ -1447,11 +1493,11 @@ inline GLenum glenum(const EBlendFactor& v){
 inline GLenum glenum(const EBlendOperation& v){
 	switch(v)
 	{
-		case EBlendOperation::Add: return (GLenum)GL_ADD;
-		case EBlendOperation::Subtract: return (GLenum)GL_SUBTRACT;
+		case EBlendOperation::Add: return (GLenum)GL_FUNC_ADD;
+		case EBlendOperation::Subtract: return (GLenum)GL_FUNC_SUBTRACT;
 		case EBlendOperation::ReverseSubtract: return (GLenum)GL_FUNC_REVERSE_SUBTRACT;
-		case EBlendOperation::Min: return (GLenum)GL_MIN;
-		case EBlendOperation::Max: return (GLenum)GL_MAX;
+		/*case EBlendOperation::Min: return (GLenum)GL_MIN;
+		case EBlendOperation::Max: return (GLenum)GL_MAX;*/
 		default: return (GLenum)GL_NONE;
 	}
 }
@@ -1609,11 +1655,269 @@ inline GLenum glenum(const ETextureFormat& v){
 		case ETextureFormat::RG: return (GLenum)GL_RG;
 		case ETextureFormat::RGB: return (GLenum)GL_RGB;
 		case ETextureFormat::RGBA: return (GLenum)GL_RGBA;
-		case ETextureFormat::Depth: return (GLenum)GL_DEPTH;
-		case ETextureFormat::depthStencil: return (GLenum)GL_DEPTH_STENCIL;
+		case ETextureFormat::Depth: return (GLenum)GL_DEPTH_COMPONENT;
+		case ETextureFormat::DepthStencil: return (GLenum)GL_DEPTH_STENCIL;
 		case ETextureFormat::RGBE: return (GLenum)GL_RGBA;
 		default: return (GLenum)GL_NONE;
 	}
+}
+inline GLenum glenum(const ETextureFormat& f, EValueType& v){
+	switch(v)
+	{
+		case EValueType::int8:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R8I;
+				case ETextureFormat::RG: return (GLenum)GL_RG8I;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB8I;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA8I;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA8I;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::int16:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R16I;
+				case ETextureFormat::RG: return (GLenum)GL_RG16I;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB16I;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA16I;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA16I;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::int32:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R32I;
+				case ETextureFormat::RG: return (GLenum)GL_RG32I;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB32I;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA32I;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA32I;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::uint8:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R8UI;
+				case ETextureFormat::RG: return (GLenum)GL_RG8UI;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB8UI;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA8UI;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA8UI;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::uint16:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R16UI;
+				case ETextureFormat::RG: return (GLenum)GL_RG16UI;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB16UI;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA16UI;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA16UI;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::uint24:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_NONE;
+				case ETextureFormat::RG: return (GLenum)GL_NONE;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB8UI;
+				case ETextureFormat::RGBA: return (GLenum)GL_NONE;
+				case ETextureFormat::Depth: return (GLenum)GL_RGB8UI;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_NONE;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::uint32:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R32UI;
+				case ETextureFormat::RG: return (GLenum)GL_RG32UI;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB32UI;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA32UI;
+				case ETextureFormat::Depth: return (GLenum)GL_R32UI;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_R32UI;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA32UI;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float16:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R16F;
+				case ETextureFormat::RG: return (GLenum)GL_RG16F;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB16F;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA16F;
+				case ETextureFormat::Depth: return (GLenum)GL_R16F;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA16F;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float24:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_NONE;
+				case ETextureFormat::RG: return (GLenum)GL_NONE;
+				case ETextureFormat::RGB: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBA: return (GLenum)GL_NONE;
+				case ETextureFormat::Depth: return (GLenum)GL_RGB8UI;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_NONE;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float32:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R32F;
+				case ETextureFormat::RG: return (GLenum)GL_RG32F;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB32F;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA32F;
+				case ETextureFormat::Depth: return (GLenum)GL_R32F;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA32F;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float64:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_NONE;
+				case ETextureFormat::RG: return (GLenum)GL_NONE;
+				case ETextureFormat::RGB: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBA: return (GLenum)GL_NONE;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_NONE;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		default: return (GLenum)GL_NONE;
+	}
+	return (GLenum)GL_NONE;
+}
+inline GLenum glenumTypeless(const ETextureFormat& f, EValueType& v){
+	switch(v)
+	{
+		case EValueType::uint8:
+		case EValueType::int8:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R8;
+				case ETextureFormat::RG: return (GLenum)GL_RG8;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB8;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA8;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA8;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::uint16:
+		case EValueType::int16:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R16;
+				case ETextureFormat::RG: return (GLenum)GL_RG16;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB16;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA16;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA16;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::uint32:
+		case EValueType::int32:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R32UI;
+				case ETextureFormat::RG: return (GLenum)GL_RG32UI;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB32UI;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA32UI;
+				case ETextureFormat::Depth: return (GLenum)GL_NONE;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA32UI;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::uint24:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB8;
+				case ETextureFormat::Depth: return (GLenum)GL_RGB8;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float16:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R16F;
+				case ETextureFormat::RG: return (GLenum)GL_RG16F;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB16F;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA16F;
+				case ETextureFormat::Depth: return (GLenum)GL_R16F;
+				case ETextureFormat::DepthStencil: return (GLenum)GL_NONE;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA16F;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float24:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::Depth: return (GLenum)GL_RGB8UI;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float32:
+			switch(f)
+			{
+				case ETextureFormat::None: return (GLenum)GL_NONE;
+				case ETextureFormat::R: return (GLenum)GL_R32F;
+				case ETextureFormat::RG: return (GLenum)GL_RG32F;
+				case ETextureFormat::RGB: return (GLenum)GL_RGB32F;
+				case ETextureFormat::RGBA: return (GLenum)GL_RGBA32F;
+				case ETextureFormat::Depth: return (GLenum)GL_R32F;
+				case ETextureFormat::RGBE: return (GLenum)GL_RGBA32F;
+				default: return (GLenum)GL_NONE;
+			}
+			break;
+		case EValueType::float64:
+		default: return (GLenum)GL_NONE;
+	}
+	return (GLenum)GL_NONE;
 }
 inline GLenum glenum(const EFillMode& v){
 	switch(v)
