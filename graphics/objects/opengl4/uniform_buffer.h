@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <functional>
 #include "../../utils/pointers.h"
 #include "../../descriptors/uniform_buffer_desc.h"
 #include "../../descriptors/shader_desc.h"
@@ -84,6 +85,9 @@ public:
 	virtual void Upload() = 0;
 	virtual bool isShared() = 0;
 
+	//static std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> CreateUniformBufferType;
+	static std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> CreateUniformBufferType;
+
 	friend class CShaderProgram;
 };
 
@@ -149,7 +153,8 @@ public:
 
 	Type* operator->(){ return &data; }
 
-	static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps);
+	static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName);
+	//static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps);
 
 	virtual ~CUniformBuffer() = default;
 };
@@ -228,13 +233,29 @@ template<typename Type> bool CUniformBuffer<Type>::setUniform(const char* name, 
 
 template<typename Type> bool CUniformBuffer<Type>::isShared(){ return false; }
 
-template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps){
-	return SharedPtr<CUniformBuffer<Type>>(new CUniformBuffer<Type>(dev, bufferName, maps));
-}
-
 template<typename Type> void CUniformBuffer<Type>::Upload(){
 	IUniformBuffer::Upload((byte*)&this->data, sizeof(Type));
 }
+//-----------------------------------------------------------------------------------------------------------------------------------
+
+template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName){
+	return SharedPtr<CUniformBuffer<Type>>(new CUniformBuffer<Type>(dev, bufferName, Type::desc));
+}
+
+//template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps){
+//	return SharedPtr<CUniformBuffer<Type>>(new CUniformBuffer<Type>(dev, bufferName, maps));
+//}
+
+size_t internal_rdAppendRegisterUniformBufferStructureFunctionCall(void (*func)());
+void internal_rdCallRegisterUniformBufferStructureFunctionCall();
+
+#define rdRegisterUniformBufferStructure(Type) template class CUniformBuffer<Type>;\
+void internal_rdRegisterUniformBufferStructure_##Type(){ \
+	IUniformBuffer::CreateUniformBufferType[#Type] = &CUniformBuffer<Type>::CreateUniformBuffer; \
+} \
+size_t internalvar_registeredUBStructure_##Type = internal_rdAppendRegisterUniformBufferStructureFunctionCall( &internal_rdRegisterUniformBufferStructure_##Type );
+
+#define rdInitUniformBufferStructreRegistry internal_rdCallRegisterUniformBufferStructureFunctionCall
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 #endif //RD_API_OPENGL4

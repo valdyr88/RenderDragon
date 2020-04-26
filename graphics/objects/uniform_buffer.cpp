@@ -33,6 +33,28 @@ void IUniformBuffer::CreateMapping(const std::vector<SUniformMap> maps){
 	}
 }
 
+//std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> IUniformBuffer::CreateUniformBufferType;
+std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> IUniformBuffer::CreateUniformBufferType;
 
+std::vector<void(*)()>* internal_rdGetRegisterUniformBufferStructureFuncitonCalls(){
+	static UniquePtr<std::vector<void(*)()>> rdRegisterUniformBufferStructureFuncitonCalls = nullptr;
+	if(rdRegisterUniformBufferStructureFuncitonCalls == nullptr)
+		rdRegisterUniformBufferStructureFuncitonCalls = NewUnique<std::vector<void(*)()>>();
+	return rdRegisterUniformBufferStructureFuncitonCalls.get();
+}
+size_t internal_rdAppendRegisterUniformBufferStructureFunctionCall(void (*func)()){ //std::string name, SharedPtr<IUniformBuffer>(*func)(GPUDevice*, const char*)
+	if(internal_rdGetRegisterUniformBufferStructureFuncitonCalls() == nullptr)
+		LOG_ERR("rdRegisterUniformBufferStructureFuncitonCalls == nullptr");
 
+	internal_rdGetRegisterUniformBufferStructureFuncitonCalls()->push_back(func);
+	return internal_rdGetRegisterUniformBufferStructureFuncitonCalls()->size();
+}
+
+void internal_rdCallRegisterUniformBufferStructureFunctionCall(){
+	auto functions = *internal_rdGetRegisterUniformBufferStructureFuncitonCalls();
+	for(uint i = 0; i < functions.size(); ++i){
+		functions[i]();
+	}
+	functions.clear();;
+}
 //---------------------------------------------------------------------------------

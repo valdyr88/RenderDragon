@@ -44,26 +44,7 @@ int main_old(){
 		{ "time", EValueType::float32, EValueSize::scalar, 1},
 		{ "intensity", EValueType::float32, EValueSize::scalar, 1}
 	};
-
-	auto shub = CUniformBuffer<UBStruct>::CreateUniformBuffer(dev.get(), "UBStruct",
-	{
-		{ "color", EValueType::float32, EValueSize::vec4, 1},
-		{ "time", EValueType::float32, EValueSize::scalar, 1},
-		{ "intensity", EValueType::float32, EValueSize::scalar, 1}
-	} );
-	auto& ub = *shub.get();
-
-	ub->color = vec4(1.0f, 0.0f, 1.0f, 1.0f);
-	ub->intensity = 1.25f;
-	ub->time = 0.1f;
-
-	ub.setUniform("time", 2.0f);
-	ub.setUniform("intensity", 0.1f);
-	ub.setUniform("color", vec4(0.1f, 0.7f, 0.8f, 1.0f));
-	ub.setUniform("color", 1.2f);
-
-	ub.Upload();
-
+	
 	SShaderResourceBindingDesc srdesc(0, 0, "name", EShaderResourceType::Texture, EShaderStage::FragmentShader);
 	{
 		srdesc.shaderStages = EShaderStage::VertexShader | EShaderStage::FragmentShader;
@@ -191,12 +172,9 @@ int main_old(){
 	
 	STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();
 	CTextureView tv(dev.get(), viewdesc, texture);
-	shub;
 	SSamplerDesc smpldsc;
 	CSampler sm(dev.get(), smpldsc);
-
-	auto resrc = reset->GetResourceSetWith({ &tv, shub.get(), &sm });
-
+	
 	//shader creation test
 	vsdesc.bindingSetsDesc = {
 		{
@@ -225,9 +203,7 @@ int main_old(){
 
 	SharedPtr<CShader> VShader = NewShared<CShader>(dev.get(), vsdesc);
 	SharedPtr<CShader> FShader = NewShared<CShader>(dev.get(), fsdesc);
-
-	resrc->getDescriptor();
-
+	
 	CShaderProgram program(dev.get(), {VShader, FShader});
 
 	MainPlatformLoop();
@@ -312,6 +288,7 @@ std::vector<SUniformMap> LightData::desc = {
 	{"intensity", EValueType::float32, EValueSize::scalar },
 	{"time", EValueType::float32, EValueSize::scalar },
 };
+rdRegisterUniformBufferStructure(LightData);
 
 UniquePtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
 	return UniquePtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(dev, "light"));
@@ -319,6 +296,7 @@ UniquePtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
 
 SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat vertexformat){
 	
+
 	CShaderDefines defines;
 	defines.add("type", "vec4");
 	defines.add("components", "rgba");
@@ -356,6 +334,13 @@ int main()
 
 	device->InitContextOnWindow(window);
 
+	//IUniformBuffer::CreateUniformBufferType["LightData"] = CUniformBuffer<LightData>::CreateUniformBuffer;
+	//SharedPtr<IUniformBuffer> iub = SharedPtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(device.get(), "light"));
+
+	auto iubTyped = IUniformBuffer::CreateUniformBufferType["LightData"](device.get(), "lightub");
+	if(IUniformBuffer::CreateUniformBufferType["LightData2"] != nullptr)
+		auto iubTyped2 = IUniformBuffer::CreateUniformBufferType["LightData2"](device.get(), "light2ub");
+
 	auto shpUniformBuffer = CreateUniformBuffer(device.get());
 	auto& ub = *shpUniformBuffer.get();
 
@@ -369,6 +354,9 @@ int main()
 	/*smpldesc.magFilter = ETextureFiltering::Nearest;
 	smpldesc.minFilter = ETextureFiltering::Nearest;
 	smpldesc.mipFilter = ETextureFiltering::Nearest;*/
+	smpldesc.uWrapping = ETextureWrapping::Clamp;
+	smpldesc.vWrapping = ETextureWrapping::Clamp;
+	smpldesc.wWrapping = ETextureWrapping::Clamp;
 	SharedPtr<CSampler> sampler = NewShared<CSampler>(device.get(), smpldesc);
 	
 	STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();

@@ -229,6 +229,7 @@ bool GPUDevice::InitContextOnWindow(SWindow& win){
 	swapchainRenderPass = SharedPtr<CRenderPass>(new CRenderPass(this, rpdesc));
 	swapchainFramebuffer = SharedPtr<CFramebuffer>(new CGLSwapchainFramebuffer(this, rpdesc));
 
+	rdInitUniformBufferStructreRegistry();
 	return true;
 }
 
