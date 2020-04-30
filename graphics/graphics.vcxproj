@@ -496,6 +496,8 @@
     <ClInclude Include="descriptors\texture_desc.h" />
     <ClInclude Include="descriptors\uniform_buffer_desc.h" />
     <ClInclude Include="descriptors\vertex_buffer_desc.h" />
+    <ClInclude Include="ext\material\material.h" />
+    <ClInclude Include="ext\model\mesh.h" />
     <ClInclude Include="include.h" />
     <ClInclude Include="objects\base\buffer.h" />
     <ClInclude Include="objects\base\device.h" />
@@ -537,7 +539,7 @@
     <ClInclude Include="utils\types\vectypes.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ext\material\material.cpp" />
     <ClCompile Include="objects\buffer.cpp" />
     <ClCompile Include="objects\device.cpp" />
     <ClCompile Include="objects\framebuffer.cpp" />

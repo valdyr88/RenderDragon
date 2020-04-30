@@ -43,6 +43,15 @@
     <Filter Include="Source Files\utils">
       <UniqueIdentifier>{f7f49140-77d4-48a0-a783-fe9640e26fc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ext">
+      <UniqueIdentifier>{a044ad91-fd81-4871-84cf-2b4351b89946}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ext\model">
+      <UniqueIdentifier>{bbb67681-dafc-42c1-aa3a-a61a88b10796}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ext\material">
+      <UniqueIdentifier>{47510f52-fc25-4c1d-a9bc-f4baccd2b6b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\types\types.h">
@@ -198,6 +207,12 @@
     <ClInclude Include="objects\mipmap_gen.h">
       <Filter>Header Files\objects</Filter>
     </ClInclude>
+    <ClInclude Include="ext\model\mesh.h">
+      <Filter>Header Files\ext\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\material\material.h">
+      <Filter>Header Files\ext\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="objects\shader.cpp">
@@ -242,11 +257,11 @@
     <ClCompile Include="objects\buffer.cpp">
       <Filter>Source Files\objects</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="objects\mipmap_gen.cpp">
       <Filter>Source Files\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\material\material.cpp">
+      <Filter>Header Files\ext\material</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

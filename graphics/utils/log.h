@@ -19,9 +19,11 @@
 
 #else
 
+#define debugbreak
 #define LOG_ERR(format, ...)
 #define LOG_WARN(format, ...)
 #define LOG(format, ...)
+#define ASSERT(x)
 
 #endif
 
