@@ -1,17 +1,13 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-/*
-ToDo:
- - sustav koji iz definicije materijala u fileu odluèi koje uniform buffer strukture treba korisit (znaèi UniformBuffer<OdlucenaStruktura>).
-		to može postiæ preko templatea nekako, svako kreiranje nove strukture za uniform 
- - napravit descriptore za CMaterial parametre, kao u glMaterial.js u WebGL projektu
-*/
-
 #include <string>
 #include <vector>
 #include "../../utils/pointers.h"
+#include "../../utils/containers.h"
 #include "../../descriptors/uniform_buffer_desc.h"
+
+//----------------------------------------------------------------------------------------------
 
 struct SMaterialParam : public SUniformMap{
 private:
@@ -44,14 +40,14 @@ public:
 };
 
 struct SMaterialParamsGroup{
-	std::string ubname;
+	std::string ubstruct;
 	std::vector<SMaterialParam> params;
 
-	SMaterialParamsGroup(std::string n, const std::vector<SMaterialParam>& p) : ubname(n), params(p) { }
-	SMaterialParamsGroup(std::string n) : ubname(n) { }
+	SMaterialParamsGroup(std::string n, const std::vector<SMaterialParam>& p) : ubstruct(n), params(p) { }
+	SMaterialParamsGroup(std::string n) : ubstruct(n) { }
 
 	bool operator == (const SMaterialParamsGroup& other) const{
-		if(ubname != other.ubname) return false;
+		if(ubstruct != other.ubstruct) return false;
 		if(params.size() != other.params.size()) return false;
 		for(uint i = 0; i < params.size(); ++i)
 			if(params[i] != other.params[i]) return false;
@@ -60,7 +56,7 @@ struct SMaterialParamsGroup{
 	bool operator !=(const SMaterialParamsGroup& other) const{ return !((*this) == other); }
 
 	SMaterialParamsGroup& operator = (const SMaterialParamsGroup& other){
-		ubname = other.ubname;
+		ubstruct = other.ubstruct;
 		params.reserve(other.params.size());
 		for(uint i = 0; i < other.params.size(); ++i)
 			params[i] = other.params[i];
@@ -91,14 +87,40 @@ struct SMaterialDesc{
 	}
 };
 
+//----------------------------------------------------------------------------------------------
+class CMaterial;
+class IUniformBuffer;
+
+class CMaterialInstance{
+protected:
+	CMaterial* material = nullptr;
+	stdex::container<SharedPtr<IUniformBuffer>> uniformBuffers;
+
+	CMaterialInstance(CMaterial* m) : material(m){}
+public:
+
+	friend class CMaterial;
+};
+
+//----------------------------------------------------------------------------------------------
+class GPUDevice;
+
 class CMaterial{
 protected:
 	SMaterialDesc descriptor;
+	stdex::container<SharedPtr<CMaterialInstance>> materialInstances;
+
+	bool Create();
 public:
-	CMaterial(const SMaterialDesc& desc) : descriptor(desc){}
+	CMaterial(const SMaterialDesc& desc) : descriptor(desc){
+		Create(); }
+
+	SharedPtr<CMaterialInstance> CreateInstance(GPUDevice* dev, std::vector<SharedPtr<IUniformBuffer>> ubs, std::vector<std::string> ubnames = {});
 
 	static SMaterialDesc CreateMaterialDescFromXML(std::string xml);
 	static SMaterialDesc CreateMaterialDescFromXML(void* xmlobject);
 };
+
+//----------------------------------------------------------------------------------------------
 
 #endif //MATERIAL_H

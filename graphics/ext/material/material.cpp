@@ -1,90 +1,10 @@
 #include "material.h"
+#include "material.h"
+#include "material.h"
 #include "../../include.h"
 
 #include "../../utils/rapidxml/rapidxml.hpp"
-#include <string.h>
-/*
-namespace xml{
-
-class CXMLbase{
-protected:
-	const char* pName = nullptr;
-	const char* pValue = nullptr;
-	CXMLbase* pParent = nullptr;
-
-	CXMLbase(const char* n, const char* v, CXMLbase* p) : pName(n), pValue(v), pParent(p){}
-public:
-	const char* name(){ return pName; }
-	const char* value(){ return pValue; }
-	CXMLbase* parent(){ return pParent; }
-};
-
-class CXMLnode : public CXMLbase{
-	CXMLnode* pNextNode = nullptr;
-	CXMLnode* pPrevNode = nullptr;
-	std::vector<CXMLattribute*> attributes;
-public:
-	CXMLnode(const char* n, const char* v, CXMLbase* p) : CXMLbase(n, v, p){}
-	CXMLnode* nextSibling(){ return pNextNode; }
-	CXMLnode* prevSibling(){ return pPrevNode; }
-};
-
-class CXMLattribute : public CXMLbase{
-	CXMLattribute* pNextAttribute = nullptr;
-	CXMLattribute* pPrevAttribute = nullptr;
-public:
-	CXMLattribute(const char* n, const char* v, CXMLbase* p) : CXMLbase(n, v, p){}
-	CXMLattribute* nextSibling(){ return pNextAttribute; }
-	CXMLattribute* prevSibling(){ return pPrevAttribute; }
-};
-
-class CXMLdoc : public CXMLnode{
-	CXMLnode* node = nullptr;
-public:
-	CXMLdoc(rapidxml::xml_document<char>& doc);
-};
-
-void recursiveAdd(CXMLbase* parent, rapidxml::xml_base<char>* node){
-
-}
-void recursiveAdd(CXMLbase* parent, rapidxml::xml_node<char>* node){
-
-}
-void recursiveAdd(CXMLbase* parent, rapidxml::xml_attribute<char>* att){
-
-}
-void recursiveAdd(CXMLbase* parent, rapidxml::xml_document<char>* doc){
-	for(auto n = doc->first_node(); n != nullptr; n = n->next_sibling()){
-		CXMLnode* node = new CXMLnode(n->name(), n->value(), parent);
-		
-	}
-}
-
-CXMLdoc::CXMLdoc(rapidxml::xml_document<char>& doc) : CXMLbase(doc.name(), doc.value(), nullptr)
-{
-	recursiveAdd(this, &doc);
-}
-
-}
-*/
-template<typename type> type strtonum(char* str){ return type(0); }
-template<> inline float strtonum(char* str){ return std::stof(str); }
-template<> inline int strtonum(char* str){ return std::stoi(str); }
-
-template<typename type, const int C> void strtonum(char* str, type* outs){
-	for(uint i = 0; i < C && str != nullptr; ++i){
-		char* str2 = str;
-		
-		for(str2; *str2 != 0 && *str2 != ','; ++str2);
-		if(*str2 == ','){ *str2 = 0; ++str2; }
-		else if(*str2 == 0) str2 = nullptr;
-
-		outs[i] = strtonum<type>(str);
-		if(str2 != nullptr){ size_t l = strlen(str); str[l] = ','; }
-
-		str = str2;
-	}
-}
+#include "../../utils/strings.h"
 
 SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 	rapidxml::xml_node<char>* node = (rapidxml::xml_node<char>*)xmlobject;
@@ -108,9 +28,9 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 		
 		for(auto paramnode = pgnode->first_node(); paramnode != nullptr; paramnode = paramnode->next_sibling())
 		{
-			char* name = paramnode->first_attribute("name")->value();
-			char* value = paramnode->first_attribute("value")->value();
-			char* type = paramnode->first_attribute("type")->value();
+			char* name = (paramnode->first_attribute("name") != nullptr)? paramnode->first_attribute("name")->value() : nullptr;
+			char* value = (paramnode->first_attribute("value") != nullptr)? paramnode->first_attribute("value")->value() : nullptr;
+			char* type = (paramnode->first_attribute("type") != nullptr)? paramnode->first_attribute("type")->value() : nullptr;
 
 			EValueType vtype = toEValueType(type);
 			EValueSize vsize = toEValueSize(type);
@@ -122,55 +42,55 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 					switch(vsize)
 					{
 						case EValueSize::scalar:{
-							float fvalue; strtonum<float, 1>(value, &fvalue);
+							float fvalue; str::strtonum<float, 1>(value, ',', &fvalue);
 							param.setAs<float>(fvalue); }
 							break;
 						case EValueSize::vec2:{
-							float fvalues[2]; strtonum<float, 2>(value, fvalues);
+							float fvalues[2]; str::strtonum<float, 2>(value, ',', fvalues);
 							param.setAs<vec2>(vec2(fvalues[0], fvalues[1])); }
 							break;
 						case EValueSize::vec3:{
-							float fvalues[3]; strtonum<float, 3>(value, fvalues);
+							float fvalues[3]; str::strtonum<float, 3>(value, ',', fvalues);
 							param.setAs<vec3>(vec3(fvalues[0], fvalues[1], fvalues[2])); }
 							break;
 						case EValueSize::vec4:{
-							float fvalues[4]; strtonum<float, 4>(value, fvalues);
+							float fvalues[4]; str::strtonum<float, 4>(value, ',', fvalues);
 							param.setAs<vec4>(vec4(fvalues[0], fvalues[1], fvalues[2], fvalues[3])); }
 							break;
 						case EValueSize::mat2x2:{
-							float fvalues[4]; strtonum<float, 4>(value, fvalues);
+							float fvalues[4]; str::strtonum<float, 4>(value, ',', fvalues);
 							param.setAs<mat2x2>(mat2x2(fvalues[0], fvalues[1], fvalues[2], fvalues[3])); }
 							break;
 						case EValueSize::mat3x3:{
-							float fvalues[9]; strtonum<float, 9>(value, fvalues);
+							float fvalues[9]; str::strtonum<float, 9>(value, ',', fvalues);
 							param.setAs<mat3x3>(mat3x3(fvalues[0], fvalues[1], fvalues[2],  fvalues[3], fvalues[4], fvalues[5],  fvalues[6], fvalues[7], fvalues[8])); }
 							break;
 						case EValueSize::mat4x4:{
-							float fvalues[16]; strtonum<float, 16>(value, fvalues);
+							float fvalues[16]; str::strtonum<float, 16>(value, ',', fvalues);
 							param.setAs<mat4x4>(mat4x4(fvalues[0], fvalues[1], fvalues[2], fvalues[3], fvalues[4], fvalues[5], fvalues[6], fvalues[7], fvalues[8], fvalues[9], fvalues[10], fvalues[11], fvalues[12], fvalues[13], fvalues[14], fvalues[15])); }
 							break;
 						case EValueSize::mat3x2:{
-							float fvalues[6]; strtonum<float, 6>(value, fvalues);
+							float fvalues[6]; str::strtonum<float, 6>(value, ',', fvalues);
 							param.setAs<mat3x2>(mat3x2(fvalues[0], fvalues[1], fvalues[2],  fvalues[3], fvalues[4], fvalues[5])); }
 							break;
 						case EValueSize::mat2x3:{
-							float fvalues[6]; strtonum<float, 6>(value, fvalues);
+							float fvalues[6]; str::strtonum<float, 6>(value, ',', fvalues);
 							param.setAs<mat2x3>(mat2x3(fvalues[0], fvalues[1], fvalues[2],  fvalues[3], fvalues[4], fvalues[5])); }
 							break;
 						case EValueSize::mat4x3:{
-							float fvalues[12]; strtonum<float, 12>(value, fvalues);
+							float fvalues[12]; str::strtonum<float, 12>(value, ',', fvalues);
 							param.setAs<mat4x3>(mat4x3(fvalues[0], fvalues[1], fvalues[2],  fvalues[3], fvalues[4], fvalues[5],  fvalues[6], fvalues[7], fvalues[8],  fvalues[9], fvalues[10], fvalues[11])); }
 							break;
 						case EValueSize::mat3x4:{
-							float fvalues[12]; strtonum<float, 12>(value, fvalues);
+							float fvalues[12]; str::strtonum<float, 12>(value, ',', fvalues);
 							param.setAs<mat3x4>(mat3x4(fvalues[0], fvalues[1], fvalues[2],  fvalues[3], fvalues[4], fvalues[5],  fvalues[6], fvalues[7], fvalues[8],  fvalues[9], fvalues[10], fvalues[11])); }
 							break;
 						case EValueSize::mat4x2:{
-							float fvalues[8]; strtonum<float, 8>(value, fvalues);
+							float fvalues[8]; str::strtonum<float, 8>(value, ',', fvalues);
 							param.setAs<mat4x2>(mat4x2(fvalues[0], fvalues[1], fvalues[2],  fvalues[3], fvalues[4], fvalues[5],  fvalues[6], fvalues[7])); }
 							break;
 						case EValueSize::mat2x4:{
-							float fvalues[8]; strtonum<float, 8>(value, fvalues);
+							float fvalues[8]; str::strtonum<float, 8>(value, ',', fvalues);
 							param.setAs<mat2x4>(mat2x4(fvalues[0], fvalues[1], fvalues[2],  fvalues[3], fvalues[4], fvalues[5],  fvalues[6], fvalues[7])); }
 							break;
 						default:
@@ -181,19 +101,19 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 					switch(vsize)
 					{
 						case EValueSize::scalar:{
-							int ivalue; strtonum<int, 1>(value, &ivalue);
+							int ivalue; str::strtonum<int, 1>(value, ',', &ivalue);
 							param.setAs<int>(ivalue); }
 							break;
 						case EValueSize::vec2:{
-							int ivalues[2]; strtonum<int, 2>(value, ivalues);
+							int ivalues[2]; str::strtonum<int, 2>(value, ',', ivalues);
 							param.setAs<ivec2>(ivec2(ivalues[0], ivalues[1])); }
 							break;
 						case EValueSize::vec3:{
-							int ivalues[3]; strtonum<int, 3>(value, ivalues);
+							int ivalues[3]; str::strtonum<int, 3>(value, ',', ivalues);
 							param.setAs<ivec3>(ivec3(ivalues[0], ivalues[1], ivalues[2])); }
 							break;
 						case EValueSize::vec4:{
-							int ivalues[4]; strtonum<int, 4>(value, ivalues);
+							int ivalues[4]; str::strtonum<int, 4>(value, ',', ivalues);
 							param.setAs<ivec4>(ivec4(ivalues[0], ivalues[1], ivalues[2], ivalues[3])); }
 							break;
 					}
@@ -217,29 +137,41 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(std::string xml){
 	auto m = doc->first_node("material");
 
 	return CreateMaterialDescFromXML(m);
+}
 
-	/*auto p = m->first_node("param");
-	auto p2 = p->next_sibling("param");
+bool CMaterial::Create()
+{
+	return false;
+}
 
-	auto a = p2->first_attribute();
-	auto a2 = a->next_attribute();
-	auto a3 = a2->next_attribute();
+SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vector<SharedPtr<IUniformBuffer>> ubs, std::vector<std::string> ubnames)
+{
+	auto mi = SharedPtr<CMaterialInstance>(__new CMaterialInstance(this));
+	this->materialInstances.add(mi);
 
-	auto v = a->value();
-	auto v2 = a2->value();
-	auto v3 = a3->value();
+	uint added_sharedubs = 0, added_names = 0;
+	for(auto pg = this->descriptor.paramGroups.begin(); pg != this->descriptor.paramGroups.end(); ++pg)
+	{
+		if((ubs.size() > added_sharedubs) && (ubs[added_sharedubs] != nullptr) && (pg->ubstruct == ubs[added_sharedubs]->getUBStructTypeName())){
+			mi->uniformBuffers.add(ubs[added_sharedubs]);
+			++added_sharedubs;
+			continue;
+		}
+		else
+		{
+			std::string name = "";
+			if((ubnames.size() > added_names)){
+				name = ubnames[added_names];
+				++added_names;
+			}
+			if(IUniformBuffer::CreateUniformBufferType[pg->ubstruct] != nullptr)
+				auto ub = IUniformBuffer::CreateUniformBufferType[pg->ubstruct](dev, name.c_str());
+			else{
+				LOG_ERR("unregistered UB struct type! : <%s>, register by calling rdRegisterUniformBufferStructure(%s)", pg->ubstruct.c_str(), pg->ubstruct.c_str());
+			}
+			continue;
+		}
+	}
 
-	if(strisequal(a3->name(), "type")){
-		auto type = toEValueType(a3->value());
-		auto size = toEValueSize(a3->value());
-
-		if(istypeof<float>(type, size) == true)
-			printf("je float");
-		if(istypeof<vec2>(type, size) == true)
-			printf("je vec2");
-		if(istypeof<vec3>(type, size) == true)
-			printf("je vec3");
-		if(istypeof<vec4>(type, size) == true)
-			printf("je vec4");
-	}*/
+	return mi;
 }

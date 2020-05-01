@@ -290,8 +290,8 @@ std::vector<SUniformMap> LightData::desc = {
 };
 rdRegisterUniformBufferStructure(LightData);
 
-UniquePtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
-	return UniquePtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(dev, "light"));
+SharedPtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
+	return SharedPtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(dev, "light"));
 }
 
 SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat vertexformat){
@@ -321,14 +321,14 @@ SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat verte
 }
 
 #include "graphics/ext/material/material.h"
-void testXML(){
+void testXML(GPUDevice* dev){
 	auto desc = CMaterial::CreateMaterialDescFromXML("  \t\r\n \
 														\t<material id=\"hull_surface\" shader=\"deferred_BcNAoRSMt\">\r\n \
-														\t\t<paramgroup ubstruct=\"UBStructName\">\r\n \
+														\t\t<paramgroup ubstruct=\"LightData\">\r\n \
 														\t\t\t<param name=\"emissionMult\" value=\"1.0\" type=\"int\"></param>\r\n \
 														\t\t\t<param name=\"roughnessScaleOffsetPower\" value=\"0.2,0.8,1.0\" type=\"vec3\"></param>\r\n \
 														\t\t\t<param name=\"txDiffuse_gamma_value\" value=\"2.2\" type=\"float\"></param>\r\n \
-														\t\t\t<param name=\"txAoRS_gamma_value\" value=\"2.2\" type=\"float\"></param>\r\n \
+														\t\t\t<param name=\"txAoRS_gamma_value\" type=\"float\"></param>\r\n \
 														\t\t\t<param name=\"txNormal_gamma_value\" value=\"1.0\" type=\"float\"></param>\r\n \
 														\t\t\t<param name=\"mat2\" value=\"1.0, 0.0, 0.0, 1.0\" type=\"mat2x2\"></param>\r\n \
 														\t\t\t<param name=\"mat4\" value=\"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,\" type=\"mat4x4\"></param>\r\n \
@@ -338,12 +338,15 @@ void testXML(){
 														\t\t</paramgroup>\r\n \
 														\t</material>" );
 	CMaterial material(desc);
+
+	auto ub = CreateUniformBuffer(dev);
+	auto mi = material.CreateInstance(dev, {  });
+
+	mi;
 }
 
 int main()
 {
-	testXML();
-
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 	devdesc.swapchain.width = 512;
@@ -356,6 +359,7 @@ int main()
 
 	device->InitContextOnWindow(window);
 
+	testXML(device.get());
 	//IUniformBuffer::CreateUniformBufferType["LightData"] = CUniformBuffer<LightData>::CreateUniformBuffer;
 	//SharedPtr<IUniformBuffer> iub = SharedPtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(device.get(), "light"));
 

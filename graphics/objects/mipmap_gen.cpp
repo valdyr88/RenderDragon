@@ -57,6 +57,7 @@ std::vector<SUniformMap> CMipMapGen::UBLevelData::desc = {
 	{"invResolution", EValueType::float32, EValueSize::vec2 },
 	{"level", EValueType::int32, EValueSize::scalar }
 };
+rdRegisterUniformBufferStructure(CMipMapGen::UBLevelData);
 
 bool CMipMapGen::Create(const SPipelineStateDesc& pipdesc, const SRenderPassDesc& rpdesc){
 	if(device == nullptr) return false;

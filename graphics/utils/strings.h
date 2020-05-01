@@ -468,5 +468,23 @@ namespace str{
 		dest_str[0] = 0; return;
 	}
 
+	template<typename type> type strtonum(char* str){ return type(0); }
+	template<> inline float strtonum(char* str){ return std::stof(str); }
+	template<> inline int strtonum(char* str){ return std::stoi(str); }
+
+	template<typename type, const int C> void strtonum(char* str, char separator, type* outs){
+		for(uint i = 0; i < C && str != nullptr; ++i){
+			char* str2 = str;
+
+			for(str2; *str2 != 0 && *str2 != separator; ++str2);
+			if(*str2 == separator){ *str2 = 0; ++str2; }
+			else if(*str2 == 0) str2 = nullptr;
+
+			outs[i] = strtonum<type>(str);
+			if(str2 != nullptr){ size_t l = strlen(str); str[l] = separator; }
+
+			str = str2;
+		}
+	}
 };
 #endif //STRINGS_H

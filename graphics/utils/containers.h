@@ -24,6 +24,11 @@ public:
 		elements.emplace_back(e);
 		return (uint)elements.size()-1;
 	}
+	uint add(Type e){
+		uint i = add(__new Type());
+		*elements[i] = e;
+		return i;
+	}
 	Type& add(){
 		uint i = add(__new Type());
 		return *elements[i];

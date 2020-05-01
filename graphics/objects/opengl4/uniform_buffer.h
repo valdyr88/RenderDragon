@@ -24,12 +24,10 @@ protected:
 
 	uint set = 0;
 	uint binding = 0;
-
+	
 	void CreateMapping(const std::vector<SUniformMap> maps);
 	bool CreateBuffer(uint32 size);
-
 	bool Upload(byte* pData, uint32 size, uint32 offset = 0);
-
 	bool Bind(uint set, uint binding);
 
 	IUniformBuffer() = delete;
@@ -85,6 +83,8 @@ public:
 	virtual void Upload() = 0;
 	virtual bool isShared() = 0;
 
+	virtual const char* getUBStructTypeName(){ return ""; }
+
 	//static std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> CreateUniformBufferType;
 	static std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> CreateUniformBufferType;
 
@@ -97,6 +97,7 @@ template <typename Type> class CUniformBuffer : public IUniformBuffer{
 protected:
 	Type data;
 
+	static const char* structTypeName;
 	template <typename UniformType> bool setUniform(const char* name, EValueType type, EValueSize size, uint32 count, UniformType& value);
 public:
 	CUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap> maps = Type::desc)
@@ -152,6 +153,8 @@ public:
 	virtual bool isShared() override;
 
 	Type* operator->(){ return &data; }
+
+	virtual const char* getUBStructTypeName() override{ return structTypeName; }
 
 	static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName);
 	//static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps);
@@ -249,11 +252,18 @@ template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::Cr
 size_t internal_rdAppendRegisterUniformBufferStructureFunctionCall(void (*func)());
 void internal_rdCallRegisterUniformBufferStructureFunctionCall();
 
-#define rdRegisterUniformBufferStructure(Type) template class CUniformBuffer<Type>;\
-void internal_rdRegisterUniformBufferStructure_##Type(){ \
-	IUniformBuffer::CreateUniformBufferType[#Type] = &CUniformBuffer<Type>::CreateUniformBuffer; \
-} \
-size_t internalvar_registeredUBStructure_##Type = internal_rdAppendRegisterUniformBufferStructureFunctionCall( &internal_rdRegisterUniformBufferStructure_##Type );
+#define RD_MACRO_CONCAT_IMPL(x,y) x##y
+#define RD_MACRO_CONCAT(x,y) RD_MACRO_CONCAT_IMPL(x,y)
+
+#define rdRegisterUniformBufferStructure(Type) \
+	template class CUniformBuffer<Type>; \
+	const char* CUniformBuffer<Type>::structTypeName = #Type; \
+namespace RD_MACRO_CONCAT(RD_MACRO_CONCAT(registerUBnamespace,__COUNTER__), __LINE__){ \
+	void internal_rdRegisterUniformBufferStructure(){ \
+		IUniformBuffer::CreateUniformBufferType[#Type] = &CUniformBuffer<Type>::CreateUniformBuffer; \
+	} \
+	size_t internalvar_registeredUBStructure = internal_rdAppendRegisterUniformBufferStructureFunctionCall( &internal_rdRegisterUniformBufferStructure ); \
+}
 
 #define rdInitUniformBufferStructreRegistry internal_rdCallRegisterUniformBufferStructureFunctionCall
 //-----------------------------------------------------------------------------------------------------------------------------------
