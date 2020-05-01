@@ -144,6 +144,17 @@ bool CMaterial::Create()
 	return false;
 }
 
+bool CheckIfMaterialGroupParamsAndUBAreEqual(const std::vector<SMaterialParam>& mpg, const std::vector<SUniformMap>& ub){
+	if(mpg.size() != ub.size()) return false;
+	for(uint i = 0; i < ub.size(); ++i){
+		if(mpg[i] != ub[i]) return false;
+	}
+	return true;
+}
+bool CheckIfMaterialGroupParamsAndUBAreEqual(SMaterialParamsGroup& mpg, IUniformBuffer& ub){
+	return CheckIfMaterialGroupParamsAndUBAreEqual(mpg.params, ub.getUBStructDesc());
+}
+
 SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vector<SharedPtr<IUniformBuffer>> ubs, std::vector<std::string> ubnames)
 {
 	auto mi = SharedPtr<CMaterialInstance>(__new CMaterialInstance(this));
@@ -153,6 +164,8 @@ SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vect
 	for(auto pg = this->descriptor.paramGroups.begin(); pg != this->descriptor.paramGroups.end(); ++pg)
 	{
 		if((ubs.size() > added_sharedubs) && (ubs[added_sharedubs] != nullptr) && (pg->ubstruct == ubs[added_sharedubs]->getUBStructTypeName())){
+			if(CheckIfMaterialGroupParamsAndUBAreEqual(*pg, *ubs[added_sharedubs]) == false)
+				LOG_ERR("ParamGroup and UniformBuffer structure mismatch for struct <%s>!, members of the ParamGroup and UniformBuffer are not equal!", pg->ubstruct.c_str());
 			mi->uniformBuffers.add(ubs[added_sharedubs]);
 			++added_sharedubs;
 			continue;
@@ -164,10 +177,14 @@ SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vect
 				name = ubnames[added_names];
 				++added_names;
 			}
-			if(IUniformBuffer::CreateUniformBufferType[pg->ubstruct] != nullptr)
+			if(IUniformBuffer::CreateUniformBufferType[pg->ubstruct] != nullptr){
 				auto ub = IUniformBuffer::CreateUniformBufferType[pg->ubstruct](dev, name.c_str());
+				if(CheckIfMaterialGroupParamsAndUBAreEqual(*pg, *ub) == false)
+					LOG_ERR("ParamGroup and UniformBuffer structure mismatch for struct <%s>!, members of the ParamGroup and UniformBuffer are not equal!", pg->ubstruct.c_str());
+				mi->uniformBuffers.add(ub);
+			}
 			else{
-				LOG_ERR("unregistered UB struct type! : <%s>, register by calling rdRegisterUniformBufferStructure(%s)", pg->ubstruct.c_str(), pg->ubstruct.c_str());
+				LOG_ERR("unregistered UB struct type <%s>!, register by calling rdRegisterUniformBufferStructure(%s)", pg->ubstruct.c_str(), pg->ubstruct.c_str());
 			}
 			continue;
 		}

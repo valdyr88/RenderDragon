@@ -340,7 +340,7 @@ void testXML(GPUDevice* dev){
 	CMaterial material(desc);
 
 	auto ub = CreateUniformBuffer(dev);
-	auto mi = material.CreateInstance(dev, {  });
+	auto mi = material.CreateInstance(dev, {}, {"ublight"});
 
 	mi;
 }

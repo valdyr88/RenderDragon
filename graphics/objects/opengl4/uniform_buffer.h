@@ -84,6 +84,7 @@ public:
 	virtual bool isShared() = 0;
 
 	virtual const char* getUBStructTypeName(){ return ""; }
+	virtual const std::vector<SUniformMap>& getUBStructDesc(){ return {}; }
 
 	//static std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> CreateUniformBufferType;
 	static std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> CreateUniformBufferType;
@@ -155,6 +156,7 @@ public:
 	Type* operator->(){ return &data; }
 
 	virtual const char* getUBStructTypeName() override{ return structTypeName; }
+	virtual const std::vector<SUniformMap>& getUBStructDesc() override{ return Type::desc; }
 
 	static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName);
 	//static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps);
