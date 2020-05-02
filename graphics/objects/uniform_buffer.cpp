@@ -33,6 +33,12 @@ void IUniformBuffer::CreateMapping(const std::vector<SUniformMap> maps){
 	}
 }
 
+void IUniformBuffer::Release(){
+	if(this->buffer != nullptr)
+		this->buffer->Release();
+	this->buffer = nullptr;
+}
+
 //std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> IUniformBuffer::CreateUniformBufferType;
 std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> IUniformBuffer::CreateUniformBufferType;
 

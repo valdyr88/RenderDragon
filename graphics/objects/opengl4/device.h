@@ -43,7 +43,7 @@ protected:
 	SGPUDeviceContext context;
 	SWindow window;
 	CGLState gl;
-	std::list<SharedPtr<CGraphicObject>> objects;
+	std::list<WeakPtr<CGraphicObject>> objects;
 
 	template <typename type>
 	void addTrackedObject(SharedPtr<type>& obj);

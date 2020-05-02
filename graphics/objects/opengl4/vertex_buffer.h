@@ -29,7 +29,7 @@ public:
 
 	GLuint getId(){ return id; }
 	void Release();
-	virtual ~CVertexBuffer() = default;
+	virtual ~CVertexBuffer() override{ Release(); }
 
 	bool Bind();
 };
@@ -51,7 +51,7 @@ public:
 
 	GLuint getId(){ return (buffer != nullptr)? buffer->getId() : 0; }
 	void Release();
-	virtual ~CIndexBuffer() = default;
+	virtual ~CIndexBuffer() override{ Release(); }
 
 	uint32 getCount(){ return count; }
 	EValueType getType(){ return type; }

@@ -37,7 +37,8 @@ public:
 
 	const auto& getDescriptor(){ return descriptor; }
 
-	virtual ~CShader() = default;
+	virtual void Release() override;
+	virtual ~CShader() override{ Release(); }
 
 	friend class CShaderProgram;
 	friend class CPipelineState;
@@ -83,7 +84,8 @@ public:
 	uint getNofStages(){ return numStages; }
 	IUniformBuffer* getUniformBuffer(EShaderStage stage, uint binding);
 
-	virtual ~CShaderProgram() = default;
+	virtual void Release() override;
+	virtual ~CShaderProgram() override{ Release(); }
 
 	friend class CPipelineState;
 };

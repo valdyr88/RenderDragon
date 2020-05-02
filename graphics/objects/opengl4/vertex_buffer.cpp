@@ -128,7 +128,7 @@ void CVertexBuffer::Release(){
 		auto& buffer = *it;
 		if(buffer != nullptr)
 			buffer->Release();
-		buffer.release();
+		buffer.reset();
 	}
 }
 

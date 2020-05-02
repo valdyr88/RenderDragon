@@ -35,7 +35,7 @@ public:
 
 	void Release();
 
-	virtual ~CBuffer() = default;
+	virtual ~CBuffer() override{ Release(); }
 };
 
 #endif //RD_API_OPENGL4

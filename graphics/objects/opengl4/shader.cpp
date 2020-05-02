@@ -62,6 +62,14 @@ bool CShader::CompileShader(){
 	return true;
 }
 
+void CShader::Release(){
+	if(this->device == nullptr) return;
+	if(this->id == 0) return;
+
+	auto& gl = device->gl;
+	gl.DeleteShader(id); id = 0;
+}
+
 // CShaderProgram
 //---------------------------------------------------------------------------------
 
@@ -114,6 +122,14 @@ bool CShaderProgram::setUniformBuffer(uint set, uint binding, IUniformBuffer* ub
 bool CShaderProgram::setTexture(uint set, uint binding, CTextureView* tx){
 	if(tx == nullptr) return false;
 	return tx->Bind(set, binding);
+}
+
+void CShaderProgram::Release(){
+	if(this->device == nullptr) return;
+	if(this->id == 0) return;
+
+	auto& gl = device->gl;
+	gl.DeleteProgram(id); id = 0;
 }
 
 #endif //RD_API_OPENGL4

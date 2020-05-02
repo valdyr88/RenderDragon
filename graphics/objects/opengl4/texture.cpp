@@ -289,6 +289,7 @@ bool CTexture::UpdateLevelData(const STextureSliceRawData& data){
 }
 
 void CTexture::Release(){
+	if(device == nullptr) return;
 	if(this->id != 0)
 		device->gl.DeleteTextures(1, &this->id);
 	this->id = 0;
@@ -340,6 +341,7 @@ bool CTextureView::Bind(uint s, uint b){
 }
 
 void CTextureView::Release(){
+	if(device == nullptr) return;
 	if(this->id != 0)
 		device->gl.DeleteTextures(1, &this->id);
 	this->id = 0;

@@ -306,8 +306,9 @@ SharedPtr<CShaderResourceSet> GPUDevice::CreateShaderResourceSet(const CShaderRe
 
 SharedPtr<CGraphicObject> GPUDevice::getTrackedObject(CGraphicObject* ptr){
 	for(auto it = objects.begin(); it != objects.end(); ++it){
-		if((*it).get() == ptr)
-			return *it;
+		auto sh = it->lock();
+		if(sh.get() == ptr)
+			return sh;
 	}
 	return nullptr;
 }

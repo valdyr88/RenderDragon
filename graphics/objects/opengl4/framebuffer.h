@@ -24,7 +24,6 @@ protected:
 	GLuint getId(){ return id; }
 
 	bool CreateAndSetupAttachments();
-	virtual void Release() override;
 
 public:
 	CFramebuffer(GPUDevice* dev, const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr) :
@@ -49,7 +48,8 @@ public:
 		return false;
 	}
 
-	virtual ~CFramebuffer() = default;
+	virtual void Release() override;
+	virtual ~CFramebuffer() override{ Release(); }
 
 	friend class GPUDevice;
 };

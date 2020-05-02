@@ -322,7 +322,7 @@ SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat verte
 
 #include "graphics/ext/material/material.h"
 void testXML(GPUDevice* dev){
-	auto desc = CMaterial::CreateMaterialDescFromXML("  \t\r\n \
+	auto desc = CMaterial::CreateMaterialDescFromXML(/*"  \t\r\n \
 														\t<material id=\"hull_surface\" shader=\"deferred_BcNAoRSMt\">\r\n \
 														\t\t<paramgroup ubstruct=\"LightData\">\r\n \
 														\t\t\t<param name=\"emissionMult\" value=\"1.0\" type=\"int\"></param>\r\n \
@@ -336,12 +336,22 @@ void testXML(GPUDevice* dev){
 														\t\t\t<param name=\"mat4x3\" value=\"1,2,3,4,5,6,7,8,9,10,11,12\" type=\"mat4x3\"></param>\r\n \
 														\t\t\t<param name=\"mat3x4\" value=\"1,2,3,4,5,6,7,8,9,10,11,12\" type=\"mat3x4\"></param>\r\n \
 														\t\t</paramgroup>\r\n \
-														\t</material>" );
+														\t</material>"*/
+													 "\t\r\n \
+														\t <material id = \"hull_surface\" shader=\"deferred_BcNAoRSMt\">\r\n \
+														\t\t<paramgroup ubstruct=\"LightData\">\r\n \
+														\t\t\t<param name=\"position\" value=\"1.0,2.0,3.0\" type=\"vec3\"></param>\r\n \
+														\t\t\t<param name=\"intensity\" value=\"1.0\" type=\"float\"></param>\r\n \
+														\t\t\t<param name=\"time\" value=\"1.0\" type=\"float\"></param>\r\n \
+														\t\t</paramgroup>\r\n \
+														\t</material>"
+	);
 	CMaterial material(desc);
 
 	auto ub = CreateUniformBuffer(dev);
 	auto mi = material.CreateInstance(dev, {}, {"ublight"});
 
+	ub = nullptr;
 	mi;
 }
 

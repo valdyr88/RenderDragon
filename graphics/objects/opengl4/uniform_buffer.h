@@ -88,6 +88,9 @@ public:
 
 	//static std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> CreateUniformBufferType;
 	static std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> CreateUniformBufferType;
+	
+	virtual void Release() override;
+	virtual ~IUniformBuffer() override{ Release(); }
 
 	friend class CShaderProgram;
 };
@@ -161,7 +164,7 @@ public:
 	static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName);
 	//static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps);
 
-	virtual ~CUniformBuffer() = default;
+	virtual ~CUniformBuffer() override{ Release(); }
 };
 
 template<typename Type> template<typename UniformType>
