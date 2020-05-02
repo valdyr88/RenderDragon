@@ -28,6 +28,8 @@ protected:
 	std::string info_string;
 	bool CheckCompileStatus();
 	bool CompileShader();
+
+	virtual void Release() override;
 public:
 
 	CShader(GPUDevice* dev, const SShaderDesc& desc) :
@@ -37,7 +39,6 @@ public:
 
 	const auto& getDescriptor(){ return descriptor; }
 
-	virtual void Release() override;
 	virtual ~CShader() override{ Release(); }
 
 	friend class CShaderProgram;

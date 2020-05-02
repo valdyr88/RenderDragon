@@ -12,8 +12,8 @@ protected:
 	CGraphicObject() = delete;
 	CGraphicObject(GPUDevice* dev) : device(dev) {}
 
-public:
 	virtual void Release(){}
+public:
 	virtual ~CGraphicObject(){ Release(); }
 };
 

@@ -47,6 +47,8 @@ protected:
 
 	bool Create();
 	CTextureView() = delete;
+
+	virtual void Release() override;
 public:
 	CTextureView(GPUDevice* dev, const STextureViewDesc& desc, SharedPtr<CTexture>& tx) :
 		CShaderResource(dev, EShaderResourceType::Texture), descriptor(desc), texture(tx), sampler(nullptr){
@@ -62,7 +64,6 @@ public:
 
 	bool Bind(uint set, uint binding);
 
-	virtual void Release() override;
 	virtual ~CTextureView() override{ Release(); }
 
 	friend class CShaderProgram;
@@ -87,6 +88,8 @@ protected:
 	SSamplerDesc sampler;
 	bool ApplySampler(const SSamplerDesc& desc);
 	bool ApplySampler(const CSampler* s);
+
+	virtual void Release() override;
 public:
 	CTexture(GPUDevice* dev, const STextureDesc& desc, const STextureRawData& data) :
 		CGraphicObject(dev), descriptor(desc){
@@ -108,7 +111,6 @@ public:
 	bool isTexture2D(){ return descriptor.type == ETextureType::Texture2D; }
 	bool isTexture1D(){ return descriptor.type == ETextureType::Texture1D; }
 
-	virtual void Release() override;
 	virtual ~CTexture() override{ Release(); }
 
 	friend class GPUDevice;

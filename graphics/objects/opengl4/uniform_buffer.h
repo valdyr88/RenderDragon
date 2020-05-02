@@ -31,6 +31,7 @@ protected:
 	bool Bind(uint set, uint binding);
 
 	IUniformBuffer() = delete;
+	virtual void Release() override;
 public:
 	IUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap> maps)
 		: CShaderResource(dev, EShaderResourceType::UniformBuffer), name(bufferName)
@@ -89,7 +90,6 @@ public:
 	//static std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> CreateUniformBufferType;
 	static std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> CreateUniformBufferType;
 	
-	virtual void Release() override;
 	virtual ~IUniformBuffer() override{ Release(); }
 
 	friend class CShaderProgram;

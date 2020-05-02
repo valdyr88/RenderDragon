@@ -18,6 +18,8 @@ protected:
 	std::vector<UniquePtr<CBuffer>> buffers;
 
 	bool Create(std::vector<SRawData> data);
+
+	virtual void Release() override;
 public:
 
 	CVertexBuffer(GPUDevice* dev, const SVertexFormat& fmt, uint32 c, std::vector<SRawData> data = std::vector<SRawData>()) :
@@ -28,10 +30,10 @@ public:
 	const SVertexFormat& getVertexFormat(){ return format; }
 
 	GLuint getId(){ return id; }
-	void Release();
-	virtual ~CVertexBuffer() override{ Release(); }
 
 	bool Bind();
+
+	virtual ~CVertexBuffer() override{ Release(); }
 };
 
 class CIndexBuffer : public CGraphicObject{
@@ -42,6 +44,8 @@ protected:
 	UniquePtr<CBuffer> buffer;
 
 	bool Create(SRawData data);
+
+	virtual void Release() override;
 public:
 
 	CIndexBuffer(GPUDevice* dev, EValueType t, uint32 c, SRawData data = SRawData()) :
@@ -50,13 +54,13 @@ public:
 	}
 
 	GLuint getId(){ return (buffer != nullptr)? buffer->getId() : 0; }
-	void Release();
-	virtual ~CIndexBuffer() override{ Release(); }
 
 	uint32 getCount(){ return count; }
 	EValueType getType(){ return type; }
 
 	bool Bind();
+
+	virtual ~CIndexBuffer() override{ Release(); }
 };
 
 #endif //RD_API_OPENGL4

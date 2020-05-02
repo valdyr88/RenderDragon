@@ -25,6 +25,7 @@ protected:
 
 	bool CreateAndSetupAttachments();
 
+	virtual void Release() override;
 public:
 	CFramebuffer(GPUDevice* dev, const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTextures = nullptr) :
 		CGraphicObject(dev), descriptor(desc) {
@@ -48,7 +49,6 @@ public:
 		return false;
 	}
 
-	virtual void Release() override;
 	virtual ~CFramebuffer() override{ Release(); }
 
 	friend class GPUDevice;

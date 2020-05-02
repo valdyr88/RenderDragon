@@ -15,6 +15,7 @@ protected:
 
 	bool Create(SRawData data);
 
+	virtual void Release() override;
 public:
 	CBuffer(GPUDevice* dev, const SBufferDesc& desc, SRawData data = SRawData()) :
 		CGraphicObject(dev), descriptor(desc){
@@ -33,9 +34,11 @@ public:
 
 	bool Bind();
 
-	void Release();
-
 	virtual ~CBuffer() override{ Release(); }
+
+	friend class IUniformBuffer;
+	friend class CVertexBuffer;
+	friend class CIndexBuffer;
 };
 
 #endif //RD_API_OPENGL4
