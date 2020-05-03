@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <list>
+#include <map>
 #include "../../utils/pointers.h"
 #include "../../utils/strings.h"
 #include "../../utils/types/types.h"
@@ -50,6 +51,17 @@ protected:
 	uint numStages;
 	SharedPtr<CShader> shader[(uint)EShaderStage::NumShaderStages];
 	std::vector<SharedPtr<CShaderResourceSetDesc>> resourceSetDescs;
+	std::map<std::string, std::pair<uint, uint>> resourceBindingPoints;
+
+	struct SShaderProgramIntrospection{
+		struct SResourceBinding{
+			EShaderResourceType type = EShaderResourceType::UniformBuffer;
+			uint set = 0;
+			uint binding = 0;
+			std::string name;
+		};
+		std::vector<SResourceBinding> resourceBindings;
+	} introspection;
 
 	GLuint id = 0;
 
@@ -57,6 +69,7 @@ protected:
 	
 	bool CheckLinkStatus();
 	bool LinkProgram();
+	bool CheckResourceBindings();
 public:
 
 	CShaderProgram(GPUDevice* dev, std::vector<SharedPtr<CShader>> shaders) :
@@ -75,10 +88,13 @@ public:
 		if(LinkProgram() == false){
 			LOG_ERR("linking failed");
 		}
+		CheckResourceBindings();
 	}
 
 	bool setUniformBuffer(uint set, uint binding, IUniformBuffer* ub);
 	bool setTexture(uint set, uint binding, CTextureView* tx);
+	bool setUniformBuffer(std::string name, IUniformBuffer* ub);
+	bool setTexture(std::string name, CTextureView* tx);
 
 	GLuint getId(){ return id; }
 

@@ -16,6 +16,7 @@
 //---------------------------------------------------------------------------------
 //common code
 //---------------------------------------------------------------------------------
+const std::vector<SUniformMap> IUniformBuffer::nodesc = {};
 
 void IUniformBuffer::CreateMapping(const std::vector<SUniformMap> maps){
 

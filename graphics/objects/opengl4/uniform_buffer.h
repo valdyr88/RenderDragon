@@ -15,6 +15,7 @@
 SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);
 	
 //-----------------------------------------------------------------------------------------------------------------------------------
+class CShaderProgram;
 
 class IUniformBuffer : public CShaderResource{
 protected:
@@ -28,10 +29,12 @@ protected:
 	void CreateMapping(const std::vector<SUniformMap> maps);
 	bool CreateBuffer(uint32 size);
 	bool Upload(byte* pData, uint32 size, uint32 offset = 0);
-	bool Bind(uint set, uint binding);
+	bool Bind(CShaderProgram* program, uint set, uint binding);
 
 	IUniformBuffer() = delete;
 	virtual void Release() override;
+
+	static const std::vector<SUniformMap> nodesc;
 public:
 	IUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap> maps)
 		: CShaderResource(dev, EShaderResourceType::UniformBuffer), name(bufferName)
@@ -84,8 +87,8 @@ public:
 	virtual void Upload() = 0;
 	virtual bool isShared() = 0;
 
-	virtual const char* getUBStructTypeName(){ return ""; }
-	virtual const std::vector<SUniformMap>& getUBStructDesc(){ return {}; }
+	virtual const char* getUBStructTypeName() const{ return ""; }
+	virtual const std::vector<SUniformMap>& getUBStructDesc() const{ return nodesc; }
 
 	//static std::map<std::string, SharedPtr<IUniformBuffer>(*)(GPUDevice*, const char*)> CreateUniformBufferType;
 	static std::map<std::string, std::function< SharedPtr<IUniformBuffer>(GPUDevice*, const char*) >> CreateUniformBufferType;
@@ -158,8 +161,8 @@ public:
 
 	Type* operator->(){ return &data; }
 
-	virtual const char* getUBStructTypeName() override{ return structTypeName; }
-	virtual const std::vector<SUniformMap>& getUBStructDesc() override{ return Type::desc; }
+	virtual const char* getUBStructTypeName() const override{ return structTypeName; }
+	virtual const std::vector<SUniformMap>& getUBStructDesc() const override{ return Type::desc; }
 
 	static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName);
 	//static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps);

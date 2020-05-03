@@ -117,6 +117,8 @@ public:
 	static std::vector<SShaderResourceBindingDesc> merge(const std::vector<SShaderResourceBindingDesc>& a, const std::vector<SShaderResourceBindingDesc>& b);
 
 	friend class CShaderResourceSet;
+	friend class CShaderProgram;
+	friend class CShader;
 };
 
 inline bool CShaderResourceSet::operator ==(const CShaderResourceSet& other) const{

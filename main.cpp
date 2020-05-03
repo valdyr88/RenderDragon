@@ -309,7 +309,11 @@ SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat verte
 	auto vsSource = TestIncludes("graphics/shaders/simple.vnt.vs.glsl");
 	vsSource = defines.insertInto(vsSource);
 
-	SShaderDesc fsdesc(EShaderStage::FragmentShader, "downsamplers.ps.glsl", source, {});
+	SShaderDesc fsdesc(EShaderStage::FragmentShader, "downsamplers.ps.glsl", source, 
+							{ {
+								{ 0, 0, "tx", EShaderResourceType::Texture, EShaderStage::FragmentShader },
+								{ 0, 1, "data", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader }
+							} });
 	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vnt.vs.glsl", vsSource, {});
 	vsdesc.vertexFormat = vertexformat;
 
@@ -422,7 +426,10 @@ int main()
 	auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
 	vsSource = globalDefines->insertInto(vsSource);
 
-	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, {});
+	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, { {
+			{0, 0, "tx", EShaderResourceType::Texture, EShaderStage::FragmentShader},
+			{0, 2, "light", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader}
+		} });
 	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vnt.vs.glsl", vsSource, {});
 	vsdesc.vertexFormat = vertexBuffer->getVertexFormat();
 
@@ -486,10 +493,11 @@ int main()
 			ub->intensity = 0.01f*(cosf(angle) * 0.5f + 0.5f);
 			ub->time = time;
 			ub.Upload();
-			
-			//shader->setUniformBuffer("light", ub.get());
-			shader->setUniformBuffer(0, 2, &ub);
-			shader->setTexture(0, 0, &txView);
+			//ToDo: napravit provjeru shader sourcea i resourceSetDesc. postoje li svi resoursi u shaderu, ili shader ima neke koji nema resourceSetDesc i obratno?
+			shader->setUniformBuffer("light", &ub);
+			shader->setTexture("tx", &txView);
+			//shader->setTexture(0, 0, &txView);
+			//shader->setUniformBuffer(0, 2, &ub);
 
 			device->BindVertexBuffer(vertexBuffer.get());
 			device->BindIndexBuffer(indexBuffer.get());

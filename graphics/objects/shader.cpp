@@ -86,6 +86,14 @@ bool CShaderProgram::MergeShaderResourceSetDescs(){
 		resourceSetDescs.emplace_back(setDesc);
 	}
 
+	//fill a map of bind points
+	for(auto rsdit = resourceSetDescs.begin(); rsdit != resourceSetDescs.end(); ++rsdit){
+		for(auto it = (*rsdit)->bindingDescs.begin(); it != (*rsdit)->bindingDescs.end(); ++it){
+			auto& bdsc = *it;
+			this->resourceBindingPoints[bdsc.name] = std::pair<uint, uint>(bdsc.setNumber, bdsc.bindPoint);
+		}
+	}
+
 	return true;
 }
 

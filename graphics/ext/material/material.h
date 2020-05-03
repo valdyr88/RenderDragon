@@ -119,6 +119,9 @@ public:
 
 	static SMaterialDesc CreateMaterialDescFromXML(std::string xml);
 	static SMaterialDesc CreateMaterialDescFromXML(void* xmlobject);
+
+	static bool CheckIfParamsGroupAndUBAreEqual(const std::vector<SMaterialParam>& mpg, const std::vector<SUniformMap>& ub);
+	static bool CheckIfParamsGroupAndUBAreEqual(const SMaterialParamsGroup& mpg, const IUniformBuffer& ub);
 };
 
 //----------------------------------------------------------------------------------------------

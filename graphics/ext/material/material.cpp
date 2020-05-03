@@ -10,19 +10,22 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 	rapidxml::xml_node<char>* node = (rapidxml::xml_node<char>*)xmlobject;
 	SMaterialDesc desc;
 
+	if(node == nullptr){
+		LOG_ERR("root node is nullptr!"); return desc; }
+
 	if(strisequal(node->name(), "material") == false)
-		LOG_ERR("node->name() != \"material\"");
+		LOG_ERR("root node is not material!");
 
 	if(node->first_attribute("id") != nullptr)
 		desc.name = node->first_attribute("id")->value();
 	else
-		LOG_ERR("node doesn't have attribute: id");
+		LOG_ERR("material doesn't have attribute: id");
 
 	if(node->first_node("paramgroup") != nullptr){
 		auto pgnode = node->first_node("paramgroup");
 		
 		if(pgnode->first_attribute("ubstruct") == nullptr)
-			LOG_ERR("node paramgroup doesn't have attribute: ubstruct");
+			LOG_ERR("paramgroup doesn't have attribute: ubstruct");
 
 		SMaterialParamsGroup paramgroup(pgnode->first_attribute("ubstruct")->value());
 		
@@ -31,6 +34,11 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 			char* name = (paramnode->first_attribute("name") != nullptr)? paramnode->first_attribute("name")->value() : nullptr;
 			char* value = (paramnode->first_attribute("value") != nullptr)? paramnode->first_attribute("value")->value() : nullptr;
 			char* type = (paramnode->first_attribute("type") != nullptr)? paramnode->first_attribute("type")->value() : nullptr;
+
+			if(name == nullptr)
+				LOG_ERR("param doesn't have attribute: name");
+			if(type == nullptr)
+				LOG_ERR("param doesn't have attribute: type");
 
 			EValueType vtype = toEValueType(type);
 			EValueSize vsize = toEValueSize(type);
@@ -125,6 +133,9 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 
 		desc.paramGroups.emplace_back(paramgroup);
 	}
+	else
+		LOG_WARN("material doesn't have any params");
+
 	return desc;
 }
 
@@ -136,6 +147,9 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(std::string xml){
 	doc->parse<0>(cxml);
 	auto m = doc->first_node("material");
 
+	if(m == nullptr)
+		LOG_ERR("root node is not material!");
+
 	return CreateMaterialDescFromXML(m);
 }
 
@@ -144,15 +158,15 @@ bool CMaterial::Create()
 	return false;
 }
 
-bool CheckIfMaterialGroupParamsAndUBAreEqual(const std::vector<SMaterialParam>& mpg, const std::vector<SUniformMap>& ub){
+bool CMaterial::CheckIfParamsGroupAndUBAreEqual(const std::vector<SMaterialParam>& mpg, const std::vector<SUniformMap>& ub){
 	if(mpg.size() != ub.size()) return false;
 	for(uint i = 0; i < ub.size(); ++i){
 		if(mpg[i] != ub[i]) return false;
 	}
 	return true;
 }
-bool CheckIfMaterialGroupParamsAndUBAreEqual(SMaterialParamsGroup& mpg, IUniformBuffer& ub){
-	return CheckIfMaterialGroupParamsAndUBAreEqual(mpg.params, ub.getUBStructDesc());
+bool CMaterial::CheckIfParamsGroupAndUBAreEqual(const SMaterialParamsGroup& mpg, const IUniformBuffer& ub){
+	return CMaterial::CheckIfParamsGroupAndUBAreEqual(mpg.params, ub.getUBStructDesc());
 }
 
 SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vector<SharedPtr<IUniformBuffer>> ubs, std::vector<std::string> ubnames)
@@ -164,7 +178,7 @@ SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vect
 	for(auto pg = this->descriptor.paramGroups.begin(); pg != this->descriptor.paramGroups.end(); ++pg)
 	{
 		if((ubs.size() > added_sharedubs) && (ubs[added_sharedubs] != nullptr) && (pg->ubstruct == ubs[added_sharedubs]->getUBStructTypeName())){
-			if(CheckIfMaterialGroupParamsAndUBAreEqual(*pg, *ubs[added_sharedubs]) == false)
+			if(CMaterial::CheckIfParamsGroupAndUBAreEqual(*pg, *ubs[added_sharedubs]) == false)
 				LOG_ERR("ParamGroup and UniformBuffer structure mismatch for struct <%s>!, members of the ParamGroup and UniformBuffer are not equal!", pg->ubstruct.c_str());
 			mi->uniformBuffers.add(ubs[added_sharedubs]);
 			++added_sharedubs;
@@ -177,14 +191,17 @@ SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vect
 				name = ubnames[added_names];
 				++added_names;
 			}
+			else
+				LOG_WARN("Creating UniformBuffer type <%s> without name!", pg->ubstruct.c_str());
+
 			if(IUniformBuffer::CreateUniformBufferType[pg->ubstruct] != nullptr){
 				auto ub = IUniformBuffer::CreateUniformBufferType[pg->ubstruct](dev, name.c_str());
-				if(CheckIfMaterialGroupParamsAndUBAreEqual(*pg, *ub) == false)
+				if(CMaterial::CheckIfParamsGroupAndUBAreEqual(*pg, *ub) == false)
 					LOG_ERR("ParamGroup and UniformBuffer structure mismatch for struct <%s>!, members of the ParamGroup and UniformBuffer are not equal!", pg->ubstruct.c_str());
 				mi->uniformBuffers.add(ub);
 			}
 			else{
-				LOG_ERR("unregistered UB struct type <%s>!, register by calling rdRegisterUniformBufferStructure(%s)", pg->ubstruct.c_str(), pg->ubstruct.c_str());
+				LOG_ERR("unregistered UniformBuffer struct type <%s>!, register by calling rdRegisterUniformBufferStructure(%s)", pg->ubstruct.c_str(), pg->ubstruct.c_str());
 			}
 			continue;
 		}

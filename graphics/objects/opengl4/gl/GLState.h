@@ -1141,8 +1141,17 @@ public:
 	forceinline GLState_prefix_func GLuint CreateShaderProgramv(GLenum type, GLsizei count, const GLchar** strings){
 		 auto rtn = glCreateShaderProgramv(type, count, strings); GLS_OFR return rtn;
 	}
+	forceinline GLState_prefix_func GLint GetUniformLocation(GLuint program, const GLchar* name){
+		auto rtn = glGetUniformLocation(program, name); GLS_OFR return rtn;
+	}
 	forceinline GLState_prefix_func GLuint GetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName){
 		 auto rtn = glGetUniformBlockIndex(program,uniformBlockName); GLS_OFR return rtn;
+	}
+	forceinline GLState_prefix_func void GetActiveUniformBlockiv(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params){
+		glGetActiveUniformBlockiv(program, uniformBlockIndex, pname, params); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void GetActiveUniformBlockName(GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformBlockName){
+		glGetActiveUniformBlockName(program, uniformBlockIndex, bufSize, length, uniformBlockName); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void UniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding){
 		 glUniformBlockBinding(program, uniformBlockIndex, uniformBlockBinding); GLS_OFR return;

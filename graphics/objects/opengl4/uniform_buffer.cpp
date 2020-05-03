@@ -1,4 +1,5 @@
 #include "uniform_buffer.h"
+#include "shader.h"
 #include "device.h"
 
 #ifdef RD_API_OPENGL4
@@ -23,13 +24,14 @@ bool IUniformBuffer::Upload(byte* pData, uint32 size, uint32 offset){
 	return buffer->Upload(pData, size, offset);
 }
 
-bool IUniformBuffer::Bind(uint s, uint b){
+bool IUniformBuffer::Bind(CShaderProgram* program, uint s, uint b){
 	if(this->device == nullptr) return false;
 	if(buffer == nullptr) return false;
 	auto& gl = this->device->gl;
 	set = s; binding = b;
 	
 	gl.BindBufferBase(GL_UNIFORM_BUFFER, binding, buffer->getId());
+	//gl.UniformBlockBinding(program->getId(), buffer->getId(), binding);
 
 	return true;
 }

@@ -27,7 +27,7 @@ protected:
 
 	bool Upload(byte* pData, uint32 size, uint32 offset = 0);
 
-	bool Bind(uint set, uint binding){ this->set = set; this->binding = binding; }
+	bool Bind(CShaderProgram* program, uint set, uint binding){ this->set = set; this->binding = binding; }
 
 	IUniformBuffer() = delete;
 public:
