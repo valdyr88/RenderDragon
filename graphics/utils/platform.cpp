@@ -257,6 +257,7 @@ bool CFile::Open(std::string name, CFile::EFileMode mode){
 	if(file != nullptr) return false;
 	fopen_s(&file, name.c_str(), charmode(mode));
 	if(file == nullptr) return false;
+	this->getSize();
 	return true;
 }
 
@@ -269,8 +270,9 @@ bool CFile::WriteFormatted(const char* format, ...){
 
 bool CFile::Read(uint size, byte** out_data, uint* out_size){
 	if(file == nullptr) return false;
-	*out_size = (uint)fread_s(*out_data, size, 1, size, file);
-	return true;
+	uint read = (uint)fread_s(*out_data, size, 1, size, file);
+	if(out_size != nullptr) *out_size = read;
+	return read == size;
 }
 bool CFile::Write(byte* data, uint size){
 	if(file == nullptr) return false;
@@ -278,8 +280,8 @@ bool CFile::Write(byte* data, uint size){
 }
 
 bool CFile::isEOF(){
-	if(file == nullptr) return false;
-	return feof(file) != EOF;
+	if(file == nullptr) return true;
+	return feof(file) != 0;
 }
 
 uint CFile::getSize(){
@@ -292,6 +294,15 @@ uint CFile::getSize(){
 	fseek(file, pos, SEEK_SET);
 
 	return size;
+}
+uint CFile::getPosition(){
+	if(file == nullptr) return 0;
+	return ftell(file);
+}
+uint CFile::getRemaining(){
+	if(file == nullptr) return 0;
+	auto pos = this->getPosition();
+	return size - pos;
 }
 
 void CFile::Close(){

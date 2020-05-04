@@ -79,8 +79,15 @@ public:
 	bool Read(uint size, byte** out_data, uint* out_size);
 	bool Write(byte* data, uint size);
 
+	template<typename type>
+	bool Read(uint count, type* out_data, uint* out_count);
+	template<typename type>
+	bool Write(type* data, uint count);
+
 	bool isEOF();
 	uint getSize();
+	uint getRemaining();
+	uint getPosition();
 
 	void Close();
 protected:
@@ -88,5 +95,18 @@ protected:
 	EFileMode mode = EFileMode::ReadBinary;
 	uint size = 0;
 };
+
+template<typename type>
+bool CFile::Read(uint count, type* out_data, uint* out_count){
+	byte** ptr = (byte**)&out_data;
+	bool r = this->Read(count*sizeof(type), ptr, out_count);
+	if(out_count != nullptr) *out_count /= sizeof(type);
+	return r;
+}
+
+template<typename type>
+bool CFile::Write(type* data, uint count){
+	return Write((byte*)data, count*sizeof(type));
+}
 //---------------------------------------------------------------------------------------
 #endif //PLATFORM_H
