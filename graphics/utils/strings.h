@@ -468,11 +468,13 @@ namespace str{
 		dest_str[0] = 0; return;
 	}
 
-	template<typename type> type strtonum(char* str){ return type(0); }
-	template<> inline float strtonum(char* str){ return std::stof(str); }
-	template<> inline int strtonum(char* str){ return std::stoi(str); }
+	template<typename type> type strtonum(const char* str){ return type(0); }
+	template<> inline float strtonum(const char* str){ return std::stof(str); }
+	template<> inline int strtonum(const char* str){ return std::stoi(str); }
 
-	template<typename type, const int C> void strtonum(char* str, char separator, type* outs){
+	template<typename type, const int C> void strtonum(const char* cstr, char separator, type* outs){
+		char* str = const_cast<char*>(cstr);
+
 		for(uint i = 0; i < C && str != nullptr; ++i){
 			char* str2 = str;
 

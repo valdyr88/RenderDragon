@@ -64,16 +64,54 @@ struct SMaterialParamsGroup{
 	}
 };
 
+enum class EMaterialTextureType{
+	Albedo = 1<<0,
+	Normal = 1<<1,
+	Roughness = 1<<2,
+	Specular = 1<<3,
+	AmbientOcclusion = 1<<4,
+	Metalness = 1<<5,
+	Emissive = 1<<6,
+};
+inline uint operator | (const EMaterialTextureType& a, const EMaterialTextureType& b){	return ((uint)a) | ((uint)b); }
+inline uint operator | (const uint& a, const EMaterialTextureType& b){ return ((uint)a) | ((uint)b); }
+inline uint operator | (const EMaterialTextureType& a, const uint& b){ return ((uint)a) | ((uint)b); }
+inline uint& operator |= (uint& a, const EMaterialTextureType& b){ a = ((uint)a) | ((uint)b); return a; }
+
+uint getMaterialTextureTypeFromString(const char* cstr);
+
+struct SMaterialTexture{
+	std::string name;
+	std::string path;
+	uint type = 0; //EMaterialTextureType
+
+	bool operator == (const SMaterialTexture& other) const{
+		return type == other.type &&
+			name == other.name &&
+			path == other.path;
+	}
+	bool operator != (const SMaterialTexture& other) const{ return !(*this == other); }
+
+	SMaterialTexture& operator = (const SMaterialTexture& other){
+		type = other.type;
+		name = other.name;
+		path = other.path;
+		return *this;
+	}
+};
+
 struct SMaterialDesc{
 	std::string name;
 	std::vector<SMaterialParamsGroup> paramGroups;
+	std::vector<SMaterialTexture> textures;
 
 	bool operator == (const SMaterialDesc& other) const{
 		if(name != other.name) return false;
 		if(paramGroups.size() != other.paramGroups.size()) return false;
 		for(uint i = 0; i < paramGroups.size(); ++i){
-			if(paramGroups[i] != other.paramGroups[i]) return false;
-		}
+			if(paramGroups[i] != other.paramGroups[i]) return false;}
+		for(uint i = 0; i < textures.size(); ++i){
+			if(textures[i] != other.textures[i]) return false;}
 		return true;
 	}
 	bool operator !=(const SMaterialDesc& other) const{ return !((*this) == other); }
@@ -83,6 +121,9 @@ struct SMaterialDesc{
 		paramGroups.reserve(other.paramGroups.size());
 		for(uint i = 0; i < other.paramGroups.size(); ++i)
 			paramGroups[i] = other.paramGroups[i];
+		textures.reserve(other.textures.size());
+		for(uint i = 0; i < other.textures.size(); ++i)
+			textures[i] = other.textures[i];
 		return *this;
 	}
 };

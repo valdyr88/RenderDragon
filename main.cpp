@@ -296,7 +296,6 @@ SharedPtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
 
 SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat vertexformat){
 	
-
 	CShaderDefines defines;
 	defines.add("type", "vec4");
 	defines.add("components", "rgba");
@@ -348,6 +347,12 @@ void testXML(GPUDevice* dev){
 														\t\t\t<param name=\"intensity\" value=\"1.0\" type=\"float\"></param>\r\n \
 														\t\t\t<param name=\"time\" value=\"1.0\" type=\"float\"></param>\r\n \
 														\t\t</paramgroup>\r\n \
+														\t\t<paramgroup ubstruct=\"LightData2\">\r\n \
+														\t\t\t<param name=\"position2\" value=\"2.0,1.0,0.0\" type=\"vec3\"></param>\r\n \
+														\t\t\t<param name=\"intensity2\" value=\"3.0\" type=\"float\"></param>\r\n \
+														\t\t\t<param name=\"time2\" value=\"1\" type=\"int\"></param>\r\n \
+														\t\t</paramgroup>\r\n \
+														\t\t<texture name=\"tx\" path=\"path/do/texture.png\" type=\"AoRSMt\"></texture>\r\n \
 														\t</material>"
 	);
 	CMaterial material(desc);
