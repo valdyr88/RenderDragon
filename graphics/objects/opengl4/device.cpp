@@ -226,8 +226,8 @@ bool GPUDevice::InitContextOnWindow(SWindow& win){
 		rpdesc.depthStencil.stencilStoreOp = ELoadStoreOp::DontCare;
 	}
 
-	swapchainRenderPass = SharedPtr<CRenderPass>(new CRenderPass(this, rpdesc));
-	swapchainFramebuffer = SharedPtr<CFramebuffer>(new CGLSwapchainFramebuffer(this, rpdesc));
+	swapchainRenderPass = SharedPtr<CRenderPass>(__new CRenderPass(this, rpdesc));
+	swapchainFramebuffer = SharedPtr<CFramebuffer>(__new CGLSwapchainFramebuffer(this, rpdesc));
 
 	rdInitUniformBufferStructreRegistry();
 	return true;
@@ -243,17 +243,17 @@ void GPUDevice::addTrackedObject(SharedPtr<type>& obj){
 }
 
 SharedPtr<CPipelineState> GPUDevice::CreatePipelineState(const SPipelineStateDesc& desc){
-	auto obj = SharedPtr<CPipelineState>(new CPipelineState(this, desc));
+	auto obj = SharedPtr<CPipelineState>(__new CPipelineState(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CRenderPass> GPUDevice::CreateRenderPass(const SRenderPassDesc& desc){
-	auto obj = SharedPtr<CRenderPass>(new CRenderPass(this, desc));
+	auto obj = SharedPtr<CRenderPass>(__new CRenderPass(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CBuffer> GPUDevice::CreateBuffer(const SBufferDesc& desc){
-	auto obj = SharedPtr<CBuffer>(new CBuffer(this, desc));
+	auto obj = SharedPtr<CBuffer>(__new CBuffer(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
@@ -261,31 +261,42 @@ SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& de
 	return device->CreateBuffer(desc);}
 
 SharedPtr<CFramebuffer> GPUDevice::CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTexture){
-	auto obj = SharedPtr<CFramebuffer>(new CFramebuffer(this, desc, textures, depthStencilTexture));
+	auto obj = SharedPtr<CFramebuffer>(__new CFramebuffer(this, desc, textures, depthStencilTexture));
 	addTrackedObject(obj);
 	return obj;
 }
 //SharedPtr<CShader> GPUDevice::CreateShaderModule(const SShaderDesc& desc);
 //SharedPtr<CShaderResource> GPUDevice::CreateShaderResrouce(const SShaderResourceDesc& desc);
 SharedPtr<CSampler> GPUDevice::CreateSampler(const SSamplerDesc& desc){
-	auto obj = SharedPtr<CSampler>(new CSampler(this, desc));
+	auto obj = SharedPtr<CSampler>(__new CSampler(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CVertexBuffer> GPUDevice::CreateVertexBuffer(const SVertexFormat& desc, uint32 count, std::vector<SRawData> data){
-	auto obj = SharedPtr<CVertexBuffer>(new CVertexBuffer(this, desc, count, data));
+	auto obj = SharedPtr<CVertexBuffer>(__new CVertexBuffer(this, desc, count, data));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CIndexBuffer> GPUDevice::CreateIndexBuffer(EValueType type, uint32 count, SRawData data){
-	auto obj = SharedPtr<CIndexBuffer>(new CIndexBuffer(this, type, count, data));
+	auto obj = SharedPtr<CIndexBuffer>(__new CIndexBuffer(this, type, count, data));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CTexture> GPUDevice::CreateTexture(const STextureDesc& desc, const STextureRawData& data){
-	auto obj = SharedPtr<CTexture>(new CTexture(this, desc, data));
+	auto obj = SharedPtr<CTexture>(__new CTexture(this, desc, data));
 	addTrackedObject(obj);
 	obj->CreateView(obj);
+	return obj;
+}
+SharedPtr<CTexture> GPUDevice::CreateTexture(const STextureDesc& desc, std::string fileName){
+	auto obj = SharedPtr<CTexture>(__new CTexture(this, desc, fileName));
+	addTrackedObject(obj);
+	obj->CreateView(obj);
+	return obj;
+}
+SharedPtr<CTextureView> GPUDevice::CreateTextureView(const STextureViewDesc& desc, SharedPtr<CTexture> tx){
+	auto obj = SharedPtr<CTextureView>(__new CTextureView(this, desc, tx));
+	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CShaderResourceBinding> GPUDevice::CreateShaderResourceBinding(const SShaderResourceBindingDesc& desc, CShaderResource* resource){
@@ -306,9 +317,9 @@ SharedPtr<CShaderResourceSet> GPUDevice::CreateShaderResourceSet(const CShaderRe
 
 SharedPtr<CGraphicObject> GPUDevice::getTrackedObject(CGraphicObject* ptr){
 	for(auto it = objects.begin(); it != objects.end(); ++it){
-		auto sh = it->lock();
-		if(sh.get() == ptr)
-			return sh;
+		if(((WeakPtrEx<CGraphicObject>*)&(*it))->contains(ptr) == true){
+			return it->lock();
+		}
 	}
 	return nullptr;
 }

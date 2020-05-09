@@ -38,14 +38,14 @@ UniquePtr<CVertexBuffer> rdCreateQuadVertexBufferInterleaved(GPUDevice* dev)
 									 vertex(vec3( 1.0f,  1.0f, 0.01f), vec2(1.0f, 1.0f)),
 									 vertex(vec3( 1.0f, -1.0f, 0.01f), vec2(1.0f, 0.0f)) };
 
-	auto vertexBuffer = UniquePtr<CVertexBuffer>(new CVertexBuffer(dev, fmt, (uint)vertices.size(), { SRawData(vertices) }));
+	auto vertexBuffer = UniquePtr<CVertexBuffer>(__new CVertexBuffer(dev, fmt, (uint)vertices.size(), { SRawData(vertices) }));
 
 	return vertexBuffer;
 }
 UniquePtr<CIndexBuffer> rdCreateQuadIndexBuffer(GPUDevice* dev)
 {
 	std::vector<uint16> data = { 0, 1, 2, 2, 3, 0 };
-	auto indexBuffer = UniquePtr<CIndexBuffer>(new CIndexBuffer(dev, EValueType::uint16, (uint)data.size(), data));
+	auto indexBuffer = UniquePtr<CIndexBuffer>(__new CIndexBuffer(dev, EValueType::uint16, (uint)data.size(), data));
 	return indexBuffer;
 }
 
@@ -67,7 +67,7 @@ bool CMipMapGen::Create(const SPipelineStateDesc& pipdesc, const SRenderPassDesc
 	renderPass = device->CreateRenderPass(rpdesc);
 	pipedesc.renderPass = renderPass;
 	pipeline = device->CreatePipelineState(pipedesc);
-	dataUB = UniquePtr<CUniformBuffer<UBLevelData>>(new CUniformBuffer<UBLevelData>(device, "data"));
+	dataUB = UniquePtr<CUniformBuffer<UBLevelData>>(__new CUniformBuffer<UBLevelData>(device, "data"));
 
 	if(CMipMapGen::quadVB == nullptr)
 		CMipMapGen::quadVB = rdCreateQuadVertexBufferInterleaved(device);

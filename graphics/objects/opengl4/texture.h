@@ -6,6 +6,8 @@
 #include "glinclude.h"
 #include "../../utils/log.h"
 #include "../../utils/types/types.h"
+#include "../../utils/containers.h"
+#include "../../utils/singleton.h"
 #include "../../descriptors/graphics_enums.h"
 #include "../../descriptors/texture_desc.h"
 #include "../../descriptors/graphic_object.h"
@@ -61,6 +63,7 @@ public:
 	}
 
 	const auto& getDescriptor(){ return descriptor; }
+	CTexture* getActualTexture(){ return texture.get(); }
 
 	bool Bind(uint set, uint binding);
 
@@ -76,7 +79,7 @@ public:
 class CTexture : public CGraphicObject{
 protected:
 	STextureDesc descriptor;
-	UniquePtr<CTextureView> view;
+	SharedPtr<CTextureView> view;
 	
 	GLuint id = 0;
 	GLuint getId(){ return id; }
@@ -84,6 +87,7 @@ protected:
 	bool Create(const STextureRawData& data);
 	bool Create(std::string& fileName);
 	bool CreateView(SharedPtr<CTexture> tx);
+	bool CreateView(CTexture* tx);
 
 	SSamplerDesc sampler;
 	bool ApplySampler(const SSamplerDesc& desc);
@@ -104,6 +108,7 @@ public:
 	bool AllocateMipmaps();
 
 	CTextureView* getView(){ return view.get(); }
+	SharedPtr<CTextureView> getViewSharedPtr(){ return view; }
 
 	const auto& getDescriptor(){ return descriptor; }
 	bool isTextureCubeMap(){ return descriptor.type == ETextureType::TextureCube; }
@@ -117,10 +122,27 @@ public:
 	friend class CFramebuffer;
 	friend class CTextureView;
 	friend class CSampler;
+	friend class CTextureManager;
 };
 
-
 //-----------------------------------------------------------------------------------
+class GPUDevice;
+
+class CTextureManager{
+protected:
+	stdex::container<SharedPtr<CTexture>> textures;
+	GPUDevice* device = nullptr;
+
+	CTextureManager() = delete;
+	CTextureManager(GPUDevice* dev) : device(dev){}
+public:
+
+	SharedPtr<CTexture> FindByName(std::string name);
+	SharedPtr<CTexture> FindByNameOrCreate(std::string name, const STextureDesc* desc = nullptr);
+
+	friend class GPUDevice;
+	friend class CSingleton<CTextureManager>;
+};
 
 #endif //RD_API_OPENGL4
 #endif //TEXTURE_H

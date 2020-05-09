@@ -29,6 +29,14 @@ public:
 		return CSingleton<T>::singleton.get();
 	}
 
+	//ToDo: napravit variadic temp za parametre, ali razlièiti tipovi parametara
+	template<typename paramType>
+	static T* get(paramType* p){
+		if(CSingleton<T>::singleton == nullptr)
+			CSingleton<T>::singleton = NewUnique<T>(T(p));
+		return CSingleton<T>::singleton.get();
+	}
+
 	static void ret(T** ptr){
 		if(*ptr != CSingleton<T>::singleton.get()){
 			LOG_ERR("wrong pointer passed into ret()");
@@ -40,7 +48,7 @@ public:
 		(*ptr) = nullptr;
 	}
 
-	static void release(){
+	static void Release(){
 		if(CSingleton<T>::singleton != nullptr)
 			CSingleton<T>::singleton.reset();
 		CSingleton<T>::singleton = nullptr;

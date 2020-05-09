@@ -36,4 +36,17 @@ struct SRawData{
 
 #define sizeof_array(Array, Type) (sizeof(Array) / sizeof(Type))
 
+namespace stdex
+{
+	template <class _Ty>
+	class weak_ptrex : public std::weak_ptr<_Ty>{
+		
+	public:
+		//Warning! this function is unsafe in case the object this weak_ptr points to is released at the same time this function is called
+		bool contains(_Ty* ptr) const{
+			return this->get() == ptr; }
+	};
+}
+#define WeakPtrEx stdex::weak_ptrex
+
 #endif POINTERS_H

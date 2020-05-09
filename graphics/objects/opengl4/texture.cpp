@@ -73,6 +73,7 @@ bool CTexture::ApplySampler(const CSampler* sampler){
 	return this->ApplySampler(sampler->getDescriptor());
 }
 
+//ToDo: za Web/wasm ovo treba imat delayed loading, dok se file ne ucita. Pozvat CFile::DelayedOpen()
 bool CTexture::Create(std::string& fileName){
 	CFile file(fileName, CFile::EFileMode::ReadBinary);
 
@@ -122,6 +123,8 @@ bool CTexture::Create(std::string& fileName){
 		case 3: descriptor.format = ETextureFormat::RGB; break;
 		case 4: descriptor.format = ETextureFormat::RGBA; break;
 	}
+
+	descriptor.name = fileName;
 
 	bool rtn = Create(txData);
 	
@@ -229,14 +232,19 @@ bool CTexture::AllocateMipmaps(){
 bool CTexture::CreateView(SharedPtr<CTexture> tx){
 	if(device == nullptr) return false;
 	if(this->id == 0) return false;
-
-	//SharedPtr<CTexture> tx = std::dynamic_pointer_cast<CTexture>(device->getTrackedObject(this));
-	if(tx == nullptr) return false;
+	if(tx == nullptr || tx.get() != this) return false;
 
 	STextureViewDesc vdesc; { vdesc = this->descriptor; }
-	view = UniquePtr<CTextureView>(new CTextureView(device, vdesc, tx));
+	view = device->CreateTextureView(vdesc, tx);
 
 	return true;
+}
+bool CTexture::CreateView(CTexture* tx){
+	if(device == nullptr) return false;
+	if(this->id == 0) return false;
+
+	auto tx = device->FindSharedPtr<CTexture>(tx);
+	return this->CreateView(tx);
 }
 
 bool CTexture::UpdateLevelData(const STextureSliceRawData& data){
@@ -345,6 +353,30 @@ void CTextureView::Release(){
 	if(this->id != 0)
 		device->gl.DeleteTextures(1, &this->id);
 	this->id = 0;
+}
+
+//-----------------------------------------------------------------------------------
+// CTextureManager
+//-----------------------------------------------------------------------------------
+SharedPtr<CTexture> CTextureManager::FindByName(std::string name){
+	for(uint i = 0; i < textures.size(); ++i){
+		auto texture = textures[i];
+		if(texture->descriptor.name == name)
+			return texture;
+	}
+	return nullptr;
+}
+SharedPtr<CTexture> CTextureManager::FindByNameOrCreate(std::string name, const STextureDesc* pdesc){
+	auto texture = this->FindByName(name);
+	if(texture != nullptr) return texture;
+
+	if(device == nullptr) return nullptr;
+
+	STextureDesc desc;
+	if(pdesc != nullptr){ desc = *pdesc; }
+	texture = device->CreateTexture(desc, name);
+	textures.add(texture);
+	return texture;
 }
 //-----------------------------------------------------------------------------------
 

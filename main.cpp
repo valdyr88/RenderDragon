@@ -324,7 +324,7 @@ SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat verte
 }
 
 #include "graphics/ext/material/material.h"
-void testXML(GPUDevice* dev){
+auto testXML(GPUDevice* dev){
 	auto desc = CMaterial::CreateMaterialDescFromXML(/*"  \t\r\n \
 														\t<material id=\"hull_surface\" shader=\"deferred_BcNAoRSMt\">\r\n \
 														\t\t<paramgroup ubstruct=\"LightData\">\r\n \
@@ -347,22 +347,22 @@ void testXML(GPUDevice* dev){
 														\t\t\t<param name=\"intensity\" value=\"1.0\" type=\"float\"></param>\r\n \
 														\t\t\t<param name=\"time\" value=\"1.0\" type=\"float\"></param>\r\n \
 														\t\t</paramgroup>\r\n \
-														\t\t<paramgroup ubstruct=\"LightData2\">\r\n \
-														\t\t\t<param name=\"position2\" value=\"2.0,1.0,0.0\" type=\"vec3\"></param>\r\n \
-														\t\t\t<param name=\"intensity2\" value=\"3.0\" type=\"float\"></param>\r\n \
-														\t\t\t<param name=\"time2\" value=\"1\" type=\"int\"></param>\r\n \
-														\t\t</paramgroup>\r\n \
-														\t\t<texture name=\"tx\" path=\"path/do/texture.png\" type=\"AoRSMt\"></texture>\r\n \
+														\t\t<texture name=\"tx\" path=\"data/Textures/TLWJP_p.jpg\" type=\"AoRSMt\"></texture>\r\n \
 														\t</material>"
 	);
-	CMaterial material(desc);
+
+	auto manager = CSingleton<CMaterialManager>::get();
+	auto material = manager->FindOrCreateMaterial(desc);
+	material = manager->FindOrCreateMaterial(desc);
 
 	auto ub = CreateUniformBuffer(dev);
-	auto mi = material.CreateInstance(dev, {}, {"ublight"});
+	auto mi = material->CreateInstance(dev, {}, {"ublight"});
 
 	ub = nullptr;
-	mi;
+	return mi;
 }
+
+int chipschallenge_main();
 
 int main()
 {
@@ -378,7 +378,7 @@ int main()
 
 	device->InitContextOnWindow(window);
 
-	testXML(device.get());
+	auto materialInstance = testXML(device.get());
 	//IUniformBuffer::CreateUniformBufferType["LightData"] = CUniformBuffer<LightData>::CreateUniformBuffer;
 	//SharedPtr<IUniformBuffer> iub = SharedPtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(device.get(), "light"));
 
@@ -392,8 +392,8 @@ int main()
 	auto vertexBuffer = CreateVertexBufferInterleaved(device.get());
 	auto indexBuffer = CreateIndexBuffer(device.get());
 
-	STextureDesc txdesc;
-	SharedPtr<CTexture> texture = NewShared<CTexture>(device.get(), txdesc, "data/Textures/TLWJP_p.jpg");
+	//STextureDesc txdesc;
+	//SharedPtr<CTexture> texture = NewShared<CTexture>(device.get(), txdesc, "data/Textures/TLWJP_p.jpg");
 
 	SSamplerDesc smpldesc;
 	/*smpldesc.magFilter = ETextureFiltering::Nearest;
@@ -404,8 +404,11 @@ int main()
 	smpldesc.wWrapping = ETextureWrapping::Clamp;
 	SharedPtr<CSampler> sampler = NewShared<CSampler>(device.get(), smpldesc);
 	
-	STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();
-	CTextureView txView(device.get(), viewdesc, texture, sampler);
+	//STextureViewDesc viewdesc; viewdesc = texture->getDescriptor();
+	//CTextureView txView(device.get(), viewdesc, texture, sampler);
+
+	auto txView = materialInstance->getTexture(0);
+	SharedPtr<CTexture> texture = device->FindSharedPtr<CTexture>(txView->getActualTexture());
 
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)
@@ -500,7 +503,7 @@ int main()
 			ub.Upload();
 			//ToDo: napravit provjeru shader sourcea i resourceSetDesc. postoje li svi resoursi u shaderu, ili shader ima neke koji nema resourceSetDesc i obratno?
 			shader->setUniformBuffer("light", &ub);
-			shader->setTexture("tx", &txView);
+			shader->setTexture("tx", txView);
 			//shader->setTexture(0, 0, &txView);
 			//shader->setUniformBuffer(0, 2, &ub);
 

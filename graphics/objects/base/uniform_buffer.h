@@ -256,7 +256,7 @@ template<typename Type> void CUniformBuffer<Type>::CreateBuffer(uint32 size){
 }
 
 template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps){
-	return SharedPtr<CUniformBuffer<Type>>(new CUniformBuffer<Type>(dev, bufferName, maps));
+	return SharedPtr<CUniformBuffer<Type>>(__new CUniformBuffer<Type>(dev, bufferName, maps));
 }
 
 #endif //RD_API_BASE

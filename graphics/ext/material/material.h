@@ -5,6 +5,7 @@
 #include <vector>
 #include "../../utils/pointers.h"
 #include "../../utils/containers.h"
+#include "../../utils/singleton.h"
 #include "../../descriptors/uniform_buffer_desc.h"
 
 //----------------------------------------------------------------------------------------------
@@ -131,14 +132,21 @@ struct SMaterialDesc{
 //----------------------------------------------------------------------------------------------
 class CMaterial;
 class IUniformBuffer;
+class CTextureView;
 
 class CMaterialInstance{
 protected:
 	CMaterial* material = nullptr;
 	stdex::container<SharedPtr<IUniformBuffer>> uniformBuffers;
+	stdex::container<SharedPtr<CTextureView>> textures;
 
 	CMaterialInstance(CMaterial* m) : material(m){}
 public:
+
+	CTextureView* getTexture(uint i){ if(i >= textures.size()) return nullptr; return textures[i].get(); }
+	IUniformBuffer* getUniformBuffer(uint i){ if(i >= uniformBuffers.size()) return nullptr; return uniformBuffers[i].get(); }
+
+	~CMaterialInstance();
 
 	friend class CMaterial;
 };
@@ -163,8 +171,19 @@ public:
 
 	static bool CheckIfParamsGroupAndUBAreEqual(const std::vector<SMaterialParam>& mpg, const std::vector<SUniformMap>& ub);
 	static bool CheckIfParamsGroupAndUBAreEqual(const SMaterialParamsGroup& mpg, const IUniformBuffer& ub);
+
+	friend class CMaterialManager;
 };
 
 //----------------------------------------------------------------------------------------------
+
+class CMaterialManager{
+protected:
+	stdex::container<SharedPtr<CMaterial>> materials;
+public:
+	SharedPtr<CMaterial> FindOrCreateMaterial(const SMaterialDesc& desc);
+
+	friend class CSingleton<CMaterialManager>;
+};
 
 #endif //MATERIAL_H

@@ -99,6 +99,8 @@ public:
 	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count, std::vector<SRawData> data = std::vector<SRawData>());
 	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count, SRawData data = SRawData());
 	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data = STextureRawData());
+	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, std::string fileName);
+	SharedPtr<CTextureView> CreateTextureView(const STextureViewDesc& desc, SharedPtr<CTexture> tx);
 
 	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear);
 	void BindVertexBuffer(CVertexBuffer* vb){ boundVertexBuffer = vb; if(vb) vb->Bind(); }
@@ -116,6 +118,8 @@ public:
 	SharedPtr<CShaderResourceSet> CreateShaderResourceSet(const CShaderResourceSetDesc* desc, const std::vector<CShaderResource*>& rers);
 
 	auto& getShaderResourceManager(){ return shaderResourceSetManager; }
+	template <typename type>
+	SharedPtr<type> FindSharedPtr(CGraphicObject* ptr);
 
 	static UniquePtr<GPUDevice> CreateGPUDevice(const SGPUDeviceDesc& desc);
 
@@ -133,6 +137,10 @@ public:
 	friend class CShaderResource;
 	friend class IUniformBuffer;
 };
+
+template <typename type>
+SharedPtr<type> GPUDevice::FindSharedPtr(CGraphicObject* ptr){
+	return  std::dynamic_pointer_cast<type, CGraphicObject>(getTrackedObject(ptr)); }
 
 SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);
 

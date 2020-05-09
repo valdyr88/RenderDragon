@@ -72,6 +72,8 @@ public:
 		Close(); }
 
 	bool Open(std::string name, EFileMode mode);
+	//ToDo: dodat delayed loading i delayed izvrsavanje calling funkcije (koja je pozvala CFile::DelayedOpen().
+	//UniquePtr<CDelayedExec> DelayedOpen(std::string name, EFileMode mode, );
 
 	bool ReadFormatted(const char* format, ...);
 	bool WriteFormatted(const char* format, ...);

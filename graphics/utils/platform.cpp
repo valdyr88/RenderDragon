@@ -1,5 +1,6 @@
 #include <list>
 #include "platform.h"
+#include "pointers.h"
 
 std::list<SWindow*> windows;
 
@@ -184,7 +185,7 @@ void SWindow::CreateProgramWindow(const char* name, int W, int H, int startX, in
 	RegisterClass(&windowClass);
 
 	size_t nameLen = strlen(name);
-	this->name = new char[nameLen+1];
+	this->name = __new char[nameLen+1];
 	strcpy_s(this->name, nameLen+1, name);
 
 	this->window = CreateWindow((LPCSTR)class_name, (LPCSTR) name, WS_OVERLAPPEDWINDOW, posX, posY,//450,

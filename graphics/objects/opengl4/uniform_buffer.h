@@ -250,11 +250,11 @@ template<typename Type> void CUniformBuffer<Type>::Upload(){
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName){
-	return SharedPtr<CUniformBuffer<Type>>(new CUniformBuffer<Type>(dev, bufferName, Type::desc));
+	return SharedPtr<CUniformBuffer<Type>>(__new CUniformBuffer<Type>(dev, bufferName, Type::desc));
 }
 
 //template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps){
-//	return SharedPtr<CUniformBuffer<Type>>(new CUniformBuffer<Type>(dev, bufferName, maps));
+//	return SharedPtr<CUniformBuffer<Type>>(__new CUniformBuffer<Type>(dev, bufferName, maps));
 //}
 
 size_t internal_rdAppendRegisterUniformBufferStructureFunctionCall(void (*func)());

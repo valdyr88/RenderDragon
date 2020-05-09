@@ -38,6 +38,10 @@ uint getMaterialTextureTypeFromString(const char* cstr){
 	return (uint)EMaterialTextureType::Albedo;
 }
 
+//----------------------------------------------------------------------------------------------
+//	CMaterial
+//----------------------------------------------------------------------------------------------
+
 SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 	rapidxml::xml_node<char>* node = (rapidxml::xml_node<char>*)xmlobject;
 	SMaterialDesc desc;
@@ -196,7 +200,7 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 }
 
 SMaterialDesc CMaterial::CreateMaterialDescFromXML(std::string xml){
-	rapidxml::xml_document<char>* doc = new rapidxml::xml_document<char>();
+	rapidxml::xml_document<char>* doc = __new rapidxml::xml_document<char>();
 	char* cxml = __new char[xml.length() + 1];
 	//xml.copy(cxml, xml.length());
 	strcpy_s(cxml, xml.length()+1, xml.c_str());
@@ -262,6 +266,41 @@ SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vect
 			continue;
 		}
 	}
+	
+	auto txManager = CSingleton<CTextureManager>::get(dev);
+	for(auto pt = this->descriptor.textures.begin(); pt != this->descriptor.textures.end(); ++pt)
+	{
+		auto tx = txManager->FindByNameOrCreate(pt->path);
+		if(tx == nullptr){
+			LOG_ERR("Can't find or create texture <%s>!", pt->path.c_str()); }
+
+		mi->textures.add(tx->getViewSharedPtr());
+	}
 
 	return mi;
 }
+
+//----------------------------------------------------------------------------------------------
+//	CMaterialInstance()
+//----------------------------------------------------------------------------------------------
+
+CMaterialInstance::~CMaterialInstance(){
+	
+}
+
+//----------------------------------------------------------------------------------------------
+//	CMaterialManager
+//----------------------------------------------------------------------------------------------
+
+SharedPtr<CMaterial> CMaterialManager::FindOrCreateMaterial(const SMaterialDesc& desc){
+	for(uint i = 0; i < materials.size(); ++i){
+		auto& material = *materials[i];
+		if(material.descriptor == desc){
+			return materials[i];
+		}
+	}
+	SharedPtr<CMaterial> material = SharedPtr<CMaterial>(__new CMaterial(desc));
+	materials.add(material);
+	return material;
+}
+//----------------------------------------------------------------------------------------------

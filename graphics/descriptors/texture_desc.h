@@ -45,6 +45,7 @@ struct STextureDesc : public STextureFormatDesc{
 	uint32 width = 0, height = 0, depth = 0;
 	uint32 usageFlags = 0x00000000;
 	bool bGenMipmaps = true; //no comparing
+	std::string name; //no comparing
 
 	bool operator == (const STextureDesc& other) const{
 		return STextureFormatDesc::operator==(other) &&
@@ -62,6 +63,7 @@ struct STextureDesc : public STextureFormatDesc{
 		depth = other.depth;
 		usageFlags = other.usageFlags;
 		bGenMipmaps = other.bGenMipmaps;
+		name = other.name;
 
 		return *this;
 	}

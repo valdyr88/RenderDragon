@@ -33,7 +33,8 @@ struct SModelParamMaterial : public SModelParam{
 	SModelParamMaterial() : SModelParam(EModelParamType::Material){}
 };
 struct SModelParamTexture : public SModelParam{
-	
+	SMaterialTexture texture;
+	SModelParamTexture() : SModelParam(EModelParamType::Texture){}
 };
 
 struct SModelDesc{
