@@ -269,9 +269,9 @@ bool CFile::WriteFormatted(const char* format, ...){
 	return false;
 }
 
-bool CFile::Read(uint size, byte** out_data, uint* out_size){
+bool CFile::Read(uint size, byte* out_data, uint* out_size){
 	if(file == nullptr) return false;
-	uint read = (uint)fread_s(*out_data, size, 1, size, file);
+	uint read = (uint)fread_s(out_data, size, 1, size, file);
 	if(out_size != nullptr) *out_size = read;
 	return read == size;
 }

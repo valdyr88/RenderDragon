@@ -6,6 +6,7 @@
 #include <string>
 #include "../../utils/types/types.h"
 #include "../../utils/pointers.h"
+#include "../../utils/singleton.h"
 #include "../../descriptors/shader_desc.h"
 #include "../../descriptors/graphics_enums.h"
 #include "../../descriptors/graphic_object.h"
@@ -129,17 +130,21 @@ inline bool CShaderResourceSet::operator ==(const CShaderResourceSet& other) con
 
 //---------------------------------------------------------------------------
 
-class CShaderResourceSetManager : public CGraphicObject{
+class CShaderResourceSetManager{
 protected:
+	GPUDevice* device = nullptr;
+
 	std::list<SharedPtr<CShaderResourceSetDesc>> resourceSetDesc;
-
 	SharedPtr<CShaderResourceSetDesc> CreateResourceSetDesc(std::vector<SShaderResourceBindingDesc>&);
+	
+	CShaderResourceSetManager(){}
+	CShaderResourceSetManager(GPUDevice* dev) : device(dev){}
+	void setDevice(GPUDevice* dev){ device = dev; }
 public:
-
-	CShaderResourceSetManager(GPUDevice* dev)
-		: CGraphicObject(dev){}
-
 	SharedPtr<CShaderResourceSetDesc> GetResourceSetDesc(std::vector<SShaderResourceBindingDesc>);
+
+	friend class CSingleton<CShaderResourceSetManager>;
+	friend bool rdSetupDeviceForGlobalObjects(GPUDevice* device);
 };
 
 //---------------------------------------------------------------------------

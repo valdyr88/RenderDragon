@@ -79,7 +79,7 @@ bool CTexture::Create(std::string& fileName){
 
 	uint size = 0;
 	byte* data = __new byte[file.getSize()];
-	file.Read(file.getSize(), &data, &size);
+	file.Read(file.getSize(), data, &size);
 
 	byte* image_data = nullptr;
 	uint image_size = 0, width = 0, height = 0, components = 0;
@@ -239,11 +239,11 @@ bool CTexture::CreateView(SharedPtr<CTexture> tx){
 
 	return true;
 }
-bool CTexture::CreateView(CTexture* tx){
+bool CTexture::CreateView(CTexture* ptx){
 	if(device == nullptr) return false;
 	if(this->id == 0) return false;
 
-	auto tx = device->FindSharedPtr<CTexture>(tx);
+	auto tx = device->FindSharedPtr<CTexture>(ptx);
 	return this->CreateView(tx);
 }
 
@@ -359,14 +359,14 @@ void CTextureView::Release(){
 // CTextureManager
 //-----------------------------------------------------------------------------------
 SharedPtr<CTexture> CTextureManager::FindByName(std::string name){
-	for(uint i = 0; i < textures.size(); ++i){
-		auto texture = textures[i];
-		if(texture->descriptor.name == name)
+	for(uint i = 0; i < device->created.textures.size(); ++i){
+		auto texture = device->created.textures[i].lock();
+		if(texture != nullptr && texture->descriptor.name == name)
 			return texture;
 	}
 	return nullptr;
 }
-SharedPtr<CTexture> CTextureManager::FindByNameOrCreate(std::string name, const STextureDesc* pdesc){
+SharedPtr<CTexture> CTextureManager::CreateTexture(std::string name, const STextureDesc* pdesc){
 	auto texture = this->FindByName(name);
 	if(texture != nullptr) return texture;
 
@@ -374,9 +374,7 @@ SharedPtr<CTexture> CTextureManager::FindByNameOrCreate(std::string name, const 
 
 	STextureDesc desc;
 	if(pdesc != nullptr){ desc = *pdesc; }
-	texture = device->CreateTexture(desc, name);
-	textures.add(texture);
-	return texture;
+	return device->CreateTexture(desc, name);
 }
 //-----------------------------------------------------------------------------------
 

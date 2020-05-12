@@ -1,10 +1,12 @@
 #include "shader.h"
+#include "..\..\descriptors\shader_parser.h"
 #include "uniform_buffer.h"
 #include "texture.h"
 
 #ifdef RD_API_OPENGL4
 
-// CShader
+//---------------------------------------------------------------------------------
+//	CShader
 //---------------------------------------------------------------------------------
 
 IUniformBuffer* CShader::getUniformBuffer(uint bindPoint)
@@ -48,10 +50,10 @@ bool CShader::CompileShader(){
 	{
 		GLint infoLogLen = 0;
 		gl.GetShaderiv(id, GL_INFO_LOG_LENGTH, &infoLogLen);
-		char* info_chars = __new char[infoLogLen + 1];
+		char* info_chars = __new char[(size_t)infoLogLen + 1];
 		gl.GetShaderInfoLog(id, infoLogLen+1, nullptr, info_chars);
 
-		info_string.reserve(infoLogLen + 1);
+		info_string.reserve((size_t)infoLogLen + 1);
 		info_string.assign(info_chars);
 
 		LOG("shader compile failed: <%s> :\n%s", descriptor.name.c_str(), info_chars);
@@ -70,8 +72,65 @@ void CShader::Release(){
 	gl.DeleteShader(id); id = 0;
 }
 
-// CShaderProgram
+std::string CShader::ReadSouceFromFile(std::string path, CShaderFileSource* includeFiles, CShaderDefines* shaderDefines){
+
+	std::string source = "";
+	{
+		CFile file; file.Open(path, CFile::EFileMode::ReadBinary);
+		uint length = file.getSize();
+
+		char* contents = __new char[(size_t)length + 1];
+		file.Read(length, contents);
+		contents[length] = '\0';
+		file.Close();
+
+		source += contents;
+
+		__release_array(contents);
+	}
+
+	source = CShaderFileSource::ParseForIncludes(source, path, includeFiles);
+
+	if(shaderDefines != nullptr)
+		source = shaderDefines->InsertInto(source);
+
+	return source;
+}
+std::string CShader::ReadSouceFromFile(std::string path, CShaderDefines* shaderDefines, CShaderFileSource* includeFiles){
+	return CShader::ReadSouceFromFile(path, includeFiles, shaderDefines); }
+
 //---------------------------------------------------------------------------------
+//	CShaderProgram
+//---------------------------------------------------------------------------------
+
+std::map<std::string, CShaderProgram*> CShaderProgram::programs;
+
+CShaderProgram::CShaderProgram(GPUDevice* dev, std::string uniquename, std::vector<SharedPtr<CShader>> shaders) :
+	CGraphicObject(dev), name(uniquename)
+{
+	{
+		auto program = CShaderProgram::programs.find(uniquename);
+		if(program != CShaderProgram::programs.end() && program->second != nullptr){
+			LOG_ERR("shader program with name <%s> already exists!", uniquename.c_str());
+		}
+		CShaderProgram::programs[uniquename] = this;
+	}
+
+	numStages = 0;
+
+	for(auto it = shaders.begin(); it != shaders.end(); ++it){
+		auto& sh = *it;
+		if(sh->descriptor.stage < EShaderStage::NumShaderStages){
+			shader[getStageNumber(sh->descriptor.stage)] = sh; ++numStages;
+		}
+	}
+
+	MergeShaderResourceSetDescs();
+	if(LinkProgram() == false){
+		LOG_ERR("linking failed");
+	}
+	CheckResourceBindings();
+}
 
 IUniformBuffer* CShaderProgram::getUniformBuffer(EShaderStage stage, uint bindPoint)
 {
@@ -134,7 +193,7 @@ bool CShaderProgram::CheckResourceBindings(){
 		for(int i = 0; i < numberOfBlocks; ++i){
 			GLint namelen = 0; GLint binding = 0;
 			gl.GetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &namelen);
-			char* cname = __new char[namelen+1];
+			char* cname = __new char[(size_t)namelen+1];
 			gl.GetActiveUniformBlockName(this->id, i, namelen, nullptr, cname);
 			cname[namelen] = 0;
 			gl.GetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_BINDING, &binding);
@@ -235,6 +294,118 @@ void CShaderProgram::Release(){
 
 	auto& gl = device->gl;
 	gl.DeleteProgram(id); id = 0;
+}
+
+bool CShaderProgram::Contains(const std::vector<SharedPtr<CShader>>& shlist){
+	for(auto it = shlist.begin(); it != shlist.end(); ++it){
+		auto& sh = *it;
+		auto stage = sh->getDescriptor().stage;
+		uint stageNum = getStageNumber(stage);
+
+		if(shader[stageNum] != nullptr){
+			if(shader[stageNum].get() != sh.get())
+				return false;
+		}
+		else return false;
+	}
+	return true;
+}
+
+//-----------------------------------------------------------------------------------
+//	CShaderModuleManager
+//-----------------------------------------------------------------------------------
+
+bool CShaderModuleManager::add(SharedPtr<CShader> shader){
+	if(device == nullptr) return false;
+	auto found = FindByName(shader->getDescriptor().name);
+	if(found != nullptr && found.get() != shader.get()){
+		LOG_WARN("different shader with same name <%s> is already in CShaderModuleManager", shader->getDescriptor().name.c_str()); return false; }
+	found = FindBySource(shader->getDescriptor().source);
+	if(found != nullptr && found.get() != shader.get()){
+		LOG_WARN("different shaders <new: %s, found: %s> with same source is already in CShaderModuleManager", shader->getDescriptor().name.c_str(), found->getDescriptor().name.c_str()); return false; }
+
+	device->created.shaders.add(shader);
+	return true;
+}
+
+SharedPtr<CShader> CShaderModuleManager::FindByName(std::string name){
+	if(device == nullptr) return nullptr;
+	for(uint i = 0; i < device->created.shaders.size(); ++i){
+		auto shader = device->created.shaders[i].lock();
+		if(shader != nullptr && shader->getDescriptor().name == name)
+			return shader;
+	}
+	return nullptr;
+}
+SharedPtr<CShader> CShaderModuleManager::FindBySource(std::string src){
+	if(device == nullptr) return nullptr;
+	for(uint i = 0; i < device->created.shaders.size(); ++i){
+		auto shader = device->created.shaders[i].lock();
+		if(shader != nullptr && shader->getDescriptor().source == src)
+			return shader;
+	}
+	return nullptr;
+}
+SharedPtr<CShader> CShaderModuleManager::CreateShaderModule(const SShaderDesc& desc){
+	if(device == nullptr) return nullptr;
+
+	auto shader = FindByName(desc.name);
+	if(shader != nullptr) return shader;
+	shader = FindBySource(desc.source);
+	if(shader != nullptr) return shader;
+
+	return device->CreateShaderModule(desc);
+}
+
+//-----------------------------------------------------------------------------------
+//	CShaderProgramManager
+//-----------------------------------------------------------------------------------
+
+bool CShaderProgramManager::add(SharedPtr<CShaderProgram> shader){
+	if(FindByName(shader->getName()) != nullptr){
+		LOG_WARN("different shader with same name <%s> is already in CShaderProgramManager", shader->getName()); return false;}
+	std::vector<SharedPtr<CShader>> shaders; shaders.reserve(shader->getNofStages());
+	for(uint i = 0; i < EShaderStage::NumShaderStages; ++i)
+		if(shader->shader[i] != nullptr) shaders.emplace_back(shader->shader[i]);
+	if(FindByStages(shaders) != nullptr){
+		LOG_WARN("different shader <%s> with same stages is already in CShaderProgramManager", shader->getName()); return false;}
+
+	device->created.programs.add(shader);
+	return true;
+}
+
+SharedPtr<CShaderProgram> CShaderProgramManager::FindByName(std::string name){
+	if(device == nullptr) return nullptr;
+	auto program = CShaderProgram::programs[name];
+	return device->FindSharedPtr<CShaderProgram>(program);
+
+	/*for(uint i = 0; i < device->created.programs.size(); ++i){
+		auto shader = device->created.programs[i].lock();
+		if(shader != nullptr && shader->getName() == name)
+			return shader;
+	}
+	return nullptr;*/
+}
+SharedPtr<CShaderProgram> CShaderProgramManager::FindByStages(const std::vector<SharedPtr<CShader>> shaderlist){
+	if(device == nullptr) return nullptr;
+	for(uint i = 0; i < device->created.programs.size(); ++i){
+		auto shader = device->created.programs[i].lock();
+		if(shader != nullptr && shader->Contains(shaderlist) == true)
+			return shader;
+	}
+	return nullptr;
+}
+SharedPtr<CShaderProgram> CShaderProgramManager::CreateShaderProgram(std::string name, const std::vector<SharedPtr<CShader>> shaders){
+	if(device == nullptr) return nullptr;
+
+	auto program = FindByName(name);
+	if(program != nullptr) return program;
+	program = FindByStages(shaders);
+	if(program != nullptr) return program;
+
+	if(shaders.size() == 0) return nullptr;
+
+	return device->CreateShaderProgram(name, shaders);
 }
 
 #endif //RD_API_OPENGL4

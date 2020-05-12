@@ -103,11 +103,13 @@ struct SMaterialTexture{
 
 struct SMaterialDesc{
 	std::string name;
+	std::string shader;
 	std::vector<SMaterialParamsGroup> paramGroups;
 	std::vector<SMaterialTexture> textures;
 
 	bool operator == (const SMaterialDesc& other) const{
 		if(name != other.name) return false;
+		if(shader != other.shader) return false;
 		if(paramGroups.size() != other.paramGroups.size()) return false;
 		for(uint i = 0; i < paramGroups.size(); ++i){
 			if(paramGroups[i] != other.paramGroups[i]) return false;}
@@ -119,6 +121,7 @@ struct SMaterialDesc{
 
 	SMaterialDesc& operator = (const SMaterialDesc& other){
 		name = other.name;
+		shader = other.shader;
 		paramGroups.reserve(other.paramGroups.size());
 		for(uint i = 0; i < other.paramGroups.size(); ++i)
 			paramGroups[i] = other.paramGroups[i];
@@ -133,12 +136,14 @@ struct SMaterialDesc{
 class CMaterial;
 class IUniformBuffer;
 class CTextureView;
+class CShaderProgram;
 
 class CMaterialInstance{
 protected:
 	CMaterial* material = nullptr;
 	stdex::container<SharedPtr<IUniformBuffer>> uniformBuffers;
 	stdex::container<SharedPtr<CTextureView>> textures;
+	SharedPtr<CShaderProgram> shader;
 
 	CMaterialInstance(CMaterial* m) : material(m){}
 public:
@@ -181,7 +186,7 @@ class CMaterialManager{
 protected:
 	stdex::container<SharedPtr<CMaterial>> materials;
 public:
-	SharedPtr<CMaterial> FindOrCreateMaterial(const SMaterialDesc& desc);
+	SharedPtr<CMaterial> CreateMaterial(const SMaterialDesc& desc);
 
 	friend class CSingleton<CMaterialManager>;
 };

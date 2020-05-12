@@ -3,11 +3,12 @@
 //common code
 //---------------------------------------------------------------------------------
 #include "../descriptors/shader_parser.h"
+#include "../utils/platform.h"
 
 //---------------------------------------------------------------------------------
 std::string CShaderDefines::globalMacrosKeyword = "#global_defines";
 
-std::string CShaderDefines::insertInto(std::string source, std::string keyword){
+std::string CShaderDefines::InsertInto(std::string source, std::string keyword){
 	std::istringstream srcStream(source);
 	std::string output = "";
 
@@ -32,7 +33,7 @@ std::string CShaderDefines::insertInto(std::string source, std::string keyword){
 
 //---------------------------------------------------------------------------------
 
-std::string CShaderFileSource::parseForIncludes(std::string source, std::string srcFilePath, CShaderFileSource* includeFiles){
+std::string CShaderFileSource::ParseForIncludes(std::string source, std::string srcFilePath, CShaderFileSource* includeFiles){
 	std::istringstream srcStream(source);
 	std::string output = "";
 
@@ -49,7 +50,7 @@ std::string CShaderFileSource::parseForIncludes(std::string source, std::string 
 			str::find_first_occurence("\"", cline + iNameStartNo, 0, &iNameEndNo); iNameEndNo += iNameStartNo;
 
 			auto includeName = line.substr(iNameStartNo, iNameEndNo - iNameStartNo);
-			line = parseForIncludes(includeFiles->contents(includeName), includeName, includeFiles);
+			line = CShaderFileSource::ParseForIncludes(includeFiles->contents(includeName), includeName, includeFiles);
 
 			istart = nullptr;
 		}
@@ -63,16 +64,12 @@ std::string CShaderFileSource::parseForIncludes(std::string source, std::string 
 }
 
 std::string getFileStringContents(const char* fileName){
-	FILE* file = nullptr; fopen_s(&file, fileName, "rb");
-	if(file == nullptr) return "";
-	fseek(file, 0, SEEK_END);
-	size_t length = ftell(file);
-	fseek(file, 0, SEEK_SET);
+	CFile file; file.Open(fileName, CFile::EFileMode::ReadBinary);
+	uint length = file.getSize();
 
-	char* contents = __new char[length + 1];
-	fread(contents, 1, length, file);
+	char* contents = __new char[(size_t)length+1];
+	file.Read(length, contents);
 	contents[length] = '\0';
-	fclose(file); file = nullptr;
 
 	std::string rtn = "";
 	rtn += contents;
@@ -82,23 +79,21 @@ std::string getFileStringContents(const char* fileName){
 	return rtn;
 }
 
-bool printContentsToFile(const char* fileName, const char* contents, size_t length){
-	FILE* file = nullptr; fopen_s(&file, fileName, "wb");
-	if(file == nullptr) return false;
-	fwrite(contents, 1, length, file);
-	fclose(file); file = nullptr;
+bool printContentsToFile(const char* fileName, const char* contents, uint length){
+	CFile file; file.Open(fileName, CFile::EFileMode::WriteBinary);
+	if(file.isOpen() == false) return false;
+	file.Read(length, contents);
 	return true;
 }
 
 std::string TestIncludes(const char* fileName){
-
 	std::string source = getFileStringContents(fileName);
-	source = CShaderFileSource::parseForIncludes(source, fileName, CSingleton<CShaderFileSource>::get());
+	source = CShaderFileSource::ParseForIncludes(source, fileName, CSingleton<CShaderFileSource>::get());
 
 	std::string outPath = fileName;
 	outPath += ".processed.glsl";
 
-	printContentsToFile(outPath.c_str(), source.c_str(), source.length());
+	printContentsToFile(outPath.c_str(), source.c_str(), (uint)source.length());
 
 	return std::move(source);
 }

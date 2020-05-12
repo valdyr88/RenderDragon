@@ -30,7 +30,7 @@ public:
 
 public:
 
-	static std::string parseForIncludes(std::string source, std::string srcFilePath, CShaderFileSource* includeFiles);
+	static std::string ParseForIncludes(std::string source, std::string srcFilePath, CShaderFileSource* includeFiles);
 };
 typedef CSingleton<CShaderFileSource> ShaderSourceList;
 
@@ -90,11 +90,11 @@ public:
 		return *this;
 	}
 
-	std::string insertInto(std::string source, std::string keyword = CShaderDefines::globalMacrosKeyword);
+	std::string InsertInto(std::string source, std::string keyword = CShaderDefines::globalMacrosKeyword);
 };
 typedef CSingleton<CShaderDefines> ShaderGlobalDefines;
 
-bool printContentsToFile(const char* fileName, const char* contents, size_t length);
+bool printContentsToFile(const char* fileName, const char* contents, uint length);
 std::string getFileStringContents(const char* fileName);
 std::string TestIncludes(const char* fileName);
 

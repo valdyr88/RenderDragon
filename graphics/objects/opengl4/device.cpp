@@ -228,8 +228,9 @@ bool GPUDevice::InitContextOnWindow(SWindow& win){
 
 	swapchainRenderPass = SharedPtr<CRenderPass>(__new CRenderPass(this, rpdesc));
 	swapchainFramebuffer = SharedPtr<CFramebuffer>(__new CGLSwapchainFramebuffer(this, rpdesc));
+	
+	rdSetupDeviceForGlobalObjects(this);
 
-	rdInitUniformBufferStructreRegistry();
 	return true;
 }
 
@@ -237,10 +238,66 @@ UniquePtr<GPUDevice> GPUDevice::CreateGPUDevice(const SGPUDeviceDesc& desc){
 	return NewUnique<GPUDevice>(desc);
 }
 
+//------------------------------------------------------------------------------------
+
 template <typename type>
 void GPUDevice::addTrackedObject(SharedPtr<type>& obj){
-	objects.emplace_back(obj);
+	created.objects.add(obj); }
+template <>
+void GPUDevice::addTrackedObject(SharedPtr<CShader>& obj){
+	created.shaders.add(obj); }
+template <>
+void GPUDevice::addTrackedObject(SharedPtr<CShaderProgram>& obj){
+	created.programs.add(obj); }
+template <>
+void GPUDevice::addTrackedObject(SharedPtr<CTexture>& obj){
+	created.textures.add(obj);}
+
+template <typename type>
+SharedPtr<type> FindInList(type* ptr, const stdex::container<WeakPtr<type>>& elems){
+	if(ptr == nullptr) return nullptr;
+	for(uint i = 0; i < elems.size(); ++i){
+		if(((WeakPtrEx<type>*)(&elems[i]))->contains(ptr) == true){
+			return elems[i].lock();
+		}
+	}
+	return nullptr;
 }
+template <typename type>
+SharedPtr<type> GPUDevice::getTrackedObject(type* ptr){
+	return FindInList(ptr, created.objects);
+}
+template <>
+SharedPtr<CShader> GPUDevice::getTrackedObject(CShader* ptr){
+	return FindInList<CShader>(ptr, created.shaders);
+}
+template <>
+SharedPtr<CShaderProgram> GPUDevice::getTrackedObject(CShaderProgram* ptr){
+	return FindInList<CShaderProgram>(ptr, created.programs);
+}
+template <>
+SharedPtr<CTexture> GPUDevice::getTrackedObject(CTexture* ptr){
+	return FindInList<CTexture>(ptr, created.textures);
+}
+
+
+template <typename type>
+SharedPtr<type> GPUDevice::FindSharedPtr(CGraphicObject* ptr){
+	return  std::dynamic_pointer_cast<type, CGraphicObject>(getTrackedObject(ptr));
+}
+template <>
+SharedPtr<CShader> GPUDevice::FindSharedPtr(CGraphicObject* ptr){
+	return getTrackedObject<CShader>((CShader*)ptr);
+}
+template <>
+SharedPtr<CShaderProgram> GPUDevice::FindSharedPtr(CGraphicObject* ptr){
+	return getTrackedObject<CShaderProgram>((CShaderProgram*)ptr);
+}
+template <>
+SharedPtr<CTexture> GPUDevice::FindSharedPtr(CGraphicObject* ptr){
+	return getTrackedObject<CTexture>((CTexture*)ptr);
+}
+//------------------------------------------------------------------------------------
 
 SharedPtr<CPipelineState> GPUDevice::CreatePipelineState(const SPipelineStateDesc& desc){
 	auto obj = SharedPtr<CPipelineState>(__new CPipelineState(this, desc));
@@ -265,7 +322,6 @@ SharedPtr<CFramebuffer> GPUDevice::CreateFramebuffer(const SRenderPassDesc& desc
 	addTrackedObject(obj);
 	return obj;
 }
-//SharedPtr<CShader> GPUDevice::CreateShaderModule(const SShaderDesc& desc);
 //SharedPtr<CShaderResource> GPUDevice::CreateShaderResrouce(const SShaderResourceDesc& desc);
 SharedPtr<CSampler> GPUDevice::CreateSampler(const SSamplerDesc& desc){
 	auto obj = SharedPtr<CSampler>(__new CSampler(this, desc));
@@ -314,19 +370,20 @@ SharedPtr<CShaderResourceSet> GPUDevice::CreateShaderResourceSet(const CShaderRe
 	addTrackedObject(obj);
 	return obj;
 }
-
-SharedPtr<CGraphicObject> GPUDevice::getTrackedObject(CGraphicObject* ptr){
-	for(auto it = objects.begin(); it != objects.end(); ++it){
-		if(((WeakPtrEx<CGraphicObject>*)&(*it))->contains(ptr) == true){
-			return it->lock();
-		}
-	}
-	return nullptr;
+SharedPtr<CShaderProgram> GPUDevice::CreateShaderProgram(std::string uniquename, const std::vector<SharedPtr<CShader>> shaders){
+	auto obj = SharedPtr<CShaderProgram>(__new CShaderProgram(this, uniquename, shaders));
+	addTrackedObject(obj);
+	return obj;
 }
+SharedPtr<CShader> GPUDevice::CreateShaderModule(const SShaderDesc& desc){
+	auto obj = SharedPtr<CShader>(__new CShader(this, desc));
+	addTrackedObject(obj);
+	return obj;
+}
+
 //------------------------------------------------------------------------------------
 // gl state setting
 //------------------------------------------------------------------------------------
-
 
 void GPUDevice::initPipelineState(){
 	//setup different init values from the default ones so they will be set in set***State() functions
@@ -695,5 +752,15 @@ bool GPUDevice::DrawIndexed(uint count){
 	return true;
 }
 //------------------------------------------------------------------------------------
+
+bool rdSetupDeviceForGlobalObjects(GPUDevice* device){
+	CSingleton<CShaderResourceSetManager>::get()->setDevice(device);
+	CSingleton<CShaderModuleManager>::get()->setDevice(device);
+	CSingleton<CShaderProgramManager>::get()->setDevice(device);
+	CSingleton<CTextureManager>::get()->setDevice(device);
+	rdInitUniformBufferStructreRegistry();
+
+	return true;
+}
 
 #endif //RD_API_OPENGL4

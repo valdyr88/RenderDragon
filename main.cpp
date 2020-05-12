@@ -80,7 +80,7 @@ int main_old(){
 	auto fshader = SharedPtr<CShader>(new CShader(dev.get(), fsdesc));
 	auto vshader = SharedPtr<CShader>(new CShader(dev.get(), vsdesc));
 
-	auto shaderProgram = SharedPtr<CShaderProgram>(new CShaderProgram(dev.get(), { vshader,fshader }));
+	auto shaderProgram = SharedPtr<CShaderProgram>(new CShaderProgram(dev.get(), "s", { vshader,fshader }));
 	
 	SPipelineStateDesc psdesc;
 	{
@@ -133,14 +133,14 @@ int main_old(){
 
 	auto framebuffer = dev->CreateFramebuffer(rpdesc, { texture });
 	
-	auto srm = dev->getShaderResourceManager();
-	auto reset = srm.GetResourceSetDesc({
+	auto srm = dev->GetShaderResourceManager();
+	auto reset = srm->GetResourceSetDesc({
 		{0, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
 		{0, 1, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
 		{0, 2, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
 	});
 
-	auto reset2 = srm.GetResourceSetDesc({
+	auto reset2 = srm->GetResourceSetDesc({
 		{1, 0, "texUniformName", EShaderResourceType::Texture, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
 		{1, 1, "ubUniformName", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
 		{1, 2, "samplerUniformName", EShaderResourceType::Sampler, EShaderStage::VertexShader | EShaderStage::FragmentShader, EShaderResourceUsageType::Static, 1 },
@@ -166,7 +166,7 @@ int main_old(){
 	auto merged = CShaderResourceSetDesc::merge(descSetA, descSetB);
 	merged = CShaderResourceSetDesc::merge(merged, descSetC);
 
-	auto mergedSetDesc = srm.GetResourceSetDesc(merged);
+	auto mergedSetDesc = srm->GetResourceSetDesc(merged);
 
 	ASSERT(reset.get() == reset2.get());
 	
@@ -204,7 +204,7 @@ int main_old(){
 	SharedPtr<CShader> VShader = NewShared<CShader>(dev.get(), vsdesc);
 	SharedPtr<CShader> FShader = NewShared<CShader>(dev.get(), fsdesc);
 	
-	CShaderProgram program(dev.get(), {VShader, FShader});
+	CShaderProgram program(dev.get(), "s", {VShader, FShader});
 
 	MainPlatformLoop();
 	
@@ -294,19 +294,16 @@ SharedPtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
 	return SharedPtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(dev, "light"));
 }
 
-SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat vertexformat){
+SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* device, SVertexFormat vertexformat){
 	
 	CShaderDefines defines;
 	defines.add("type", "vec4");
 	defines.add("components", "rgba");
+	
+	auto source = CShader::ReadSouceFromFile("graphics/shaders/mipmap_gen/downsamplers.ps.glsl", &defines);
+	auto vsSource = CShader::ReadSouceFromFile("graphics/shaders/simple.vnt.vs.glsl", &defines);
 
-	auto source = TestIncludes("graphics/shaders/mipmap_gen/downsamplers.ps.glsl");
-	source = defines.insertInto(source);
-
-	printContentsToFile("graphics/shaders/mipmap_gen/downsamplers.ps.glsl.processed.glsl", source.c_str(), source.length());
-
-	auto vsSource = TestIncludes("graphics/shaders/simple.vnt.vs.glsl");
-	vsSource = defines.insertInto(vsSource);
+	printContentsToFile("graphics/shaders/mipmap_gen/downsamplers.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
 
 	SShaderDesc fsdesc(EShaderStage::FragmentShader, "downsamplers.ps.glsl", source, 
 							{ {
@@ -316,9 +313,9 @@ SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* dev, SVertexFormat verte
 	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vnt.vs.glsl", vsSource, {});
 	vsdesc.vertexFormat = vertexformat;
 
-	SharedPtr<CShader> VShader = NewShared<CShader>(dev, vsdesc);
-	SharedPtr<CShader> FShader = NewShared<CShader>(dev, fsdesc);
-	SharedPtr<CShaderProgram> program = SharedPtr<CShaderProgram>(new CShaderProgram(dev, { VShader, FShader }));
+	auto VShader = device->GetShaderModuleManager()->CreateShaderModule(vsdesc);
+	auto FShader = device->GetShaderModuleManager()->CreateShaderModule(fsdesc);
+	auto program = device->GetShaderProgramManager()->CreateShaderProgram("downsamplers.ps.glsl", { VShader, FShader });
 	
 	return program;
 }
@@ -352,8 +349,8 @@ auto testXML(GPUDevice* dev){
 	);
 
 	auto manager = CSingleton<CMaterialManager>::get();
-	auto material = manager->FindOrCreateMaterial(desc);
-	material = manager->FindOrCreateMaterial(desc);
+	auto material = manager->CreateMaterial(desc);
+	material = manager->CreateMaterial(desc);
 
 	auto ub = CreateUniformBuffer(dev);
 	auto mi = material->CreateInstance(dev, {}, {"ublight"});
@@ -427,12 +424,12 @@ int main()
 	*globalDefines += defines2;
 
 	auto source = TestIncludes("data/Shaders/simple.ps.glsl");
-	source = globalDefines->insertInto(source);
+	source = globalDefines->InsertInto(source);
 
-	printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), source.length());
+	printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
 
 	auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
-	vsSource = globalDefines->insertInto(vsSource);
+	vsSource = globalDefines->InsertInto(vsSource);
 
 	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, { {
 			{0, 0, "tx", EShaderResourceType::Texture, EShaderStage::FragmentShader},
@@ -443,10 +440,10 @@ int main()
 
 	SharedPtr<CShader> VShader = NewShared<CShader>(device.get(), vsdesc);
 	SharedPtr<CShader> FShader = NewShared<CShader>(device.get(), fsdesc);
-	SharedPtr<CShaderProgram> program = SharedPtr<CShaderProgram>(new CShaderProgram(device.get(), { VShader, FShader }));
+	SharedPtr<CShaderProgram> program = SharedPtr<CShaderProgram>(new CShaderProgram(device.get(), "simple.ps.glsl", { VShader, FShader }));
 
-	auto renderPass = device->getSwapchainRenderPass();
-	auto framebuffer = device->getActiveSwapchainFramebuffer();
+	auto renderPass = device->GetSwapchainRenderPass();
+	auto framebuffer = device->GetActiveSwapchainFramebuffer();
 	
 	SPipelineStateDesc psdesc;
 	{

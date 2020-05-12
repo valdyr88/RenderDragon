@@ -130,18 +130,19 @@ class GPUDevice;
 
 class CTextureManager{
 protected:
-	stdex::container<SharedPtr<CTexture>> textures;
 	GPUDevice* device = nullptr;
 
-	CTextureManager() = delete;
+	CTextureManager(){}
 	CTextureManager(GPUDevice* dev) : device(dev){}
+	void setDevice(GPUDevice* dev){ device = dev; }
 public:
 
 	SharedPtr<CTexture> FindByName(std::string name);
-	SharedPtr<CTexture> FindByNameOrCreate(std::string name, const STextureDesc* desc = nullptr);
+	SharedPtr<CTexture> CreateTexture(std::string name, const STextureDesc* desc = nullptr);
 
 	friend class GPUDevice;
 	friend class CSingleton<CTextureManager>;
+	friend bool rdSetupDeviceForGlobalObjects(GPUDevice* device);
 };
 
 #endif //RD_API_OPENGL4

@@ -43,11 +43,19 @@ protected:
 	SGPUDeviceContext context;
 	SWindow window;
 	CGLState gl;
-	std::list<WeakPtr<CGraphicObject>> objects;
+
+	struct CreatedObjects{
+		stdex::container<WeakPtr<CGraphicObject>> objects;
+
+		stdex::container<WeakPtr<CShader>> shaders;
+		stdex::container<WeakPtr<CShaderProgram>> programs;
+		stdex::container<WeakPtr<CTexture>> textures;
+	} created;
 
 	template <typename type>
 	void addTrackedObject(SharedPtr<type>& obj);
-	SharedPtr<CGraphicObject> getTrackedObject(CGraphicObject* ptr);
+	template <typename type>
+	SharedPtr<type> getTrackedObject(type* ptr);
 
 	SharedPtr<CRenderPass> swapchainRenderPass;
 	SharedPtr<CFramebuffer> swapchainFramebuffer;
@@ -56,7 +64,7 @@ protected:
 	CVertexBuffer* boundVertexBuffer = nullptr;
 	CIndexBuffer* boundIndexBuffer = nullptr;
 
-	CShaderResourceSetManager shaderResourceSetManager;
+	//CShaderResourceSetManager shaderResourceSetManager;
 
 	GPUDevice() = delete;
 
@@ -78,7 +86,7 @@ protected:
 
 public:
 
-	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc), shaderResourceSetManager(this){
+	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){
 		descriptor.api = EGraphicsAPI::OpenGL4;
 	}
 
@@ -93,8 +101,9 @@ public:
 	SharedPtr<CRenderPass> CreateRenderPass(const SRenderPassDesc& desc);
 	SharedPtr<CBuffer> CreateBuffer(const SBufferDesc& desc);
 	SharedPtr<CFramebuffer> CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTexture = nullptr);
-	//SharedPtr<CShader> CreateShaderModule(const SShaderDesc& desc);
+	SharedPtr<CShader> CreateShaderModule(const SShaderDesc& desc);
 	//SharedPtr<CShaderResource> CreateShaderResrouce(const SShaderResourceDesc& desc);
+	SharedPtr<CShaderProgram> CreateShaderProgram(std::string uniquename, std::vector<SharedPtr<CShader>> shaders);
 	SharedPtr<CSampler> CreateSampler(const SSamplerDesc& desc);
 	SharedPtr<CVertexBuffer> CreateVertexBuffer(const SVertexFormat& desc, uint32 count, std::vector<SRawData> data = std::vector<SRawData>());
 	SharedPtr<CIndexBuffer> CreateIndexBuffer(EValueType type, uint32 count, SRawData data = SRawData());
@@ -110,14 +119,18 @@ public:
 
 	bool PresentFrame();
 
-	SharedPtr<CRenderPass> getSwapchainRenderPass(){ return swapchainRenderPass; }
-	SharedPtr<CFramebuffer> getActiveSwapchainFramebuffer(){ return swapchainFramebuffer; }
+	SharedPtr<CRenderPass> GetSwapchainRenderPass(){ return swapchainRenderPass; }
+	SharedPtr<CFramebuffer> GetActiveSwapchainFramebuffer(){ return swapchainFramebuffer; }
 
 	SharedPtr<CShaderResourceBinding> CreateShaderResourceBinding(const SShaderResourceBindingDesc& desc, CShaderResource* resource);
 	SharedPtr<CShaderResourceSetDesc> CreateShaderResourceSetDesc(const std::vector<SShaderResourceBindingDesc>& binds);
 	SharedPtr<CShaderResourceSet> CreateShaderResourceSet(const CShaderResourceSetDesc* desc, const std::vector<CShaderResource*>& rers);
 
-	auto& getShaderResourceManager(){ return shaderResourceSetManager; }
+	auto GetShaderResourceManager(){ return CSingleton<CShaderResourceSetManager>::get(); }
+	auto GetShaderProgramManager(){ return CSingleton<CShaderProgramManager>::get(); }
+	auto GetShaderModuleManager(){ return CSingleton<CShaderModuleManager>::get(); }
+	auto GetTextureManager(){ return CSingleton<CTextureManager>::get(); }
+
 	template <typename type>
 	SharedPtr<type> FindSharedPtr(CGraphicObject* ptr);
 
@@ -136,13 +149,16 @@ public:
 	friend class CShaderProgram;
 	friend class CShaderResource;
 	friend class IUniformBuffer;
+	
+	friend class CShaderResourceSetManager;
+	friend class CShaderModuleManager;
+	friend class CShaderProgramManager;
+	friend class CTextureManager;
 };
 
-template <typename type>
-SharedPtr<type> GPUDevice::FindSharedPtr(CGraphicObject* ptr){
-	return  std::dynamic_pointer_cast<type, CGraphicObject>(getTrackedObject(ptr)); }
-
 SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);
+
+bool rdSetupDeviceForGlobalObjects(GPUDevice* device);
 
 #endif //RD_API_OPENGL4
 #endif //DEVICE_H

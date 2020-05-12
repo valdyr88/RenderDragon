@@ -57,6 +57,13 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 	else
 		LOG_ERR("material doesn't have attribute: id");
 
+	LOG("Parsing material: <%s>", desc.name.c_str());
+
+	if(node->first_attribute("shader") != nullptr)
+		desc.shader = node->first_attribute("shader")->value();
+	else
+		LOG_ERR("material doesn't have attribute: shader");
+
 	if(node->first_node("paramgroup") != nullptr){
 		for(auto pgnode = node->first_node("paramgroup"); pgnode != nullptr; pgnode = pgnode->next_sibling("paramgroup"))
 		{
@@ -196,6 +203,8 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 	if(desc.paramGroups.size() == 0 && desc.textures.size() == 0)
 		LOG_WARN("material <%s> doesn't have any params", desc.name.c_str());
 
+	LOG("Parsing material end");
+
 	return desc;
 }
 
@@ -267,10 +276,10 @@ SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vect
 		}
 	}
 	
-	auto txManager = CSingleton<CTextureManager>::get(dev);
+	auto txManager = CSingleton<CTextureManager>::get();
 	for(auto pt = this->descriptor.textures.begin(); pt != this->descriptor.textures.end(); ++pt)
 	{
-		auto tx = txManager->FindByNameOrCreate(pt->path);
+		auto tx = txManager->CreateTexture(pt->path);
 		if(tx == nullptr){
 			LOG_ERR("Can't find or create texture <%s>!", pt->path.c_str()); }
 
@@ -292,7 +301,7 @@ CMaterialInstance::~CMaterialInstance(){
 //	CMaterialManager
 //----------------------------------------------------------------------------------------------
 
-SharedPtr<CMaterial> CMaterialManager::FindOrCreateMaterial(const SMaterialDesc& desc){
+SharedPtr<CMaterial> CMaterialManager::CreateMaterial(const SMaterialDesc& desc){
 	for(uint i = 0; i < materials.size(); ++i){
 		auto& material = *materials[i];
 		if(material.descriptor == desc){

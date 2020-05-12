@@ -78,11 +78,11 @@ public:
 	bool ReadFormatted(const char* format, ...);
 	bool WriteFormatted(const char* format, ...);
 
-	bool Read(uint size, byte** out_data, uint* out_size);
+	bool Read(uint size, byte* out_data, uint* out_size = nullptr);
 	bool Write(byte* data, uint size);
 
 	template<typename type>
-	bool Read(uint count, type* out_data, uint* out_count);
+	bool Read(uint count, type* out_data, uint* out_count = nullptr);
 	template<typename type>
 	bool Write(type* data, uint count);
 
@@ -90,6 +90,7 @@ public:
 	uint getSize();
 	uint getRemaining();
 	uint getPosition();
+	bool isOpen(){ return file != nullptr; }
 
 	void Close();
 protected:
@@ -100,7 +101,7 @@ protected:
 
 template<typename type>
 bool CFile::Read(uint count, type* out_data, uint* out_count){
-	byte** ptr = (byte**)&out_data;
+	byte* ptr = (byte*)out_data;
 	bool r = this->Read(count*sizeof(type), ptr, out_count);
 	if(out_count != nullptr) *out_count /= sizeof(type);
 	return r;
