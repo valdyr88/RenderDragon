@@ -32,7 +32,7 @@ bool CVertexBuffer::Create(std::vector<SRawData> datas){
 
 		uint32 stride = 0;
 
-		for(uint i = 0; i < this->format.attributes.size(); ++i){
+		for(sizetype i = 0; i < this->format.attributes.size(); ++i){
 			auto& att = this->format.attributes[i];
 			if(att.stride == 0){
 				att.stride = stride;
@@ -56,7 +56,7 @@ bool CVertexBuffer::Create(std::vector<SRawData> datas){
 
 		for(uint i = 0; i < this->format.attributes.size(); ++i){
 			auto& att = this->format.attributes[i];
-			uint size = sizeInBytes(att.type)*componentCount(att.count)*count;
+			sizetype size = (sizetype)sizeInBytes(att.type)*componentCount(att.count)*count;
 			if(att.stride == 0){
 				att.stride = componentCount(att.count)*sizeInBytes(att.type); }
 

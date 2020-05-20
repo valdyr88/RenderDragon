@@ -219,7 +219,7 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(std::string xml){
 	if(m == nullptr)
 		LOG_ERR("root node is not material!");
 
-	return CreateMaterialDescFromXML(m);
+	return CMaterial::CreateMaterialDescFromXML(m);
 }
 
 bool CMaterial::Create()

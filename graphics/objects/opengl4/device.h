@@ -110,6 +110,8 @@ public:
 	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, const STextureRawData& data = STextureRawData());
 	SharedPtr<CTexture> CreateTexture(const STextureDesc& desc, std::string fileName);
 	SharedPtr<CTextureView> CreateTextureView(const STextureViewDesc& desc, SharedPtr<CTexture> tx);
+	template <typename type>
+	SharedPtr<CUniformBuffer<type>> CreateUniformBuffer(const char* name);
 
 	void ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorValues clear);
 	void BindVertexBuffer(CVertexBuffer* vb){ boundVertexBuffer = vb; if(vb) vb->Bind(); }
@@ -159,6 +161,11 @@ public:
 SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& desc);
 
 bool rdSetupDeviceForGlobalObjects(GPUDevice* device);
+
+template <typename type>
+inline SharedPtr<CUniformBuffer<type>> GPUDevice::CreateUniformBuffer(const char* name){
+	return SharedPtr<CUniformBuffer<type>>(new CUniformBuffer<type>(this, name));
+}
 
 #endif //RD_API_OPENGL4
 #endif //DEVICE_H

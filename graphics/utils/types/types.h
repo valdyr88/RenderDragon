@@ -19,6 +19,8 @@ typedef double float64;
 typedef unsigned int uint;
 typedef uint8_t byte;
 
+typedef size_t sizetype;
+
 template <typename type>
 inline bool isequal(const type* a, const type* b, uint l){
 	if(a == nullptr || b == nullptr) return false;
@@ -193,7 +195,27 @@ inline EValueSize toEValueSize(const char* str){
 	if(strisequal(str, "ivec4")) return EValueSize::vec4;
 	return EValueSize::scalar;
 }
-
+inline EValueSize toEValueSizeVec(uint count){
+	switch(count){
+		case 1: return EValueSize::scalar;
+		case 2: return EValueSize::vec2;
+		case 3: return EValueSize::vec3;
+		case 4: return EValueSize::vec4;
+	}
+	return EValueSize::scalar;
+}
+inline EValueSize toEValueSizeMat(uint count, bool colmajor = false){
+	switch(count){
+		case 1: return EValueSize::scalar;
+		case 4: return EValueSize::mat2x2;
+		case 6: return (colmajor)? EValueSize::mat3x2 : EValueSize::mat2x3;
+		case 8: return (colmajor)? EValueSize::mat4x2 : EValueSize::mat2x4;
+		case 9: return EValueSize::mat3x3;
+		case 12: return (colmajor)? EValueSize::mat4x3 : EValueSize::mat3x4;
+		case 16: return EValueSize::mat4x4;
+	}
+	return EValueSize::scalar;
+}
 
 template <typename type> bool istypeof(EValueType v, EValueSize s){ return false; }
 template<> inline bool istypeof<float>(EValueType v, EValueSize s){ return (v == EValueType::float32) && (s == EValueSize::scalar); }
@@ -215,5 +237,9 @@ const uint16 uint16_max = ((uint16)(0xffff));
 const int8 int8_max = ((int8)(0x7f));
 const uint8 uint8_max = ((uint8)(0xff));
 const byte byte_max = ((byte)(0xff));
+const float32 float32_infinity = ((float32)((1e+300)*(1e+300)));
+const float32 float32_nan = ((float32)(((1e+300)*(1e+300))*0.0));
+const float64 float64_infinity = ((float64)((float32)((1e+300)*(1e+300))));
+const float64 float64_nan = ((float64)((float32)(((1e+300)*(1e+300))*0.0)));
 
 #endif //TYPES_H

@@ -21,7 +21,13 @@ public:
 		SUniformMap(n, t, s, c)
 	{
 		valueSizeInBytes = sizeInBytes(t) * componentCount(s) * count;
-		value = __new byte[valueSizeInBytes];
+		value = __new byte[valueSizeInBytes]; bIsValueSet = false;
+	}
+
+	SMaterialParam() : SUniformMap("", EValueType::float32, EValueSize::scalar, 1)
+	{
+		valueSizeInBytes = 0;
+		value = nullptr; bIsValueSet = false;
 	}
 
 	template <typename Type>
@@ -46,6 +52,7 @@ struct SMaterialParamsGroup{
 
 	SMaterialParamsGroup(std::string n, const std::vector<SMaterialParam>& p) : ubstruct(n), params(p) { }
 	SMaterialParamsGroup(std::string n) : ubstruct(n) { }
+	SMaterialParamsGroup() : ubstruct("") { }
 
 	bool operator == (const SMaterialParamsGroup& other) const{
 		if(ubstruct != other.ubstruct) return false;
@@ -58,7 +65,7 @@ struct SMaterialParamsGroup{
 
 	SMaterialParamsGroup& operator = (const SMaterialParamsGroup& other){
 		ubstruct = other.ubstruct;
-		params.reserve(other.params.size());
+		params.resize(other.params.size());
 		for(uint i = 0; i < other.params.size(); ++i)
 			params[i] = other.params[i];
 		return *this;
@@ -122,10 +129,10 @@ struct SMaterialDesc{
 	SMaterialDesc& operator = (const SMaterialDesc& other){
 		name = other.name;
 		shader = other.shader;
-		paramGroups.reserve(other.paramGroups.size());
+		paramGroups.resize(other.paramGroups.size());
 		for(uint i = 0; i < other.paramGroups.size(); ++i)
 			paramGroups[i] = other.paramGroups[i];
-		textures.reserve(other.textures.size());
+		textures.resize(other.textures.size());
 		for(uint i = 0; i < other.textures.size(); ++i)
 			textures[i] = other.textures[i];
 		return *this;

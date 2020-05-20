@@ -12,7 +12,7 @@
 class CVertexBuffer : public CGraphicObject{
 protected:
 	SVertexFormat format;
-	uint32 count;
+	sizetype count;
 	GLuint id = 0;
 
 	std::vector<UniquePtr<CBuffer>> buffers;
@@ -22,7 +22,7 @@ protected:
 	virtual void Release() override;
 public:
 
-	CVertexBuffer(GPUDevice* dev, const SVertexFormat& fmt, uint32 c, std::vector<SRawData> data = std::vector<SRawData>()) :
+	CVertexBuffer(GPUDevice* dev, const SVertexFormat& fmt, sizetype c, std::vector<SRawData> data = std::vector<SRawData>()) :
 		CGraphicObject(dev), format(fmt), count(c){
 		Create(data);
 	}
@@ -34,6 +34,8 @@ public:
 	bool Bind();
 
 	virtual ~CVertexBuffer() override{ Release(); }
+
+	static std::vector<byte> InterleaveVertexData(const SVertexFormat& fmt, const std::vector<byte*>& data, sizetype vertexCount);
 };
 
 class CIndexBuffer : public CGraphicObject{

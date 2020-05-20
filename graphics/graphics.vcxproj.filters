@@ -213,6 +213,9 @@
     <ClInclude Include="ext\material\material.h">
       <Filter>Header Files\ext\material</Filter>
     </ClInclude>
+    <ClInclude Include="utils\hash.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="objects\shader.cpp">
@@ -262,6 +265,9 @@
     </ClCompile>
     <ClCompile Include="ext\material\material.cpp">
       <Filter>Header Files\ext\material</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\model\mesh.cpp">
+      <Filter>Header Files\ext\model</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

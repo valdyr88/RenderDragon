@@ -2,6 +2,7 @@
 #define VECTYPES_H
 
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 typedef float scalar;
 typedef glm::vec2 vec2;

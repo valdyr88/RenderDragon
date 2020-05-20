@@ -282,13 +282,28 @@ struct LightData{
 
 	static std::vector<SUniformMap> desc;
 };
-
 std::vector<SUniformMap> LightData::desc = {
 	{"position", EValueType::float32, EValueSize::vec3 },
 	{"intensity", EValueType::float32, EValueSize::scalar },
 	{"time", EValueType::float32, EValueSize::scalar },
 };
 rdRegisterUniformBufferStructure(LightData);
+
+
+struct TransformMatrices{
+	mat4 world;
+	mat4 view;
+	mat4 projection;
+
+	static std::vector<SUniformMap> desc;
+};
+std::vector<SUniformMap> TransformMatrices::desc = {
+	{"world", EValueType::float32, EValueSize::mat4x4 },
+	{"view", EValueType::float32, EValueSize::mat4x4 },
+	{"projection", EValueType::float32, EValueSize::mat4x4 }
+};
+rdRegisterUniformBufferStructure(TransformMatrices);
+
 
 SharedPtr<CUniformBuffer<LightData>> CreateUniformBuffer(GPUDevice* dev){
 	return SharedPtr<CUniformBuffer<LightData>>(new CUniformBuffer<LightData>(dev, "light"));
@@ -359,9 +374,152 @@ auto testXML(GPUDevice* dev){
 	return mi;
 }
 
+#include "graphics/ext/model/mesh.h"
+auto testMeshXML(GPUDevice* dev){
+	SModelDesc mdlDesc;
+	mdlDesc.name = "nejm";
+	mdlDesc.path = "data/Meshes/Sponza/glTF/Sponza.gltf";
+
+	CModel mesh = CModel(dev, mdlDesc);
+
+	return mesh;
+}
+
 int chipschallenge_main();
 
 int main()
+{
+	SGPUDeviceDesc devdesc;
+	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
+	devdesc.swapchain.width = 512;
+	devdesc.swapchain.height = 288;
+
+	UniquePtr<GPUDevice> device = GPUDevice::CreateGPUDevice(devdesc);
+
+	SWindow window;
+	window.CreateProgramWindow("Prozor", devdesc.swapchain.width, devdesc.swapchain.height, 20, 20, window.flags, true);
+
+	device->InitContextOnWindow(window);
+
+	auto sponza = testMeshXML(device.get());
+	sponza = testMeshXML(device.get());
+
+	auto vsubTransform = device->CreateUniformBuffer<TransformMatrices>("transform");
+	auto& vsub = *vsubTransform.get();
+
+	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
+	for(uint i = 0; include_list[i] != nullptr; ++i)
+		srcList->add(include_list[i], getFileStringContents(include_list[i]));
+
+	CShaderDefines* globalDefines = CSingleton<CShaderDefines>::get();
+	globalDefines->add("DEBUG", "1");
+	globalDefines->add("HDR_ENABLE", "true");
+	globalDefines->add("NEKIDEFINE", "0x001");
+
+	CShaderDefines defines2;
+	defines2.add("DEBUG_BUG", "123");
+	defines2.add("BLABLA_TADA", "DEBUG_BUG");
+	defines2.add("T", "1");
+
+	*globalDefines += defines2;
+
+	auto source = TestIncludes("data/Shaders/simple_shading.ps.glsl");
+	source = globalDefines->InsertInto(source);
+
+	printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
+
+	auto vsSource = TestIncludes("data/Shaders/simple.vntt.vs.glsl");
+	vsSource = globalDefines->InsertInto(vsSource);
+
+	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple_shading.ps.glsl", source, {  });
+	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vntt.vs.glsl", vsSource, {{
+			{0, 0, "transform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader}
+		}});
+	vsdesc.vertexFormat = (*sponza.begin())->Mesh()->getVertexBuffer()->getVertexFormat();
+
+	auto VShader = CSingleton<CShaderModuleManager>::get()->CreateShaderModule(vsdesc);
+	auto FShader = CSingleton<CShaderModuleManager>::get()->CreateShaderModule(fsdesc);
+	auto program = CSingleton<CShaderProgramManager>::get()->CreateShaderProgram("simple_shading.glsl", { VShader,FShader });
+	
+	auto renderPass = device->GetSwapchainRenderPass();
+	auto framebuffer = device->GetActiveSwapchainFramebuffer();
+
+	SPipelineStateDesc psdesc;
+	{
+		psdesc.shader = program;
+		psdesc.blendDesc.alphaToCoverageEnable = false;
+		psdesc.blendDesc.attachmentBlends[0].blendEnable = false;
+		psdesc.depthDesc.enable = true;
+		psdesc.depthDesc.depthFunc = EComparisonOp::Less;
+		psdesc.depthDesc.depthWriteEnable = true;
+		psdesc.primitiveTopology = EPrimitiveTopology::TriangleList;
+		psdesc.renderPass = renderPass;
+		psdesc.viewports.numViewports = 1;
+		psdesc.viewports.viewports[0].width = (float)device->getDescriptor().swapchain.width;
+		psdesc.viewports.viewports[0].height = (float)device->getDescriptor().swapchain.height;
+		psdesc.viewports.viewports[0].x = 0;
+		psdesc.viewports.viewports[0].y = 0;
+		psdesc.viewports.scissorTest->enable = false;
+		psdesc.rasterizerDesc.fillMode = EFillMode::Solid;
+		/*psdesc.rasterizerDesc.cullMode = ECullMode::FrontFaces;
+		psdesc.rasterizerDesc.frontFace = EFrontFace::CounterClockwise;*/
+		psdesc.rasterizerDesc.cullMode = ECullMode::BackFaces;
+		psdesc.rasterizerDesc.frontFace = EFrontFace::CounterClockwise;
+	}
+	auto pipeline = device->CreatePipelineState(psdesc);
+
+	program->getNofStages();
+	auto shader = pipeline->getShaderProgram();
+
+	float angle = 0.0f;
+	float dTime = 0.0f;
+	float time = 0.0f;
+
+	float possitionHeight = 0.2f;
+
+	vec3 position = vec3(1.0f,0.0f,0.0f);
+	vec3 lookPt = vec3(0.0f, possitionHeight,0.0f);
+
+	while(true)
+	{
+		PlatfromLoopUpdate();
+
+		//----------------------------
+		renderPass->Begin(framebuffer.get(), SClearColorValues(vec4(0.5f, 0.7f, 1.0f, 1.0f), 1.0f));
+		pipeline->Bind();
+
+		angle = 1.0f * time;
+		position = 0.15f * vec3(cosf(angle), possitionHeight/0.15f, sinf(angle));
+
+			vsub->projection = glm::perspective(75.0f, 1.0f, 0.01f, 100.0f);
+			vsub->view = glm::identity<mat4>();
+			vsub->view = glm::lookAt(position, lookPt, vec3(0.0f, -1.0f, 0.0f));
+			vsub->world = glm::identity<mat4>();
+			vsub->world = glm::scale(vsub->world, vec3(0.001f));
+
+		vsub.Upload();
+
+		//ToDo: napravit provjeru shader sourcea i resourceSetDesc. postoje li svi resoursi u shaderu, ili shader ima neke koji nema resourceSetDesc i obratno?
+		shader->setUniformBuffer("transform", &vsub);
+
+		for(auto meshT : sponza){
+			device->BindVertexBuffer(meshT->Mesh()->getVertexBuffer());
+			device->BindIndexBuffer(meshT->Mesh()->getIndexBuffer());
+
+			device->DrawIndexed();
+		}
+		renderPass->End();
+		//----------------------------
+		device->PresentFrame();
+
+		time += dTime;
+		Sleep(1); dTime = 1.0f / 1000.0f;
+	}
+
+	return 0;
+}
+
+int main_mipmapgen()
 {
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
@@ -430,17 +588,17 @@ int main()
 
 	auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
 	vsSource = globalDefines->InsertInto(vsSource);
-
-	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, { {
+	
+	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple_shading.ps.glsl", source, { {
 			{0, 0, "tx", EShaderResourceType::Texture, EShaderStage::FragmentShader},
 			{0, 2, "light", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader}
-		} });
-	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vnt.vs.glsl", vsSource, {});
+		}});
+	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vntt.vs.glsl", vsSource, {});
 	vsdesc.vertexFormat = vertexBuffer->getVertexFormat();
 
-	SharedPtr<CShader> VShader = NewShared<CShader>(device.get(), vsdesc);
-	SharedPtr<CShader> FShader = NewShared<CShader>(device.get(), fsdesc);
-	SharedPtr<CShaderProgram> program = SharedPtr<CShaderProgram>(new CShaderProgram(device.get(), "simple.ps.glsl", { VShader, FShader }));
+	auto VShader = CSingleton<CShaderModuleManager>::get()->CreateShaderModule(vsdesc);
+	auto FShader = CSingleton<CShaderModuleManager>::get()->CreateShaderModule(fsdesc);
+	auto program = CSingleton<CShaderProgramManager>::get()->CreateShaderProgram("simple.ps.glsl", { VShader,FShader });
 
 	auto renderPass = device->GetSwapchainRenderPass();
 	auto framebuffer = device->GetActiveSwapchainFramebuffer();
@@ -483,7 +641,7 @@ int main()
 	CMipMapGen mipmap(device.get(), mipshader, txfmt);
 
 	mipmap.Generate(texture);
-
+	
 	while(true)
 	{
 		PlatfromLoopUpdate();

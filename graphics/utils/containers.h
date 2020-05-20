@@ -9,6 +9,29 @@
 
 namespace stdex{
 
+template <typename classname, typename returntype>
+class iterator{
+	sizetype position = 0;
+	const classname* pcontainer = nullptr;
+	returntype(*getelement)(const classname*, sizetype) = nullptr;
+public:
+	iterator(const classname* cnt, sizetype pos, returntype(*pfnc)(const classname*,sizetype))
+		: pcontainer(cnt), position(pos), getelement(pfnc)
+	{ }
+
+	bool operator != (const iterator& other){
+		return position != other.position;
+	}
+
+	returntype operator*() const{
+		return getelement(pcontainer, position);
+	}
+
+	const iterator& operator++(){
+		++position; return *this;
+	}
+};
+
 template <typename Type> class container{
 	std::vector<Type*> elements;
 public:
@@ -73,90 +96,11 @@ public:
 	~container(){
 		clear();
 	}
-
+	
+	friend class iterator<container<Type>, Type*>;
+	iterator<container<Type>, Type*> begin() const{ return iterator<container<Type>, Type*>(this, 0, [](const container<Type>* ptr, sizetype pos){ return ptr->elements[pos]; }); }
+	iterator<container<Type>, Type*> end() const{ return iterator<container<Type>, Type*>(this, elements.size(), [](const container<Type>* ptr, sizetype pos){ return ptr->elements[pos]; }); }
 };
-/*
-template <typename Type> class array{
-	std::vector<Type> elements;
-public:
-	array(){}
-
-	Type& operator[](uint i){
-		if(i >= elements.size())
-			LOG_ERR("i >= elements.size()!");
-		return elements[i];
-	}
-
-	uint add(Type& e){
-		elements.emplace_back(e);
-		return (uint)elements.size() - 1;
-	}
-	Type& add(){
-		Type e();
-		uint i = add(e);
-		return elements[i];
-	}
-	void resize(uint newSize){
-		elements.resize(newSize);
-	}
-	uint size(){ return (uint)elements.size(); }
-
-	void clear(){
-		elements.clear();
-	}
-	~array(){
-		clear();
-	}
-};
-
-template <typename Type> class list{
-	std::list<Type> elements;
-public:
-	list(){}
-
-	uint add(Type& e){
-		elements.emplace_back(e);
-		return (uint)elements.size()-1;
-	}
-	Type& add(){
-		return *elements.emplace();
-	}
-	uint size(){ return (uint)elements.size(); }
-
-	auto begin(){ return elements.begin(); }
-	auto end(){ return elements.end(); }
-
-	void clear(){
-		elements.clear();
-	}
-	~list(){
-		clear();
-	}
-};
-
-template <typename Key, typename Type> class map{
-	std::map<Key, Type> elements;
-public:
-	map(){}
-
-	auto operator[](Key key){
-		return elements[key]; }
-
-	auto begin(){ return elements.begin(); }
-	auto end(){ return elements.end(); }
-
-	uint size(){ return (uint)elements.size(); }
-
-	uint add(Key key, Type value){
-		elements[key] = value; return size();
-	}
-	auto insert(Key key, Type value){
-		return elements.insert({ key, value });
-	}
-
-	auto find(Key key){ return elements.find(key); }
-};
-*/
 
 template <typename type>
 bool CheckNotInList(type pt, std::list<type>& points){

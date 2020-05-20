@@ -234,28 +234,36 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL4|x64'">
     <LibraryPath>$(ProjectDir)objects\opengl4\gl\lib\win\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(ProjectDir)utils\assimp\code;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL4|x64'">
     <LibraryPath>$(ProjectDir)objects\opengl4\gl\lib\win\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(ProjectDir)utils\assimp\code;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Vk|x64'">
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_WGL|x64'">
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Vk|x64'">
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_WGL|x64'">
     <OutDir>$(SolutionDir)</OutDir>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -528,6 +536,7 @@
     <ClInclude Include="objects\opengl4\uniform_buffer.h" />
     <ClInclude Include="objects\opengl4\vertex_buffer.h" />
     <ClInclude Include="utils\containers.h" />
+    <ClInclude Include="utils\hash.h" />
     <ClInclude Include="utils\log.h" />
     <ClInclude Include="utils\platform.h" />
     <ClInclude Include="utils\platform_defines.h" />
@@ -540,6 +549,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ext\material\material.cpp" />
+    <ClCompile Include="ext\model\mesh.cpp" />
     <ClCompile Include="objects\buffer.cpp" />
     <ClCompile Include="objects\device.cpp" />
     <ClCompile Include="objects\framebuffer.cpp" />
