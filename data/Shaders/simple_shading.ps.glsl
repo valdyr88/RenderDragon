@@ -5,7 +5,7 @@
 #include "Shaders/include/functions.glsl"
 #include "Shaders/include/defines.glsl"
 
-layout(std140, binding = 2) uniform LightData{
+layout(std140, binding = 3) uniform LightData{
 	vec3 position;
 	float intensity;
 	float time;
@@ -25,7 +25,8 @@ out vec4 FragColor;
 
 void main(){
 /**/
-	vec3 LightPosition = 1.0f*vec3(-1.0,-0.0,-0.1);
+	// vec3 LightPosition = 1.0f*vec3(-1.0f,2.0f,-1.5f);
+	vec3 LightPosition = 1.0f*vec3(-1.0f,0.35f,-0.05f) + 0.15f*vec3(sin(light.time),0.0f,cos(light.time));
 	highp vec3 toLight = LightPosition - WorldPosition;
 	vec3 L = normalize(toLight);
 	vec3 N = normalize(Normal);
@@ -34,12 +35,12 @@ void main(){
 	
 	vec4 color = texture(txDiffuse, UV.xy);
 	vec4 normal = texture(txNormal, UV.xy);
-	normal.xyz = normalize(2.0f*normal.xyz - vec3(1.0f));
+	normal.xyz = vec3(1.0f,-1.0f,1.0f)*normalize(2.0f*normal.xyz - vec3(1.0f));
 	
-	mat3 normalMatrix = mat3(Normal,Tangent,Bitangent);
+	mat3 normalMatrix = transpose(mat3(Tangent,Bitangent,Normal));
 	N = normalize(normal.xyz*normalMatrix);	
 	
-	float shade = dot(L,N)*0.5f + 0.5f;
+	float shade = 0.5f*dot(L,N)+0.5f;
 	// shade = 0.1f / pow(distoLight,2.0f);
 
 	FragColor = vec4(vec3(shade),1.0f);
@@ -55,8 +56,8 @@ void main(){
 		// FragColor.xyz = vec3(0.0f);
 	// if((Flags & VertexFlags_UVisCCW) != 0)
 		// FragColor.xyz += vec3(0.0f,0.0f,0.5f);
-	if((Flags & VertexFlags_TangentHandedness) != 0)
-		FragColor.xyz += vec3(0.0f,0.5f,0.0f);
+	// if((Flags & VertexFlags_TangentHandedness) != 0)
+		// FragColor.xyz += vec3(0.0f,0.5f,0.0f);
 	// if((Flags & VertexFlags_UVWindIsDifferent) != 0)
 		// FragColor.xyz += vec3(0.5f,0.0f,0.0f);
 		

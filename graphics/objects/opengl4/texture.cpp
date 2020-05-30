@@ -97,6 +97,8 @@ bool CTexture::Create(std::string& fileName){
 		case EValueType::uint24:
 		case EValueType::int32:
 		case EValueType::uint32:
+		case EValueType::int64:
+		case EValueType::uint64:
 			rdLoadImageData<uint16>(data, size, (uint16**)&image_data, &image_size, &width, &height, &components);
 			descriptor.valueType = EValueType::uint16;
 			break;

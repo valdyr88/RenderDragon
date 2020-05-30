@@ -294,13 +294,15 @@ struct TransformMatrices{
 	mat4 world;
 	mat4 view;
 	mat4 projection;
+	mat4 normal;
 
 	static std::vector<SUniformMap> desc;
 };
 std::vector<SUniformMap> TransformMatrices::desc = {
 	{"world", EValueType::float32, EValueSize::mat4x4 },
 	{"view", EValueType::float32, EValueSize::mat4x4 },
-	{"projection", EValueType::float32, EValueSize::mat4x4 }
+	{"projection", EValueType::float32, EValueSize::mat4x4 },
+	{"normal", EValueType::float32, EValueSize::mat4x4 }
 };
 rdRegisterUniformBufferStructure(TransformMatrices);
 
@@ -408,6 +410,9 @@ int main()
 	auto vsubTransform = device->CreateUniformBuffer<TransformMatrices>("transform");
 	auto& vsub = *vsubTransform.get();
 
+	auto ubLight = device->CreateUniformBuffer<LightData>("light");
+	auto& ub = *ubLight.get();
+
 	CShaderFileSource* srcList = CSingleton<CShaderFileSource>::get();
 	for(uint i = 0; include_list[i] != nullptr; ++i)
 		srcList->add(include_list[i], getFileStringContents(include_list[i]));
@@ -437,7 +442,8 @@ int main()
 			{0, 2, "txNormal", EShaderResourceType::Texture, EShaderStage::FragmentShader}
 		}});
 	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vntt.vs.glsl", vsSource, "data/Shaders/simple.vntt.vs.glsl", {{
-			{0, 0, "transform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader}
+			{0, 0, "transform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader},
+			{0, 3, "light", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader}
 		}});
 	vsdesc.vertexFormat = (*sponza.begin())->Mesh()->getVertexBuffer()->getVertexFormat();
 
@@ -525,12 +531,18 @@ int main()
 			vsub->view = glm::identity<mat4>();
 			vsub->view = glm::lookAt(position, lookPt, vec3(0.0f, -1.0f, 0.0f));
 			vsub->world = glm::identity<mat4>();
+			vsub->normal = vsub->world;
 			vsub->world = glm::scale(vsub->world, vec3(0.001f));
-
 		vsub.Upload();
+
+			ub->position = vec3(0.5f, 0.5f, 0.1f) + 0.1f * vec3(sinf(angle), cosf(angle), 0.0f);
+			ub->intensity = 0.01f * (cosf(angle) * 0.5f + 0.5f);
+			ub->time = time;
+		ub.Upload();
 
 		//ToDo: napravit provjeru shader sourcea i resourceSetDesc. postoje li svi resoursi u shaderu, ili shader ima neke koji nema resourceSetDesc i obratno?
 		shader->setUniformBuffer("transform", &vsub);
+		shader->setUniformBuffer("light", &ub);
 
 		for(auto meshT : sponza.AllMeshAndMaterials()){
 			shader->setTexture("txDiffuse", meshT.material->getTexture(0));

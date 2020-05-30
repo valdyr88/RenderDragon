@@ -333,7 +333,6 @@ CMesh* CModelLoad::LoadFromAssimp(GPUDevice* dev, aiMesh* aimesh){
 				flag = (isUVCCW[a]) ? flag | CMesh::VertexFlags::UVisCCW : flag;
 				flag = (isUVWindingDifferent[a]) ? flag | CMesh::VertexFlags::UVWindIsDifferent : flag;
 			}
-			
 			delete[] tan1; tan1 = tan2 = nullptr;
 			delete[] isUVCCW; isUVCCW = nullptr;
 			delete[] isUVWindingDifferent; isUVWindingDifferent = nullptr;

@@ -13,6 +13,7 @@ layout(std140, row_major, binding = 0) uniform TransformMatrices{
 	mat4 world;
 	mat4 view;
 	mat4 projection;
+	mat4 normal;
 } transform;
 
 out vec3 WorldPosition;
@@ -26,11 +27,10 @@ void main(){
 	vec4 wPosition = vec4(vertex,1.0) * transform.world;
 	gl_Position = (wPosition*transform.view)*transform.projection;
 	WorldPosition = wPosition.xyz;
-	Normal = normalize(normal);
+	Normal = normalize(normal*mat3(transform.normal));
+	Tangent = normalize(tangent);
 	
 	Flags = flags;
-	Tangent = normalize(tangent);
-	Bitangent = normalize(cross(Tangent, Normal));
 	
 	// if(Flags != 0){
 		// Tangent = -normalize(tangent);
@@ -40,6 +40,11 @@ void main(){
 		// Tangent = normalize(tangent);
 		// Bitangent = normalize(cross(Tangent, Normal));
 	// }
+	
+	if((Flags & VertexFlags_TangentHandedness) != 0)
+		Bitangent = -normalize(cross(Normal, Tangent));
+	else
+		Bitangent = normalize(cross(Normal, Tangent));
 	
 	UV = texCoord;
 }
