@@ -64,6 +64,15 @@ bool CShader::CompileShader(){
 	return true;
 }
 
+
+bool CShader::RecompileFromSrcFile(std::string path){
+	if(path.size() == 0) path = descriptor.path;
+	if(path.size() == 0) return false;
+
+	descriptor.source = CShader::ReadSouceFromFile(path);
+	return this->CompileShader();
+}
+
 void CShader::Release(){
 	if(this->device == nullptr) return;
 	if(this->id == 0) return;
@@ -126,8 +135,20 @@ CShaderProgram::CShaderProgram(GPUDevice* dev, std::string uniquename, std::vect
 	}
 
 	MergeShaderResourceSetDescs();
-	if(LinkProgram() == false){
-		LOG_ERR("linking failed");
+	if(LinkProgram() == false && device != nullptr)
+	{
+		auto& gl = device->gl;
+
+		GLint infoLogLen = 0;
+		gl.GetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLogLen);
+		char* info_chars = __new char[(size_t)infoLogLen + 1];
+		gl.GetProgramInfoLog(id, infoLogLen + 1, nullptr, info_chars);
+
+		info_string.reserve((size_t)infoLogLen + 1);
+		info_string.assign(info_chars);
+
+		LOG("shader linking failed: <%s> :\n%s", name.c_str(), info_string.c_str());
+		__release_array(info_chars);
 	}
 	CheckResourceBindings();
 }
@@ -172,6 +193,14 @@ bool CShaderProgram::LinkProgram(){
 	gl.LinkProgram(id);
 
 	return CheckLinkStatus();
+}
+
+bool CShaderProgram::Recompile(){
+
+	for(auto sh : shader){
+		if(sh != nullptr) sh->RecompileFromSrcFile();
+	}
+	return this->LinkProgram();
 }
 
 bool CShaderProgram::CheckResourceBindings(){
@@ -287,6 +316,7 @@ bool CShaderProgram::setTexture(std::string name, CTextureView* tx){
 		return setTexture(setbindpair.first, setbindpair.second, tx);
 	return false;
 }
+
 
 void CShaderProgram::Release(){
 	if(this->device == nullptr) return;

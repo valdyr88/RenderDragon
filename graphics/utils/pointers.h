@@ -18,14 +18,14 @@
 
 struct SRawData{
 	byte* data = nullptr;
-	uint32 size = 0;
+	sizetype size = 0;
 
 	SRawData() : data(nullptr), size(0){}
-	SRawData(void* ptr, uint32 s) : data((byte*)ptr), size(s){}
+	SRawData(void* ptr, sizetype s) : data((byte*)ptr), size(s){}
 	template<typename type>
 	SRawData(std::vector<type>& darray){
 		data = (byte*)darray.data();
-		size = (uint32)(sizeof(type)*darray.size());
+		size = (sizetype)(sizeof(type)*darray.size());
 	}
 };
 

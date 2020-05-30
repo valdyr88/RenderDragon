@@ -19,6 +19,9 @@ typedef double float64;
 typedef unsigned int uint;
 typedef uint8_t byte;
 
+typedef char char8;
+typedef wchar_t char16;
+
 typedef size_t sizetype;
 
 template <typename type>
@@ -42,14 +45,18 @@ enum class EValueType {
 	int8,
 	int16,
 	int32,
+	int64,
 	uint8,
 	uint16,
 	uint24, //for depth
 	uint32,
+	uint64,
 	float16,
 	float24, //for depth
 	float32,
-	float64
+	float64,
+	char8,//string
+	char16,//wstring
 };
 
 inline uint sizeInBytes(EValueType t){
@@ -58,16 +65,54 @@ inline uint sizeInBytes(EValueType t){
 		case EValueType::int8: return 1;
 		case EValueType::int16: return 2;
 		case EValueType::int32: return 4;
+		case EValueType::int64: return 8;
 		case EValueType::uint8: return 1;
 		case EValueType::uint16: return 2;
 		case EValueType::uint24: return 3;
 		case EValueType::uint32: return 4;
+		case EValueType::uint64: return 8;
 		case EValueType::float16: return 2;
 		case EValueType::float24: return 3;
 		case EValueType::float32: return 4;
 		case EValueType::float64: return 8;
+		case EValueType::char8: return 1;
+		case EValueType::char16: return 2;
 	}
 	return 0;
+}
+
+inline bool isFloatType(EValueType t){
+	switch(t)
+	{
+		case EValueType::float16:
+		case EValueType::float24:
+		case EValueType::float32:
+		case EValueType::float64: return true;
+	}
+	return false;
+}
+inline bool isIntType(EValueType t){
+	switch(t)
+	{
+		case EValueType::int8: 
+		case EValueType::int16:
+		case EValueType::int32:
+		case EValueType::int64:
+		case EValueType::uint8:
+		case EValueType::uint16:
+		case EValueType::uint24:
+		case EValueType::uint32:
+		case EValueType::uint64: return true;
+	}
+	return false;
+}
+inline bool isCharType(EValueType t){
+	switch(t)
+	{
+		case EValueType::char8:
+		case EValueType::char16: return true;
+	}
+	return false; 
 }
 
 inline const char* tostring(EValueType t){
@@ -76,14 +121,18 @@ inline const char* tostring(EValueType t){
 		case EValueType::int8: return "int8";
 		case EValueType::int16: return "int16";
 		case EValueType::int32: return "int32";
+		case EValueType::int64: return "int64";
 		case EValueType::uint8: return "uint8";
 		case EValueType::uint16: return "uint16";
 		case EValueType::uint24: return "uint24";
 		case EValueType::uint32: return "uint32";
+		case EValueType::uint64: return "uint64";
 		case EValueType::float16: return "float16";
 		case EValueType::float24: return "float24";
 		case EValueType::float32: return "float32";
 		case EValueType::float64: return "float64";
+		case EValueType::char8: return "char8";
+		case EValueType::char16: return "char16";
 	}
 	return "none";
 }
@@ -111,6 +160,8 @@ inline EValueType toEValueType(const char* str){
 	if(strisequal(str, "uivec2")) return EValueType::uint32;
 	if(strisequal(str, "uivec3")) return EValueType::uint32;
 	if(strisequal(str, "uivec4")) return EValueType::uint32;
+	if(strisequal(str, "char")) return EValueType::char8;
+	if(strisequal(str, "wchar")) return EValueType::char16;
 	return EValueType::float32;
 }
 
@@ -220,12 +271,16 @@ inline EValueSize toEValueSizeMat(uint count, bool colmajor = false){
 template <typename type> bool istypeof(EValueType v, EValueSize s){ return false; }
 template<> inline bool istypeof<float>(EValueType v, EValueSize s){ return (v == EValueType::float32) && (s == EValueSize::scalar); }
 template<> inline bool istypeof<double>(EValueType v, EValueSize s){ return (v == EValueType::float64) && (s == EValueSize::scalar); }
+template<> inline bool istypeof<int64>(EValueType v, EValueSize s){ return (v == EValueType::int64) && (s == EValueSize::scalar); }
+template<> inline bool istypeof<uint64>(EValueType v, EValueSize s){ return (v == EValueType::uint64) && (s == EValueSize::scalar); }
 template<> inline bool istypeof<int32>(EValueType v, EValueSize s){ return (v == EValueType::int32) && (s == EValueSize::scalar); }
 template<> inline bool istypeof<uint32>(EValueType v, EValueSize s){ return (v == EValueType::uint32) && (s == EValueSize::scalar); }
 template<> inline bool istypeof<int16>(EValueType v, EValueSize s){ return (v == EValueType::int16) && (s == EValueSize::scalar); }
 template<> inline bool istypeof<uint16>(EValueType v, EValueSize s){ return (v == EValueType::uint16) && (s == EValueSize::scalar); }
 template<> inline bool istypeof<int8>(EValueType v, EValueSize s){ return (v == EValueType::int8) && (s == EValueSize::scalar); }
 template<> inline bool istypeof<uint8>(EValueType v, EValueSize s){ return (v == EValueType::uint8) && (s == EValueSize::scalar); }
+template<> inline bool istypeof<char8>(EValueType v, EValueSize s){ return (v == EValueType::char8) && (s == EValueSize::scalar); }
+template<> inline bool istypeof<char16>(EValueType v, EValueSize s){ return (v == EValueType::char16) && (s == EValueSize::scalar); }
 
 
 const uint64 uint64_max = ((uint64)(0xffffffffffffffff));

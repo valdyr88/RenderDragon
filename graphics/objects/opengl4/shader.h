@@ -43,12 +43,14 @@ public:
 		CompileShader();
 	}
 
+	bool RecompileFromSrcFile(std::string path = "");
+
 	const auto& getDescriptor(){ return descriptor; }
 
 	virtual ~CShader() override{ Release(); }
 
 	static std::string ReadSouceFromFile(std::string path, CShaderFileSource* includeFiles = CSingleton<CShaderFileSource>::get(), CShaderDefines* shaderDefines = CSingleton<CShaderDefines>::get());
-	static std::string ReadSouceFromFile(std::string path, CShaderDefines* shaderDefines = CSingleton<CShaderDefines>::get(), CShaderFileSource* includeFiles = CSingleton<CShaderFileSource>::get());
+	static std::string ReadSouceFromFile(std::string path, CShaderDefines* shaderDefines, CShaderFileSource* includeFiles = CSingleton<CShaderFileSource>::get());
 	
 	friend class CShaderProgram;
 	friend class CPipelineState;
@@ -80,7 +82,8 @@ protected:
 	GLuint id = 0;
 
 	bool MergeShaderResourceSetDescs();
-	
+
+	std::string info_string;
 	bool CheckLinkStatus();
 	bool LinkProgram();
 	bool CheckResourceBindings();
@@ -100,6 +103,8 @@ public:
 	uint getNofStages(){ return numStages; }
 	IUniformBuffer* getUniformBuffer(EShaderStage stage, uint binding);
 	const char* getName(){ return name.c_str(); }
+
+	bool Recompile();
 
 	virtual void Release() override;
 	virtual ~CShaderProgram() override{

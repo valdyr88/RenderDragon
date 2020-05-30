@@ -24,6 +24,7 @@ struct SMeshDesc
 		uint64 normal = 0;
 		uint64 texCoord[RD_MAX_UV_CHANNELS] = { 0 };
 		uint64 tangent = 0;
+		uint64 flags = 0;
 
 		bool operator ==(const CRC64& other) const{
 			for(uint c = 0; c < RD_MAX_UV_CHANNELS; ++c)
@@ -31,7 +32,8 @@ struct SMeshDesc
 			return vertex == other.vertex &&
 				index == other.index &&
 				normal == other.normal &&
-				tangent == other.tangent;
+				tangent == other.tangent &&
+				flags == other.flags;
 		}
 		bool operator != (const CRC64& other) const{ return !(*this == other); }
 	} crc64hash;
@@ -61,18 +63,20 @@ struct SMeshDesc
 class CMesh : public CGraphicObject{
 	SMeshDesc descriptor;
 
-	struct VertexData{
+	struct VertexData
+	{
 		sizetype count = 0;
 		uint vertexDim = 3;
-		std::vector<float> vertex;
+		std::vector<float32> vertex;
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles;
-		std::vector<uint> index;
+		std::vector<uint32> index;
 		uint normalDim = 3;
-		std::vector<float> normal;
+		std::vector<float32> normal;
 		uint texCoordDim[RD_MAX_UV_CHANNELS];
-		std::vector<float> texCoord[RD_MAX_UV_CHANNELS];
+		std::vector<float32> texCoord[RD_MAX_UV_CHANNELS];
 		uint tangentDim = 3;
-		std::vector<float> tangent;
+		std::vector<float32> tangent;
+		std::vector<uint32> flags;
 
 		VertexData(){
 			for(uint c = 0; c < RD_MAX_UV_CHANNELS; ++c) texCoordDim[c] = 2; }
@@ -105,6 +109,8 @@ class CMesh : public CGraphicObject{
 					if(texCoord[c][i] != other.texCoord[c][i]) return false;
 			for(uint i = 0; i < tangent.size(); ++i)
 				if(tangent[i] != other.tangent[i]) return false;
+			for(uint i = 0; i < flags.size(); ++i)
+				if(flags[i] != other.flags[i]) return false;
 
 			return true;
 		}
@@ -136,6 +142,14 @@ public:
 	auto getVertexBuffer(){ return vertexBuffer.get(); }
 	auto getIndexBuffer(){ return indexBuffer.get(); }
 
+	enum VertexFlags{
+		UVisCCW = 1<<0,
+		TangentHandedness = 1<<1,//true is -1.0, false is 1.0 
+		UVWindIsDifferent = 1<<2,
+		AllFlags = 0xffffffff
+	};
+	static CShaderDefines ConstructVertexFlagsShaderMacros();
+
 	friend class CModel;
 	friend class CModelLoad;
 	friend class CMeshManager;
@@ -147,8 +161,8 @@ class CMeshTransform{
 	mat3 rotation;
 	SharedPtr<CMesh> mesh;
 public:
-	CMeshTransform(){ rotation = mat3(); }
-	CMeshTransform(SharedPtr<CMesh> msh) : mesh(msh){ rotation = mat3(); }
+	CMeshTransform(){ position = vec3(); rotation = mat3(); }
+	CMeshTransform(SharedPtr<CMesh> msh) : mesh(msh){ position = vec3(); rotation = mat3(); }
 
 	CMeshTransform& operator =(const CMeshTransform& other){
 		position = other.position;
@@ -214,12 +228,22 @@ struct SModelDesc{
 	}
 };
 
-
-class CModel;
-
 class CModel{
 	SModelDesc descriptor;
 	std::vector<UniquePtr<CMeshTransform>> meshes;
+	std::vector<SharedPtr<CMaterialInstance>> materials;
+
+	//typedef std::pair<CMeshTransform*, CMaterialInstance*> SMeshMaterialPair;
+	struct SMeshMaterialPair{
+		CMeshTransform* mesh = nullptr;
+		CMaterialInstance* material = nullptr;
+
+		SMeshMaterialPair(CMeshTransform* msh, CMaterialInstance* mat) : mesh(msh), material(mat){}
+	};
+	std::vector<SMeshMaterialPair> meshMaterialPairs;
+
+	//one-time init calls
+	static bool StaticInit();
 
 	bool Create(GPUDevice* dev);
 public:
@@ -228,17 +252,17 @@ public:
 	}
 
 	auto& AllMeshes(){ return meshes; }
+	auto& AllMeshAndMaterials(){ return meshMaterialPairs; }
 
 	static SModelDesc CreateModelDescFromXML(std::string xml);
 	static SModelDesc CreateModelDescFromXML(void* xmlobject);
 
 	friend class stdex::iterator<CModel, CMeshTransform*>;
+	/* template<> inline CMeshTransform* stdex::iterator<CModel, CMeshTransform*>::operator*()const{ return pcontainer->meshes[position].get(); } */
 	stdex::iterator<CModel, CMeshTransform*> begin() const{ return stdex::iterator<CModel, CMeshTransform*>(this, 0, [](const CModel* ptr, sizetype position){ return ptr->meshes[position].get(); }); }
 	stdex::iterator<CModel, CMeshTransform*> end() const{ return stdex::iterator<CModel, CMeshTransform*>(this, meshes.size(), [](const CModel* ptr, sizetype position){ return ptr->meshes[position].get(); }); }
 };
-/*
-template<>
-inline CMeshTransform* stdex::iterator<CModel, CMeshTransform*>::operator*()const{ return pcontainer->meshes[position].get(); }*/
+
 //-------------------------------------------------------------------------------------------
 
 struct SModelAssemblyDesc{

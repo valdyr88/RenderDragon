@@ -41,7 +41,14 @@ bool CVertexBuffer::Create(std::vector<SRawData> datas){
 
 			gl.EnableVertexAttribArray(att.binding);
 			//gl.VertexAttribPointer(att.binding, componentCount(att.count), glenum(att.type), att.bIsNormalized, att.stride, 0);
-			gl.VertexAttribFormat(att.binding, componentCount(att.count), glenum(att.type), att.bIsNormalized, att.stride);
+			if(isFloatType(att.type))
+				gl.VertexAttribFormat(att.binding, componentCount(att.count), glenum(att.type), att.bIsNormalized, att.stride);
+			else if(isIntType(att.type)){
+				if(sizeInBytes(att.type) < sizeInBytes(EValueType::uint64))
+					gl.VertexAttribIFormat(att.binding, componentCount(att.count), glenum(att.type), att.stride);
+				else
+					gl.VertexAttribLFormat(att.binding, componentCount(att.count), glenum(att.type), att.stride);
+			}
 			gl.VertexAttribBinding(att.binding, 0);
 		}
 
@@ -75,7 +82,10 @@ bool CVertexBuffer::Create(std::vector<SRawData> datas){
 			abuffer->Bind();
 
 			gl.EnableVertexAttribArray(att.binding);
-			gl.VertexAttribPointer(att.binding, componentCount(att.count), glenum(att.type), att.bIsNormalized, att.stride, 0);
+			if(isFloatType(att.type))
+				gl.VertexAttribPointer(att.binding, componentCount(att.count), glenum(att.type), att.bIsNormalized, att.stride, 0);
+			else if(isIntType(att.type))
+				gl.VertexAttribIPointer(att.binding, componentCount(att.count), glenum(att.type), att.stride, 0);
 			//gl.VertexAttribFormat(att.binding, componentCount(att.count), glenum(att.type), att.bIsNormalized, att.stride);
 			//gl.VertexAttribBinding(att.binding, att.binding);
 			//gl.BindVertexBuffer(att.binding, abuffer->getId(), 0, att.stride);

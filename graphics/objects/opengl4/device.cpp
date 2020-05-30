@@ -85,6 +85,7 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 	if(wglMakeCurrent(window.windowDeviceContext, GPUDeviceContext.context)){
 		LOG("init OpenGL success!");
 		LOG("GL version: %s", glGetString(GL_VERSION));
+		printf_s("GL version: %s", glGetString(GL_VERSION));
 	}
 	else{
 		DWORD error = GetLastError();
@@ -713,7 +714,7 @@ void GPUDevice::ClearAttachments(CRenderPass* rp, CFramebuffer* fb, SClearColorV
 	}
 	else{ //clear all
 		if(colorClear == true){
-			gl.ClearColor(clear.color[0].r, clear.color[0].g, clear.color[0].b, clear.color[0].a);
+			gl.ClearColor(clear.color[0].x, clear.color[0].y, clear.color[0].z, clear.color[0].w);
 			flags |= GL_COLOR_BUFFER_BIT;
 		}
 		if(depthStencilClear == true){

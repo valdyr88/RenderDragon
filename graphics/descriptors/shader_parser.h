@@ -54,6 +54,12 @@ class CShaderDefines{
 	stdex::container<SMacroDefine> macros;
 	static std::string globalMacrosKeyword;
 public:
+	CShaderDefines() = default;
+
+	CShaderDefines(const CShaderDefines& other){
+		this->add(other);
+	}
+
 	uint add(std::string Macro, std::string Value){
 		SMacroDefine& m = macros.add();
 		m.set(Macro, Value);
@@ -89,6 +95,8 @@ public:
 		macros += other.macros;
 		return *this;
 	}
+	CShaderDefines& add(const CShaderDefines& other){
+		return this->operator+=(other); }
 
 	std::string InsertInto(std::string source, std::string keyword = CShaderDefines::globalMacrosKeyword);
 };

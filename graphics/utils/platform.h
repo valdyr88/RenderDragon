@@ -112,4 +112,17 @@ bool CFile::Write(type* data, uint count){
 	return Write((byte*)data, count*sizeof(type));
 }
 //---------------------------------------------------------------------------------------
+
+#include <chrono>
+
+typedef std::chrono::high_resolution_clock::time_point timetype;
+
+extern timetype chrono_clock_start;
+inline timetype getTime_c(){ return std::chrono::high_resolution_clock::now(); }
+inline double getTime_s(){ //µs
+	std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(getTime_c() - chrono_clock_start); return diff.count(); }
+
+float getTime_ms();
+
+//---------------------------------------------------------------------------------------
 #endif //PLATFORM_H

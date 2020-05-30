@@ -2,6 +2,8 @@
 #include "platform.h"
 #include "pointers.h"
 
+timetype chrono_clock_start = getTime_c();
+
 std::list<SWindow*> windows;
 
 SWindow::SWindow(){
@@ -13,11 +15,40 @@ SWindow::SWindow(){
 SWindow::~SWindow(){
 	windows.remove(this);
 }
-
 //==========================================================================================
+
 #ifdef PLATFORM_WINDOWS
 
 #include <windowsx.h>
+
+/*#include <time.h>
+
+uint64 queryPerformanceCounter(){
+	LARGE_INTEGER time; QueryPerformanceCounter(&time); return time.QuadPart;  }
+uint64 queryPerformanceFrequency(){
+	LARGE_INTEGER freq; QueryPerformanceFrequency(&freq); return freq.QuadPart; }
+	/*
+	auto start = time(nullptr);
+	auto qpc_start = queryPerformanceCounter();
+	auto qpc_end = queryPerformanceCounter();
+	while(start == time(nullptr)){
+		qpc_end = queryPerformanceCounter(); }
+	return qpc_end - qpc_start;*/
+/*}
+
+const uint64 qpc_start = queryPerformanceCounter();
+const uint64 qpc_frequency = queryPerformanceFrequency();
+
+double getTimeµs(){
+	uint64 current = queryPerformanceCounter() - qpc_start;
+	return ((double)current) * ((1.0) / ((double)qpc_frequency));
+}
+float getTimems(){
+	return getTimeµs();
+}
+*/
+
+//==========================================================================================
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {		//PAINTSTRUCT paints;
@@ -225,6 +256,10 @@ bool ListenForMessage(SWindow* window)
 
 	return true;
 }
+
+#endif //PLATFORM_WINDOWS
+
+
 void ProcessCallback(SWindow* window)
 {
 	if(ListenForMessage(window) == true)
@@ -241,6 +276,9 @@ void MainPlatformLoop(){
 		PlatfromLoopUpdate();
 	}
 }
+
+
+
 
 const char* charmode(CFile::EFileMode mode){
 	switch(mode)
@@ -312,6 +350,6 @@ void CFile::Close(){
 	}
 }
 //---------------------------------------------------------------------------------------
-
-#endif //PLATFORM_WINDOWS
 //==========================================================================================
+
+

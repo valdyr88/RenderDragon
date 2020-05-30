@@ -384,15 +384,17 @@ auto testMeshXML(GPUDevice* dev){
 
 	return mesh;
 }
+#include <conio.h>
 
 int chipschallenge_main();
+#define LOG_TO_CONSOLE(format, ...)		{ printf_s(format "\n", __VA_ARGS__); }
 
 int main()
 {
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
-	devdesc.swapchain.width = 512;
-	devdesc.swapchain.height = 288;
+	devdesc.swapchain.width = 1600;
+	devdesc.swapchain.height = 970;
 
 	UniquePtr<GPUDevice> device = GPUDevice::CreateGPUDevice(devdesc);
 
@@ -402,7 +404,6 @@ int main()
 	device->InitContextOnWindow(window);
 
 	auto sponza = testMeshXML(device.get());
-	sponza = testMeshXML(device.get());
 
 	auto vsubTransform = device->CreateUniformBuffer<TransformMatrices>("transform");
 	auto& vsub = *vsubTransform.get();
@@ -431,8 +432,11 @@ int main()
 	auto vsSource = TestIncludes("data/Shaders/simple.vntt.vs.glsl");
 	vsSource = globalDefines->InsertInto(vsSource);
 
-	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple_shading.ps.glsl", source, {  });
-	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vntt.vs.glsl", vsSource, {{
+	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple_shading.ps.glsl", source, "data/Shaders/simple_shading.ps.glsl", {{
+			{0, 1, "txDiffuse", EShaderResourceType::Texture, EShaderStage::FragmentShader},
+			{0, 2, "txNormal", EShaderResourceType::Texture, EShaderStage::FragmentShader}
+		}});
+	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vntt.vs.glsl", vsSource, "data/Shaders/simple.vntt.vs.glsl", {{
 			{0, 0, "transform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader}
 		}});
 	vsdesc.vertexFormat = (*sponza.begin())->Mesh()->getVertexBuffer()->getVertexFormat();
@@ -471,27 +475,53 @@ int main()
 	program->getNofStages();
 	auto shader = pipeline->getShaderProgram();
 
-	float angle = 0.0f;
-	float dTime = 0.0f;
-	float time = 0.0f;
+	float aspect = ((float)devdesc.swapchain.width) / ((float)devdesc.swapchain.height);
 
 	float possitionHeight = 0.2f;
-
 	vec3 position = vec3(1.0f,0.0f,0.0f);
 	vec3 lookPt = vec3(0.0f, possitionHeight,0.0f);
+
+	float angle = 12.75f;
+	float dTime = 0.01f;
+	float time = 0.0f;
+	float averageFPS = 30.0f;
+	float averageDTime = 0.01f;
+
+	uint64 frameNo = 0; 
+	double startTime = getTime_s();
+	time = getTime_s();
+
+	bool bRotate = false;
 
 	while(true)
 	{
 		PlatfromLoopUpdate();
+		if(_kbhit() == true){
+			char c = _getch();
+			if(c == 's' || c == 'S'){
+				program->Recompile();
+				LOG("Recompiled shader: <%s>", program->getName())
+			}
+			if(c == 'r' || c == 'R')
+				bRotate = !bRotate;
+			if(c == 'p' || c == 'P'){
+				LOG("Paused;");
+				_getch();
+				LOG("Resumed;");
+			}
+		}
+
+		double frameStartTime = getTime_s();
 
 		//----------------------------
 		renderPass->Begin(framebuffer.get(), SClearColorValues(vec4(0.5f, 0.7f, 1.0f, 1.0f), 1.0f));
 		pipeline->Bind();
 
-		angle = 1.0f * time;
+		if(bRotate == true) angle = angle + 0.25f * dTime;
+
 		position = 0.15f * vec3(cosf(angle), possitionHeight/0.15f, sinf(angle));
 
-			vsub->projection = glm::perspective(75.0f, 1.0f, 0.01f, 100.0f);
+			vsub->projection = glm::perspective(75.0f, aspect, 0.01f, 100.0f);
 			vsub->view = glm::identity<mat4>();
 			vsub->view = glm::lookAt(position, lookPt, vec3(0.0f, -1.0f, 0.0f));
 			vsub->world = glm::identity<mat4>();
@@ -502,18 +532,38 @@ int main()
 		//ToDo: napravit provjeru shader sourcea i resourceSetDesc. postoje li svi resoursi u shaderu, ili shader ima neke koji nema resourceSetDesc i obratno?
 		shader->setUniformBuffer("transform", &vsub);
 
-		for(auto meshT : sponza){
-			device->BindVertexBuffer(meshT->Mesh()->getVertexBuffer());
-			device->BindIndexBuffer(meshT->Mesh()->getIndexBuffer());
+		for(auto meshT : sponza.AllMeshAndMaterials()){
+			shader->setTexture("txDiffuse", meshT.material->getTexture(0));
+			shader->setTexture("txNormal", meshT.material->getTexture(2));
+
+			device->BindVertexBuffer(meshT.mesh->Mesh()->getVertexBuffer());
+			device->BindIndexBuffer(meshT.mesh->Mesh()->getIndexBuffer());
 
 			device->DrawIndexed();
 		}
 		renderPass->End();
 		//----------------------------
-		device->PresentFrame();
+		float renderpassTime = getTime_s();
 
-		time += dTime;
-		Sleep(1); dTime = 1.0f / 1000.0f;
+		device->PresentFrame();
+		
+		averageFPS = lerp(averageFPS, 1.0f/dTime, 0.05f);
+		averageDTime = lerp(averageDTime, (float)(renderpassTime - frameStartTime), 0.05f);
+
+		++frameNo;
+
+		if(false&&(frameNo & 0x7f) == 0){
+			system("cls");
+			LOG_TO_CONSOLE("time: %f", time);
+			LOG_TO_CONSOLE("FPS avg: %f", averageFPS);
+			LOG_TO_CONSOLE("FPS fc/dr: %f", ((float)(frameNo)) / (time - startTime));
+			LOG_TO_CONSOLE("frame no: %d", (int32)frameNo);
+			LOG_TO_CONSOLE("dTime avg: %f", averageDTime);
+		}
+		Sleep(25);
+
+		time = getTime_s();
+		dTime = time - frameStartTime;
 	}
 
 	return 0;

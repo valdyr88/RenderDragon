@@ -69,6 +69,7 @@ struct SShaderDesc{
 	EShaderStage stage = EShaderStage::FragmentShader;
 	std::string name = "";
 	std::string source = "";
+	std::string path = "";
 	std::list<std::vector<SShaderResourceBindingDesc>> bindingSetsDesc;
 
 	SVertexFormat vertexFormat;
@@ -77,6 +78,11 @@ struct SShaderDesc{
 
 	SShaderDesc(EShaderStage s, std::string n, std::string src, std::list<std::vector<SShaderResourceBindingDesc>> binds)
 		: stage(s), name(n), source(src), bindingSetsDesc(binds){
+		VerifyBindingDesc();
+	}
+
+	SShaderDesc(EShaderStage s, std::string n, std::string src, std::string srcPath, std::list<std::vector<SShaderResourceBindingDesc>> binds)
+		: stage(s), name(n), source(src), path(srcPath), bindingSetsDesc(binds){
 		VerifyBindingDesc();
 	}
 

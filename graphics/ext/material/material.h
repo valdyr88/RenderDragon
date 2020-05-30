@@ -15,13 +15,31 @@ private:
 	void* value = nullptr;
 	uint valueSizeInBytes = 0;
 	bool bIsValueSet = false;
+
+	void Release(){
+		if(value != nullptr)
+			__release_array(value); 
+		valueSizeInBytes = 0; bIsValueSet = false;
+	}
 public:
+
+
+	void Reserve()
+	{ 
+		Release();
+		if(value != nullptr) return;
+		valueSizeInBytes = sizeInBytes(type) * componentCount(size) * count;
+		if(valueSizeInBytes > 0) value = __new byte[valueSizeInBytes]; bIsValueSet = false;
+	}
 
 	SMaterialParam(const char* n, EValueType t, EValueSize s, uint32 c = 1) :
 		SUniformMap(n, t, s, c)
 	{
-		valueSizeInBytes = sizeInBytes(t) * componentCount(s) * count;
-		value = __new byte[valueSizeInBytes]; bIsValueSet = false;
+		Reserve();
+	}
+
+	SMaterialParam(const SMaterialParam& other){
+		this->operator=(other);
 	}
 
 	SMaterialParam() : SUniformMap("", EValueType::float32, EValueSize::scalar, 1)
@@ -29,6 +47,22 @@ public:
 		valueSizeInBytes = 0;
 		value = nullptr; bIsValueSet = false;
 	}
+
+	SMaterialParam& operator = (const SMaterialParam& other){
+		SUniformMap::operator=(other);
+		if(other.value != nullptr)
+		{
+			this->Reserve();
+			for(uint i = 0; i < this->valueSizeInBytes; ++i){
+				((byte*)this->value)[i] = ((byte*)other.value)[i];
+			}
+		}
+		bIsValueSet = other.bIsValueSet;
+		
+		return *this;
+	}
+
+	bool isValueSet(){ return bIsValueSet; }
 
 	template <typename Type>
 	bool isOfType(){ return (valueSizeInBytes == sizeof(Type) && istypeof<Type>(type, size)); }
@@ -41,9 +75,13 @@ public:
 	const Type* getAs(uint c){ return (this->isOfType<Type>(c) && bIsValueSet == true)? (Type*)value : nullptr; }
 
 	template <typename Type>
-	bool setAs(Type v){ if(this->isOfType<Type>()){ (*(Type*)value) = v; bIsValueSet = true; return true; } return false; }
+	bool setAs(const Type v){ if(value != nullptr && this->isOfType<Type>()){ (*(Type*)value) = v; bIsValueSet = true; return true; } return false; }
 	template <typename Type>
-	bool setAs(Type* v, uint c){ if(this->isOfType<Type>(c)){ memcpy(value, v, valueSizeInBytes); bIsValueSet = true; return true; } return false; }
+	bool setAs(const Type* v, uint c){ if(value != nullptr && this->isOfType<Type>(c)){ memcpy(value, v, valueSizeInBytes); bIsValueSet = true; return true; } return false; }
+
+	~SMaterialParam(){
+		Release();
+	}
 };
 
 struct SMaterialParamsGroup{
@@ -73,6 +111,7 @@ struct SMaterialParamsGroup{
 };
 
 enum class EMaterialTextureType{
+	None = 0,
 	Albedo = 1<<0,
 	Normal = 1<<1,
 	Roughness = 1<<2,
@@ -80,6 +119,9 @@ enum class EMaterialTextureType{
 	AmbientOcclusion = 1<<4,
 	Metalness = 1<<5,
 	Emissive = 1<<6,
+	AmbientMap = 1<<7,
+	Height = 1<<8,
+	Opacity = 1<<9
 };
 inline uint operator | (const EMaterialTextureType& a, const EMaterialTextureType& b){	return ((uint)a) | ((uint)b); }
 inline uint operator | (const uint& a, const EMaterialTextureType& b){ return ((uint)a) | ((uint)b); }
@@ -157,6 +199,9 @@ public:
 
 	CTextureView* getTexture(uint i){ if(i >= textures.size()) return nullptr; return textures[i].get(); }
 	IUniformBuffer* getUniformBuffer(uint i){ if(i >= uniformBuffers.size()) return nullptr; return uniformBuffers[i].get(); }
+
+	CShaderProgram* getShader(){ return shader.get(); }
+	bool hasShader(){ return shader != nullptr; }
 
 	~CMaterialInstance();
 

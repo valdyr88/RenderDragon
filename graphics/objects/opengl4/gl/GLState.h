@@ -553,6 +553,9 @@ public:
 	forceinline GLState_prefix_func void GetProgramiv(GLuint program, GLenum pname, GLint* params){
 		glGetProgramiv(program, pname, params); GLS_OFR return;
 	}
+	forceinline GLState_prefix_func void GetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog){
+		glGetProgramInfoLog(program, maxLength, length, infoLog); GLS_OFR return;
+	}
 	forceinline GLState_prefix_func void UseProgram(GLuint program){
 		 glUseProgram(program); GLS_OFR return;
 	}
@@ -585,8 +588,14 @@ public:
 	forceinline GLState_prefix_func void VertexAttribLPointer(GLuint index, GLint size, GLenum type, GLsizei stride, GLvoid* pointer){
 		 glVertexAttribLPointer(index, size, type, stride, pointer); GLS_OFR return;
 	}
-	forceinline GLState_prefix_func void VertexAttribFormat(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride){
-		glVertexAttribFormat(index,size,type,normalized,stride); GLS_OFR return;
+	forceinline GLState_prefix_func void VertexAttribFormat(GLuint index, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset){
+		glVertexAttribFormat(index,size,type,normalized,relativeoffset); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void VertexAttribIFormat(GLuint index, GLint size, GLenum type, GLuint relativeoffset){
+		glVertexAttribIFormat(index,size,type,relativeoffset); GLS_OFR return;
+	}
+	forceinline GLState_prefix_func void VertexAttribLFormat(GLuint index, GLint size, GLenum type, GLuint relativeoffset){
+		glVertexAttribLFormat(index,size,type,relativeoffset); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void VertexAttribBinding(GLuint attribindex, GLint bindingindex){
 		glVertexAttribBinding(attribindex,bindingindex); GLS_OFR return;

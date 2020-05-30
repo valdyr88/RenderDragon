@@ -34,8 +34,11 @@ uint getMaterialTextureTypeFromString(const char* cstr){
 	if(str == "aorsmt" || str == "srmtao" || str == "aormts" || str == "mtraos" || str == "mtrsao") return EMaterialTextureType::AmbientOcclusion | EMaterialTextureType::Roughness | EMaterialTextureType::Specular | EMaterialTextureType::Metalness;
 	if(str == "srmt" || str == "mtrs") return EMaterialTextureType::Roughness | EMaterialTextureType::Specular | EMaterialTextureType::Metalness;
 	if(str == "srem" || str == "emrs") return EMaterialTextureType::Roughness | EMaterialTextureType::Specular | EMaterialTextureType::Emissive;
+	if(str == "ambient" || str == "amb" || str == "ambientmap") return (uint)EMaterialTextureType::AmbientMap;
+	if(str == "height" || str == "h" || str == "depth") return (uint)EMaterialTextureType::Height;
+	if(str == "opacity" || str == "a" || str == "alpha") return (uint)EMaterialTextureType::Opacity;
 
-	return (uint)EMaterialTextureType::Albedo;
+	return (uint)EMaterialTextureType::None;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -246,6 +249,9 @@ SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vect
 	uint added_sharedubs = 0, added_names = 0;
 	for(auto pg = this->descriptor.paramGroups.begin(); pg != this->descriptor.paramGroups.end(); ++pg)
 	{
+		if(pg->ubstruct == "-")//skipping ubstruct
+			continue;
+
 		if((ubs.size() > added_sharedubs) && (ubs[added_sharedubs] != nullptr) && (pg->ubstruct == ubs[added_sharedubs]->getUBStructTypeName())){
 			if(CMaterial::CheckIfParamsGroupAndUBAreEqual(*pg, *ubs[added_sharedubs]) == false)
 				LOG_ERR("ParamGroup and UniformBuffer structure mismatch for struct <%s>!, members of the ParamGroup and UniformBuffer are not equal!", pg->ubstruct.c_str());

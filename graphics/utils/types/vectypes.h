@@ -1,6 +1,7 @@
 #ifndef VECTYPES_H
 #define VECTYPES_H
 
+#define GLM_FORCE_XYZW_ONLY
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -47,5 +48,26 @@ template<> inline bool istypeof<mat2x4>(EValueType v, EValueSize s){ return (v =
 template<> inline bool istypeof<mat4x2>(EValueType v, EValueSize s){ return (v == EValueType::float32) && (s == EValueSize::mat4x2); }
 template<> inline bool istypeof<mat3x4>(EValueType v, EValueSize s){ return (v == EValueType::float32) && (s == EValueSize::mat3x4); }
 template<> inline bool istypeof<mat4x3>(EValueType v, EValueSize s){ return (v == EValueType::float32) && (s == EValueSize::mat4x3); }
+
+template<typename type, typename ttype>
+inline type lerp(type a, type b, ttype t){ return (ttype(1.0)-t)*a + t*b; }
+
+inline bool isClockwise(vec3 a, vec3 b, vec3 c, vec3 N){
+	vec3 v13 = glm::normalize(a - c);
+	vec3 v23 = glm::normalize(b - c);
+
+	vec3 n = glm::cross(v13, v23);
+
+	if(glm::dot(N,n) < 0.0f) return true; //clockwise
+	else return false; //counterclockways
+}
+inline bool isClockwise(vec2 a, vec2 b, vec2 c){
+	return isClockwise(vec3(a.x, a.y, 0.0f), vec3(b.x, b.y, 0.0f), vec3(c.x, c.y, 0.0f), vec3(0.0f,0.0f,1.0f)); }
+
+inline vec3 calcNormal(vec3 a, vec3 b, vec3 c){
+	vec3 v13 = glm::normalize(a - c);
+	vec3 v23 = glm::normalize(b - c);
+	return glm::normalize(glm::cross(v13, v23));
+}
 
 #endif //VECTYPES_H

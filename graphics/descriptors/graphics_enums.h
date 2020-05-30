@@ -442,6 +442,7 @@ enum class ELoadStoreOp {
 };
 
 enum class EBufferType{
+	None,
 	Vertex,
 	Index,
 	Uniform,

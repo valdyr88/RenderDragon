@@ -5,11 +5,11 @@
 #include "graphics_enums.h"
 
 struct SBufferDesc{
-	EBufferType type;
+	EBufferType type = EBufferType::None;
 	EShaderResourceUsageType usage = EShaderResourceUsageType::Static;
 	EShaderResourceAccessType access = EShaderResourceAccessType::Draw;
 
-	uint32 size;
+	sizetype size = 0;
 
 	bool operator == (const SBufferDesc& other) const{
 		return type == other.type &&
