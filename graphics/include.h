@@ -8,6 +8,7 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "objects/webgl/device.h"
 #endif
 
 #ifdef RD_API_VULKAN

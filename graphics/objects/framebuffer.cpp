@@ -8,6 +8,7 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "webgl/framebuffer.cpp"
 #endif
 
 #ifdef RD_API_VULKAN

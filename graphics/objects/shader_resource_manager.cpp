@@ -13,6 +13,9 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "webgl/device.h"
+#include "webgl/shader_resource_manager.h"
+#include "webgl/shader_resource_manager.cpp"
 #endif
 
 #ifdef RD_API_VULKAN

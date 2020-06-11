@@ -167,7 +167,7 @@ SGPUDeviceContext rdInitOpenGL_ARB(SWindow& window, const SGPUDeviceDesc& descri
 	
 	//ToDo: destroy current window and create new one to use new pixel format
 	DestroyWindow(window.window); window.window = nullptr;
-	window.CreateProgramWindow(window.name, window.width, window.height, window.posX, window.posY, window.flags, true);
+	window.CreateProgramWindow(window.name.c_str(), window.width, window.height, window.posX, window.posY, window.flags, true);
 
 	PIXELFORMATDESCRIPTOR pfd; memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR)); pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 	SetPixelFormat(window.windowDeviceContext, pixelFormat, &pfd);

@@ -2,6 +2,8 @@
 #define PLATFORM_H
 
 #include <string>
+#include <chrono>
+#include <thread>
 #include "types/types.h"
 #include "platform_defines.h"
 
@@ -11,6 +13,8 @@
 #ifdef PLATFORM_LINUX
 #endif
 #ifdef PLATFORM_MAC
+#endif
+#ifdef PLATFORM_EMSCRIPTEN
 #endif
 
 struct SWindow{
@@ -22,7 +26,6 @@ struct SWindow{
 	HDC windowDeviceContext = nullptr;
 	HINSTANCE hInstance = nullptr;
 	uint flags = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	char* name = nullptr;
 
 	HWND getWindowHandle(){ return window; }
 #endif
@@ -37,6 +40,11 @@ struct SWindow{
 #ifdef PLATFORM_MAC
 	//MacOS-specific window
 #endif
+#ifdef PLATFORM_EMSCRIPTEN
+	//Emscripten-specific canvas handler
+	uint flags = 0x00000000;
+#endif
+	std::string name = "";
 
 	uint width = 0;
 	uint height = 0;
@@ -113,7 +121,6 @@ bool CFile::Write(type* data, uint count){
 }
 //---------------------------------------------------------------------------------------
 
-#include <chrono>
 
 typedef std::chrono::high_resolution_clock::time_point timetype;
 
@@ -122,7 +129,12 @@ inline timetype getTime_c(){ return std::chrono::high_resolution_clock::now(); }
 inline double getTime_s(){ //µs
 	std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(getTime_c() - chrono_clock_start); return diff.count(); }
 
-float getTime_ms();
+inline void sleep_s(uint time){
+	std::this_thread::sleep_for(std::chrono::seconds(time)); }
+inline void sleep_ms(uint time){
+	std::this_thread::sleep_for(std::chrono::milliseconds(time)); }
+inline void sleep_µs(uint time){
+	std::this_thread::sleep_for(std::chrono::microseconds(time)); }
 
 //---------------------------------------------------------------------------------------
 #endif //PLATFORM_H

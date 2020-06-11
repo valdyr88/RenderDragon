@@ -8,6 +8,7 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "webgl/pipeline_state.h"
 #endif
 
 #ifdef RD_API_VULKAN

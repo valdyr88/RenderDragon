@@ -73,6 +73,7 @@ private:
 	GLState_prefix_var GLuint bound_read_framebuffer, bound_draw_framebuffer;
 
 	GLState_prefix_var bool vertex_attrib_array_enabled[RD_MAX_VERTEX_ATTRIBS];
+	GLState_prefix_var GLuint bound_textures[RD_MAX_TEXTURE_BINDINGS];
 
 	class GLStateOnFuctionReturn{
 		CGLState* pState; const char* FunctionName;
@@ -1040,10 +1041,24 @@ public:
 		 auto rtn = glBindTexGenParameterEXT(unit,coord,value); GLS_OFR return rtn;
 	}
 	forceinline GLState_prefix_func void BindTexture(GLenum target, GLuint texture){
+		if((ACTIVE_TEXTURE_ID != (GLuint)-1) && (ACTIVE_TEXTURE_ID-GL_TEXTURE0 < RD_MAX_TEXTURE_BINDINGS))
+			if(bound_textures[ACTIVE_TEXTURE_ID-GL_TEXTURE0] == texture) return;
+			else bound_textures[ACTIVE_TEXTURE_ID-GL_TEXTURE0] = texture;
 		 glBindTexture(target,texture); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindTextures(GLenum first, GLsizei count, GLuint* textures){
-		 glBindTextures(first,count,textures); GLS_OFR return;
+		GLuint countSame = 0;
+
+		for(GLuint i = 0; i < (GLuint)count; ++i)
+		{
+			GLenum target = first+i - GL_TEXTURE0;
+			if(target >= RD_MAX_TEXTURE_BINDINGS) break;
+			if(bound_textures[target] == textures[i]) ++countSame;
+			else bound_textures[target] = textures[i];
+		}
+		if(countSame == count) return;
+
+		glBindTextures(first,count,textures); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindTextureEXT(GLenum target, GLuint texture){
 		 glBindTextureEXT(target,texture); GLS_OFR return;

@@ -228,7 +228,7 @@ CMesh* CModelLoad::LoadFromAssimp(GPUDevice* dev, aiMesh* aimesh){
 			}
 		}
 	}
-	if(false && aimesh->HasTangentsAndBitangents() == true){
+	if(aimesh->HasTangentsAndBitangents() == true){
 		mesh->data.tangent.reserve(3 * aimesh->mNumVertices);
 		for(uint i = 0; i < aimesh->mNumVertices; ++i){
 			auto& ait = aimesh->mTangents[i];
@@ -242,6 +242,7 @@ CMesh* CModelLoad::LoadFromAssimp(GPUDevice* dev, aiMesh* aimesh){
 			mesh->data.tangent.emplace_back(t.z);
 		}
 	}
+	//tangent and UV flags
 	if(mesh->data.primitiveType == EPrimitiveType::Triangles && (aimesh->HasPositions() && aimesh->HasNormals() && aimesh->HasFaces() && aimesh->HasTextureCoords(0))){
 		mesh->data.tangent.reserve(3*aimesh->mNumVertices);
 		{
@@ -321,9 +322,9 @@ CMesh* CModelLoad::LoadFromAssimp(GPUDevice* dev, aiMesh* aimesh){
 				// Gram-Schmidt orthogonalize
 				vec3 tangent = glm::normalize(t - n * glm::dot(n, t));
 
-				mesh->data.tangent.emplace_back(tangent.x);
+				/*mesh->data.tangent.emplace_back(tangent.x);
 				mesh->data.tangent.emplace_back(tangent.y);
-				mesh->data.tangent.emplace_back(tangent.z);/**/
+				mesh->data.tangent.emplace_back(tangent.z);*/
 
 				// Calculate handedness
 				bool bHandedness = glm::dot(glm::cross(n, t), tan2[a]) < 0.0f;
@@ -384,8 +385,6 @@ CMesh* CModelLoad::LoadFromAssimp(GPUDevice* dev, aiMesh* aimesh){
 		}*/
 	}
 
-	//for(auto& f : mesh->data.flags) f = rand() % 2;
-
 	mesh->data.count = aimesh->mNumVertices;
 
 	CModelLoad::fillCRC32desc(mesh);
@@ -419,8 +418,8 @@ SMaterialDesc CModelLoad::CreateMaterialDescFromAssimp(uint id, std::string mode
 		aiTextureMapping mapping;
 		aiTextureMapMode mapmode[4] = { aiTextureMapMode_Wrap, aiTextureMapMode_Wrap, aiTextureMapMode_Wrap, aiTextureMapMode_Wrap };
 
-		auto toMaterialTexture = [&](uint ty, uint t, EMaterialTextureType txType){
-			aiReturn rtn = aimat->GetTexture((aiTextureType)ty, t, &path, &mapping, &uvindex, nullptr, nullptr, mapmode);
+		auto toMaterialTexture = [&](aiTextureType ty, uint t, EMaterialTextureType txType){
+			aiReturn rtn = aimat->GetTexture(ty, t, &path, &mapping, &uvindex, nullptr, nullptr, mapmode);
 			if(rtn != aiReturn::aiReturn_SUCCESS) return;
 
 			SMaterialTexture txDesc;
@@ -432,7 +431,7 @@ SMaterialDesc CModelLoad::CreateMaterialDescFromAssimp(uint id, std::string mode
 			desc.textures.emplace_back(txDesc);
 		};
 
-		for(uint ty = 0; ty < aiTextureType_UNKNOWN; ++ty){
+		for(uint ty = 0; ty <= aiTextureType_UNKNOWN; ++ty){
 			switch((aiTextureType)ty)
 			{
 				case aiTextureType_NONE:
@@ -658,8 +657,8 @@ bool CModel::Create(GPUDevice* dev){
 		sizetype pos = dirpath.find_last_of('/');
 		dirpath.erase(pos, dirpath.size() - pos);
 	}
-	//aiProcess_CalcTangentSpace | 
-	const aiScene* scene = importer.ReadFile(descriptor.path, aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
+	
+	const aiScene* scene = importer.ReadFile(descriptor.path, aiProcess_CalcTangentSpace |  aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_OptimizeMeshes | aiProcess_RemoveRedundantMaterials);
 	
 	for(uint i = 0; i < scene->mNumMeshes; ++i)
 	{

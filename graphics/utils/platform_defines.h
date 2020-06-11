@@ -1,7 +1,11 @@
 #ifndef PLATFORM_DEFINES_H
 #define PLATFORM_DEFINES_H
 
-#if defined(__WIN32__) || defined(_WIN32) || defined(_WIN64)
+#if defined(__EMSCRIPTEN__)
+	#define PLATFORM_EMSCRIPTEN
+
+//PLATFORM_EMSCRIPTEN
+#elif defined(__WIN32__) || defined(_WIN32) || defined(_WIN64)
 	#define PLATFORM_WINDOWS
 
 	#ifdef _WIN64
@@ -12,14 +16,13 @@
 
 	#define NOMINMAX
 
-#endif //PLATFORM_WINDOWS
-
-#ifdef __LINUX__
+//PLATFORM_WINDOWS
+#elif defined(__LINUX__)
 	#define PLATFORM_LINUX
-#endif //PLATFORM_LINUX
-
-#ifdef __APPLE__
+//PLATFORM_LINUX
+#elif defined(__APPLE__)
 	#define PLATFORM_MAC
-#endif //PLATFORM_MAC
+//PLATFORM_MAC
+#endif 
 
-#endif
+#endif //PLATFORM_DEFINES_H

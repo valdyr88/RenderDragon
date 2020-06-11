@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_GL4|Win32">
@@ -331,7 +331,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>RD_API_WEBGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RD_API_WEBGL;__EMSCRIPTEN__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -450,7 +450,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>RD_API_WEBGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RD_API_WEBGL;__EMSCRIPTEN__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -518,6 +518,9 @@
     <ClInclude Include="objects\base\texture.h" />
     <ClInclude Include="objects\base\uniform_buffer.h" />
     <ClInclude Include="objects\base\vertex_buffer.h" />
+    <ClInclude Include="objects\buffer.h" />
+    <ClInclude Include="objects\device.h" />
+    <ClInclude Include="objects\framebuffer.h" />
     <ClInclude Include="objects\mipmap_gen.h" />
     <ClInclude Include="objects\opengl4\buffer.h" />
     <ClInclude Include="objects\opengl4\device.h" />
@@ -535,6 +538,30 @@
     <ClInclude Include="objects\opengl4\texture.h" />
     <ClInclude Include="objects\opengl4\uniform_buffer.h" />
     <ClInclude Include="objects\opengl4\vertex_buffer.h" />
+    <ClInclude Include="objects\pipeline_state.h" />
+    <ClInclude Include="objects\render_pass.h" />
+    <ClInclude Include="objects\shader.h" />
+    <ClInclude Include="objects\shader_parser.h" />
+    <ClInclude Include="objects\shader_resource_manager.h" />
+    <ClInclude Include="objects\texture.h" />
+    <ClInclude Include="objects\uniform_buffer.h" />
+    <ClInclude Include="objects\vertex_buffer.h" />
+    <ClInclude Include="objects\webgl\buffer.h" />
+    <ClInclude Include="objects\webgl\device.h" />
+    <ClInclude Include="objects\webgl\framebuffer.h" />
+    <ClInclude Include="objects\webgl\gl\gles3\gl3.h" />
+    <ClInclude Include="objects\webgl\gl\gles3\gl31.h" />
+    <ClInclude Include="objects\webgl\gl\gles3\gl32.h" />
+    <ClInclude Include="objects\webgl\gl\gles3\gl3platform.h" />
+    <ClInclude Include="objects\webgl\gl\GLState.h" />
+    <ClInclude Include="objects\webgl\mipmap_gen.h" />
+    <ClInclude Include="objects\webgl\pipeline_state.h" />
+    <ClInclude Include="objects\webgl\render_pass.h" />
+    <ClInclude Include="objects\webgl\shader.h" />
+    <ClInclude Include="objects\webgl\shader_resource_manager.h" />
+    <ClInclude Include="objects\webgl\texture.h" />
+    <ClInclude Include="objects\webgl\uniform_buffer.h" />
+    <ClInclude Include="objects\webgl\vertex_buffer.h" />
     <ClInclude Include="utils\containers.h" />
     <ClInclude Include="utils\hash.h" />
     <ClInclude Include="utils\log.h" />
@@ -564,6 +591,7 @@
     <ClCompile Include="objects\texture.cpp" />
     <ClCompile Include="objects\uniform_buffer.cpp" />
     <ClCompile Include="objects\vertex_buffer.cpp" />
+    <ClCompile Include="objects\webgl\gl\GLState.cpp" />
     <ClCompile Include="utils\platform.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

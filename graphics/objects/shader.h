@@ -7,6 +7,7 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "webgl/shader.h"
 #endif
 
 #ifdef RD_API_VULKAN

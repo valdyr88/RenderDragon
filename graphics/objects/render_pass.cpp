@@ -8,6 +8,7 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "webgl/render_pass.cpp"
 #endif
 
 #ifdef RD_API_VULKAN

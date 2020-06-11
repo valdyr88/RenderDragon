@@ -104,29 +104,34 @@ bool CVertexBuffer::Bind(){
 	auto& gl = this->device->gl;
 	
 	gl.BindVertexArray(this->id);
-	if(this->format.layout == EAttributeLayout::Interleaved) //one buffer
-	{
-		for(uint i = 0; i < this->format.attributes.size(); ++i){
-			auto& att = this->format.attributes[i];
-			if(gl.IsVerexAttribArrayEnabled(att.binding) == false)
-				gl.EnableVertexAttribArray(att.binding);
-		}
-		auto& buffer = this->buffers[0];
-		gl.BindVertexBuffer(0, buffer->getId(), 0, this->format.stride);
-	}
-	else if(this->format.layout == EAttributeLayout::Contiguous) //multiple buffers
-	{
-		ASSERT(this->format.attributes.size() == buffers.size());
 
-		for(uint i = 0; i < this->format.attributes.size(); ++i){
-			auto& att = this->format.attributes[i];
-			auto& buffer = this->buffers[i];
+	if(firstBind){
+		if(this->format.layout == EAttributeLayout::Interleaved) //one buffer
+		{
+			for(uint i = 0; i < this->format.attributes.size(); ++i){
+				auto& att = this->format.attributes[i];
+				if(gl.IsVerexAttribArrayEnabled(att.binding) == false)
+					gl.EnableVertexAttribArray(att.binding);
+			}
+			auto& buffer = this->buffers[0];
+			gl.BindVertexBuffer(0, buffer->getId(), 0, this->format.stride);
+		}
+		else if(this->format.layout == EAttributeLayout::Contiguous) //multiple buffers
+		{
+			ASSERT(this->format.attributes.size() == buffers.size());
 
-			if(gl.IsVerexAttribArrayEnabled(att.binding) == false)
-				gl.EnableVertexAttribArray(att.binding);
-			gl.BindVertexBuffer(att.binding, buffer->getId(), 0, att.stride);
+			for(uint i = 0; i < this->format.attributes.size(); ++i){
+				auto& att = this->format.attributes[i];
+				auto& buffer = this->buffers[i];
+
+				if(gl.IsVerexAttribArrayEnabled(att.binding) == false)
+					gl.EnableVertexAttribArray(att.binding);
+				gl.BindVertexBuffer(att.binding, buffer->getId(), 0, att.stride);
+			}
 		}
 	}
+
+	firstBind = false;
 	return true;
 }
 

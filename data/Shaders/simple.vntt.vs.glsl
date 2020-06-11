@@ -20,6 +20,8 @@ out vec3 WorldPosition;
 out vec3 Normal;
 out vec3 Tangent;
 out vec3 Bitangent;
+out vec3 ViewDir;
+out vec3 ViewPosition;
 out vec2 UV;
 flat out uint Flags;
 
@@ -29,6 +31,9 @@ void main(){
 	WorldPosition = wPosition.xyz;
 	Normal = normalize(normal*mat3(transform.normal));
 	Tangent = normalize(tangent);
+	
+	ViewPosition = transform.view[3].xyz;
+	ViewDir = normalize(transform.view[0].xyz);
 	
 	Flags = flags;
 	

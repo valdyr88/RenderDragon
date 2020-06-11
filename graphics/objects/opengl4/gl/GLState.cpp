@@ -42,6 +42,7 @@ GLState_prefix_func void CGLState::Init(){
 	bound_read_framebuffer = 0; bound_draw_framebuffer = 0;
 
 	for(uint i = 0; i < RD_MAX_VERTEX_ATTRIBS; ++i) vertex_attrib_array_enabled[i] = false;
+	for(uint i = 0; i < RD_MAX_TEXTURE_BINDINGS; ++i) bound_textures[i] = -1;
 
 	bIsInit = true;
 }

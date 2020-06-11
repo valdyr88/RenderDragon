@@ -14,7 +14,8 @@ protected:
 	SVertexFormat format;
 	sizetype count;
 	GLuint id = 0;
-
+	bool firstBind = true;
+	
 	std::vector<UniquePtr<CBuffer>> buffers;
 
 	bool Create(std::vector<SRawData> data);

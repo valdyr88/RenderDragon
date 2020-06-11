@@ -8,6 +8,7 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "webgl/texture.h"
 #endif
 
 #ifdef RD_API_VULKAN

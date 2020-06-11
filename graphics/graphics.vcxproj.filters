@@ -52,6 +52,15 @@
     <Filter Include="Header Files\ext\material">
       <UniqueIdentifier>{47510f52-fc25-4c1d-a9bc-f4baccd2b6b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\objects\webgl">
+      <UniqueIdentifier>{f31f5fce-1112-4395-85d5-5e18c2dd674e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\objects\webgl\gl">
+      <UniqueIdentifier>{a8002fa5-447e-40a9-bcb7-b17487642f1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\objects\webgl\gl\gles3">
+      <UniqueIdentifier>{beb1e3eb-ebc4-414c-967d-f2b304e69d48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\types\types.h">
@@ -216,6 +225,87 @@
     <ClInclude Include="utils\hash.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
+    <ClInclude Include="objects\webgl\gl\GLState.h">
+      <Filter>Header Files\objects\webgl\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\gl\gles3\gl3.h">
+      <Filter>Header Files\objects\webgl\gl\gles3</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\gl\gles3\gl3platform.h">
+      <Filter>Header Files\objects\webgl\gl\gles3</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\gl\gles3\gl31.h">
+      <Filter>Header Files\objects\webgl\gl\gles3</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\gl\gles3\gl32.h">
+      <Filter>Header Files\objects\webgl\gl\gles3</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\buffer.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\device.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\framebuffer.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\mipmap_gen.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\pipeline_state.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\render_pass.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\shader.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\shader_resource_manager.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\texture.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\uniform_buffer.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\webgl\vertex_buffer.h">
+      <Filter>Header Files\objects\webgl</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\buffer.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\device.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\framebuffer.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\pipeline_state.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\render_pass.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\shader.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\shader_parser.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\shader_resource_manager.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\texture.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\uniform_buffer.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\vertex_buffer.h">
+      <Filter>Header Files\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="objects\shader.cpp">
@@ -268,6 +358,9 @@
     </ClCompile>
     <ClCompile Include="ext\model\mesh.cpp">
       <Filter>Header Files\ext\model</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\webgl\gl\GLState.cpp">
+      <Filter>Header Files\objects\webgl\gl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

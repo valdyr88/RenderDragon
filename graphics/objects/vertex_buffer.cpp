@@ -8,6 +8,7 @@
 #endif
 
 #ifdef RD_API_WEBGL
+#include "webgl/vertex_buffer.cpp"
 #endif
 
 #ifdef RD_API_VULKAN

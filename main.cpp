@@ -219,6 +219,7 @@ const char* include_list[] =
 {
 	"data/Shaders/include/functions.glsl",
 	"data/Shaders/include/defines.glsl",
+	"data/Shaders/include/pbr.glsl",
 	"data/Shaders/error_shader.glsl",
 	nullptr
 };
@@ -432,23 +433,30 @@ int main()
 	auto source = TestIncludes("data/Shaders/simple_shading.ps.glsl");
 	source = globalDefines->InsertInto(source);
 
-	printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
+	//printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
+	{
+		CFile file; file.Open("data/Shaders/simple.ps.glsl.processed.glsl", CFile::EFileMode::WriteBinary);
+		file.Write(source.c_str(), source.size());
+		file.Close();
+	}
 
 	auto vsSource = TestIncludes("data/Shaders/simple.vntt.vs.glsl");
 	vsSource = globalDefines->InsertInto(vsSource);
 
 	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple_shading.ps.glsl", source, "data/Shaders/simple_shading.ps.glsl", {{
 			{0, 1, "txDiffuse", EShaderResourceType::Texture, EShaderStage::FragmentShader},
-			{0, 2, "txNormal", EShaderResourceType::Texture, EShaderStage::FragmentShader}
+			{0, 2, "txNormal", EShaderResourceType::Texture, EShaderStage::FragmentShader},
+			{0, 3, "txAoRS", EShaderResourceType::Texture, EShaderStage::FragmentShader}
 		}});
 	SShaderDesc vsdesc(EShaderStage::VertexShader, "simple.vntt.vs.glsl", vsSource, "data/Shaders/simple.vntt.vs.glsl", {{
 			{0, 0, "transform", EShaderResourceType::UniformBuffer, EShaderStage::VertexShader},
-			{0, 3, "light", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader}
+			{0, 4, "light", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader}
 		}});
+
 	vsdesc.vertexFormat = (*sponza.begin())->Mesh()->getVertexBuffer()->getVertexFormat();
 
-	auto VShader = CSingleton<CShaderModuleManager>::get()->CreateShaderModule(vsdesc);
 	auto FShader = CSingleton<CShaderModuleManager>::get()->CreateShaderModule(fsdesc);
+	auto VShader = CSingleton<CShaderModuleManager>::get()->CreateShaderModule(vsdesc);
 	auto program = CSingleton<CShaderProgramManager>::get()->CreateShaderProgram("simple_shading.glsl", { VShader,FShader });
 	
 	auto renderPass = device->GetSwapchainRenderPass();
@@ -547,6 +555,7 @@ int main()
 		for(auto meshT : sponza.AllMeshAndMaterials()){
 			shader->setTexture("txDiffuse", meshT.material->getTexture(0));
 			shader->setTexture("txNormal", meshT.material->getTexture(2));
+			shader->setTexture("txAoRS", meshT.material->getTexture(3));
 
 			device->BindVertexBuffer(meshT.mesh->Mesh()->getVertexBuffer());
 			device->BindIndexBuffer(meshT.mesh->Mesh()->getIndexBuffer());
@@ -572,7 +581,7 @@ int main()
 			LOG_TO_CONSOLE("frame no: %d", (int32)frameNo);
 			LOG_TO_CONSOLE("dTime avg: %f", averageDTime);
 		}
-		Sleep(25);
+		sleep_ms(25);
 
 		time = getTime_s();
 		dTime = time - frameStartTime;
@@ -733,7 +742,7 @@ int main_mipmapgen()
 		device->PresentFrame();
 
 		time += dTime;
-		Sleep(1); dTime = 1.0f / 1000.0f;
+		sleep_ms(1); dTime = 1.0f / 1000.0f;
 	}
 
 	return 0;

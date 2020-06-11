@@ -6,6 +6,7 @@
 #define RD_MAX_VERTEX_ATTRIBS 32
 #define RD_MAX_UNIFORM_BUFFER_BINDINGS 32
 #define RD_MAX_UV_CHANNELS 8
+#define RD_MAX_TEXTURE_BINDINGS 32
 
 enum class EGraphicsAPI{
 	Base,

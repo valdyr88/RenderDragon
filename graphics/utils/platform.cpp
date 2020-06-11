@@ -1,6 +1,7 @@
 #include <list>
 #include "platform.h"
 #include "pointers.h"
+#include "log.h"
 
 timetype chrono_clock_start = getTime_c();
 
@@ -195,7 +196,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 1;
 }
 
-void SWindow::CreateProgramWindow(const char* name, int W, int H, int startX, int startY, uint style, bool showWindow){
+void SWindow::CreateProgramWindow(const char* c_name, int W, int H, int startX, int startY, uint style, bool showWindow){
 
 	width = W; height = H; posX = startX; posY = startY;
 
@@ -215,11 +216,10 @@ void SWindow::CreateProgramWindow(const char* name, int W, int H, int startX, in
 
 	RegisterClass(&windowClass);
 
-	size_t nameLen = strlen(name);
-	this->name = __new char[nameLen+1];
-	strcpy_s(this->name, nameLen+1, name);
+	size_t nameLen = strlen(c_name);
+	this->name = c_name;
 
-	this->window = CreateWindow((LPCSTR)class_name, (LPCSTR) name, WS_OVERLAPPEDWINDOW, posX, posY,//450,
+	this->window = CreateWindow((LPCSTR)class_name, (LPCSTR)c_name, WS_OVERLAPPEDWINDOW, posX, posY,//450,
 								width+16, height+39, NULL, NULL, hInstance, NULL);
 	
 	this->windowDeviceContext = GetDC(this->window);
@@ -259,6 +259,18 @@ bool ListenForMessage(SWindow* window)
 
 #endif //PLATFORM_WINDOWS
 
+#ifdef PLATFORM_EMSCRIPTEN
+
+void CreateProgramWindow(const char* name, int W, int H, int startX, int startY, uint style, bool showWindow){
+	LOG_ERR("not implemented");
+}
+
+void ProcessMessage(SWindow* window){}
+
+bool ListenForMessage(SWindow* window){
+	return false; }
+
+#endif //PLATFORM_EMSCRIPTEN
 
 void ProcessCallback(SWindow* window)
 {
@@ -296,6 +308,7 @@ bool CFile::Open(std::string name, CFile::EFileMode mode){
 	if(file != nullptr) return false;
 	fopen_s(&file, name.c_str(), charmode(mode));
 	if(file == nullptr) return false;
+	this->mode = mode;
 	this->getSize();
 	return true;
 }
