@@ -67,14 +67,14 @@ std::string getFileStringContents(const char* fileName){
 	CFile file; file.Open(fileName, CFile::EFileMode::ReadBinary);
 	uint length = file.getSize();
 
-	char* contents = __new char[(size_t)length+1];
+	char* contents = __rd_new char[(size_t)length+1];
 	file.Read(length, contents);
 	contents[length] = '\0';
 
 	std::string rtn = "";
 	rtn += contents;
 
-	__release_array(contents);
+	__rd_release_array(contents);
 
 	return rtn;
 }

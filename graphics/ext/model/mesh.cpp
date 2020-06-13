@@ -66,8 +66,8 @@ SModelDesc CModel::CreateModelDescFromXML(void* xmlobject){
 	return desc;
 }
 SModelDesc CModel::CreateModelDescFromXML(std::string xml){
-	rapidxml::xml_document<char>* doc = __new rapidxml::xml_document<char>();
-	char* cxml = __new char[xml.length() + 1];
+	rapidxml::xml_document<char>* doc = __rd_new rapidxml::xml_document<char>();
+	char* cxml = __rd_new char[xml.length() + 1];
 	//xml.copy(cxml, xml.length());
 	strcpy_s(cxml, xml.length() + 1, xml.c_str());
 	doc->parse<0>(cxml);

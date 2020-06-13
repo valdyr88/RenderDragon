@@ -78,7 +78,7 @@ bool CTexture::Create(std::string& fileName){
 	CFile file(fileName, CFile::EFileMode::ReadBinary);
 
 	uint size = 0;
-	byte* data = __new byte[file.getSize()];
+	byte* data = __rd_new byte[file.getSize()];
 	file.Read(file.getSize(), data, &size);
 
 	byte* image_data = nullptr;
@@ -130,8 +130,8 @@ bool CTexture::Create(std::string& fileName){
 
 	bool rtn = Create(txData);
 	
-	__release_array(data); size = 0;
-	__release_array(image_data);
+	__rd_release_array(data); size = 0;
+	__rd_release_array(image_data);
 	return rtn;
 }
 

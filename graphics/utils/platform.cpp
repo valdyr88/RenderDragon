@@ -14,6 +14,7 @@ SWindow::SWindow(){
 #endif
 }
 SWindow::~SWindow(){
+	this->Release();
 	windows.remove(this);
 }
 //==========================================================================================
@@ -57,14 +58,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 	int i = 1;
 
-	SWindow* pWindow = NULL;
+	SWindow* pWindow = nullptr;
 
 	for(auto it = windows.begin(); it != windows.end(); ++it)
 		if((*it)->getWindowHandle() == hWnd){
 			pWindow = *it; break;
 		}
 
-	if(pWindow == NULL)
+	if(pWindow == nullptr)
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 
 	switch(msg){
@@ -201,13 +202,13 @@ void SWindow::CreateProgramWindow(const char* c_name, int W, int H, int startX, 
 	width = W; height = H; posX = startX; posY = startY;
 
 	const char* class_name = "rdWindow";
-	hInstance = GetModuleHandle(NULL);
+	hInstance = GetModuleHandle(nullptr);
 
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hbrBackground = (HBRUSH) GetStockObject(BLACK_BRUSH);
-	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	windowClass.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
 	windowClass.hInstance = hInstance;
 	windowClass.lpfnWndProc = WndProc;
 	windowClass.lpszClassName = class_name;//TEXT("");
@@ -220,7 +221,7 @@ void SWindow::CreateProgramWindow(const char* c_name, int W, int H, int startX, 
 	this->name = c_name;
 
 	this->window = CreateWindow((LPCSTR)class_name, (LPCSTR)c_name, WS_OVERLAPPEDWINDOW, posX, posY,//450,
-								width+16, height+39, NULL, NULL, hInstance, NULL);
+								width+16, height+39, nullptr, nullptr, hInstance, nullptr);
 	
 	this->windowDeviceContext = GetDC(this->window);
 
@@ -238,6 +239,10 @@ bool SWindow::SwapBackbuffer(){
 	return SwapBuffers(this->windowDeviceContext);
 }
 
+void SWindow::Release(){
+
+}
+
 void ProcessMessage(SWindow* window){
 
 }
@@ -246,8 +251,8 @@ bool ListenForMessage(SWindow* window)
 {
 	MSG msg;
 
-	//int getmessage = GetMessage(&msg,NULL,0,0);
-	bool getmessage = PeekMessage(&msg, window->getWindowHandle(), NULL, NULL, PM_REMOVE) == 1;
+	//int getmessage = GetMessage(&msg,nullptr,0,0);
+	bool getmessage = PeekMessage(&msg, window->getWindowHandle(), 0, 0, PM_REMOVE) == 1;
 	if(getmessage == false)
 		return false;
 	
@@ -261,8 +266,24 @@ bool ListenForMessage(SWindow* window)
 
 #ifdef PLATFORM_EMSCRIPTEN
 
-void CreateProgramWindow(const char* name, int W, int H, int startX, int startY, uint style, bool showWindow){
-	LOG_ERR("not implemented");
+void SWindow::CreateProgramWindow(const char* c_name, int W, int H, int startX, int startY, uint style, bool showWindow){
+	
+	if(SDL_Init(SDL_INIT_VIDEO) < 0){
+		LOG_ERR("SDL can't be initialized!"); return;
+	}
+	this->window = SDL_CreateWindow(c_name, startX, startY, W, H, style);
+	width = W; height = H; posX = startX; posY = startY;
+	this->name = c_name;
+}
+
+bool SWindow::SwapBackbuffer(){
+	//SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(this->window);
+}
+
+void SWindow::Release(){
+	SDL_DestroyWindow(this->window); this->window = nullptr;
+	SDL_Quit();
 }
 
 void ProcessMessage(SWindow* window){}
@@ -291,7 +312,6 @@ void MainPlatformLoop(){
 
 
 
-
 const char* charmode(CFile::EFileMode mode){
 	switch(mode)
 	{
@@ -305,9 +325,13 @@ const char* charmode(CFile::EFileMode mode){
 
 //---------------------------------------------------------------------------------------
 bool CFile::Open(std::string name, CFile::EFileMode mode){
-	if(file != nullptr) return false;
-	fopen_s(&file, name.c_str(), charmode(mode));
-	if(file == nullptr) return false;
+	if(this->file != nullptr) return false;
+	#ifdef PLATFORM_WINDOWS
+		fopen_s(&this->file, name.c_str(), charmode(mode));
+	#else
+		this->file = fopen(name.c_str(), charmode(mode));
+	#endif
+	if(this->file == nullptr) return false;
 	this->mode = mode;
 	this->getSize();
 	return true;
@@ -321,45 +345,49 @@ bool CFile::WriteFormatted(const char* format, ...){
 }
 
 bool CFile::Read(uint size, byte* out_data, uint* out_size){
-	if(file == nullptr) return false;
-	uint read = (uint)fread_s(out_data, size, 1, size, file);
+	if(this->file == nullptr) return false;
+	#ifdef PLATFORM_WINDOWS
+		uint read = (uint)fread_s(out_data, size, 1, size, this->file);
+	#else
+		uint read = (uint)fread(out_data, 1, size, this->file);
+	#endif
 	if(out_size != nullptr) *out_size = read;
 	return read == size;
 }
 bool CFile::Write(byte* data, uint size){
-	if(file == nullptr) return false;
-	return fwrite(data, size, 1, file) != 0;
+	if(this->file == nullptr) return false;
+	return fwrite(data, size, 1, this->file) != 0;
 }
 
 bool CFile::isEOF(){
-	if(file == nullptr) return true;
-	return feof(file) != 0;
+	if(this->file == nullptr) return true;
+	return feof(this->file) != 0;
 }
 
 uint CFile::getSize(){
-	if(file == nullptr) return 0;
+	if(this->file == nullptr) return 0;
 	if(size != 0) return size;
 
-	auto pos = ftell(file);
-	fseek(file, 0, SEEK_END);
-	size = ftell(file);
-	fseek(file, pos, SEEK_SET);
+	auto pos = ftell(this->file);
+	fseek(this->file, 0, SEEK_END);
+	size = ftell(this->file);
+	fseek(this->file, pos, SEEK_SET);
 
 	return size;
 }
 uint CFile::getPosition(){
-	if(file == nullptr) return 0;
-	return ftell(file);
+	if(this->file == nullptr) return 0;
+	return ftell(this->file);
 }
 uint CFile::getRemaining(){
-	if(file == nullptr) return 0;
+	if(this->file == nullptr) return 0;
 	auto pos = this->getPosition();
 	return size - pos;
 }
 
 void CFile::Close(){
-	if(file != nullptr){
-		fclose(file); file = nullptr;
+	if(this->file != nullptr){
+		fclose(this->file); this->file = nullptr;
 	}
 }
 //---------------------------------------------------------------------------------------

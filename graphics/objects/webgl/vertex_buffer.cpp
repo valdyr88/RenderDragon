@@ -27,7 +27,7 @@ bool CVertexBuffer::Create(std::vector<SRawData> datas){
 			desc.usage = EShaderResourceUsageType::Static;
 			desc.size = data.size;
 		}
-		auto abuffer = UniquePtr<CBuffer>(__new CBuffer(this->device, desc, data));
+		auto abuffer = UniquePtr<CBuffer>(__rd_new CBuffer(this->device, desc, data));
 		abuffer->Bind();
 
 		uint32 stride = 0;
@@ -71,7 +71,7 @@ bool CVertexBuffer::Create(std::vector<SRawData> datas){
 				desc.usage = EShaderResourceUsageType::Static;
 				desc.size = size;
 			}
-			auto abuffer = UniquePtr<CBuffer>(__new CBuffer(this->device, desc, data));
+			auto abuffer = UniquePtr<CBuffer>(__rd_new CBuffer(this->device, desc, data));
 			abuffer->Bind();
 
 			gl.EnableVertexAttribArray(att.binding);
@@ -153,7 +153,7 @@ bool CIndexBuffer::Create(SRawData data){
 		desc.usage = EShaderResourceUsageType::Static;
 		desc.size = data.size;
 	}
-	buffer = UniquePtr<CBuffer>(__new CBuffer(this->device, desc, data));
+	buffer = UniquePtr<CBuffer>(__rd_new CBuffer(this->device, desc, data));
 	return true;
 }
 

@@ -69,7 +69,7 @@ std::string getFileStringContents(const char* fileName){
 	size_t length = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
-	char* contents = __new char[length + 1];
+	char* contents = __rd_new char[length + 1];
 	fread(contents, 1, length, file);
 	contents[length] = '\0';
 	fclose(file); file = nullptr;
@@ -77,7 +77,7 @@ std::string getFileStringContents(const char* fileName){
 	std::string rtn = "";
 	rtn += contents;
 
-	__release_array(contents);
+	__rd_release_array(contents);
 
 	return rtn;
 }

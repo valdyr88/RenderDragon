@@ -11,11 +11,11 @@
 template <typename type> type* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
 	return nullptr;}
 template <> uint8* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
-	return stbi_load_from_memory(in_image_data, in_size, out_width, out_height, out_components, *out_components); }
+	return stbi_load_from_memory((const stbi_uc*)in_image_data, in_size, out_width, out_height, out_components, *out_components); }
 template <> uint16* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
-	return stbi_load_16_from_memory(in_image_data, in_size, out_width, out_height, out_components, *out_components); }
+	return stbi_load_16_from_memory((const stbi_uc*)in_image_data, in_size, out_width, out_height, out_components, *out_components); }
 template <> float* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
-	return stbi_loadf_from_memory(in_image_data, in_size, out_width, out_height, out_components, *out_components);
+	return stbi_loadf_from_memory((const stbi_uc*)in_image_data, in_size, out_width, out_height, out_components, *out_components);
 }
 
 template <typename type>
@@ -78,7 +78,7 @@ bool CTexture::Create(std::string& fileName){
 	CFile file(fileName, CFile::EFileMode::ReadBinary);
 
 	uint size = 0;
-	byte* data = __new byte[file.getSize()];
+	byte* data = __rd_new byte[file.getSize()];
 	file.Read(file.getSize(), data, &size);
 
 	byte* image_data = nullptr;
@@ -89,7 +89,7 @@ bool CTexture::Create(std::string& fileName){
 		default:
 		case EValueType::int8:
 		case EValueType::uint8:
-			rdLoadImageData<uint8>(data, size, &image_data, &image_size, &width, &height, &components);
+			rdLoadImageData<byte>(data, size, &image_data, &image_size, &width, &height, &components);
 			descriptor.valueType = EValueType::uint8;
 			break;
 		case EValueType::int16:
@@ -130,8 +130,8 @@ bool CTexture::Create(std::string& fileName){
 
 	bool rtn = Create(txData);
 	
-	__release_array(data); size = 0;
-	__release_array(image_data);
+	__rd_release_array(data); size = 0;
+	__rd_release_array(image_data);
 	return rtn;
 }
 

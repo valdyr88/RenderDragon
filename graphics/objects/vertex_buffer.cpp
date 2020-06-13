@@ -28,7 +28,7 @@ std::vector<byte> CVertexBuffer::InterleaveVertexData(const SVertexFormat& fmt, 
 	}
 	
 	std::vector<byte> databytes; databytes.resize(vertexCount*vtxbytesize);
-	for(auto& b : databytes) b = 0x00;
+	for(auto& b : databytes) b = (byte)0x00;
 
 	{
 		byte* dataptr = databytes.data();

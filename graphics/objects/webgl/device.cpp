@@ -3,21 +3,33 @@
 #include "../../utils/platform_defines.h"
 #include "device.h"
 
+#ifdef PLATFORM_EMSCRIPTEN
+	#include "emscripten\emscripten.h"
+	#include "SDL\SDL.h"
+#endif
+
 SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& descriptor){
 	SGPUDeviceContext GPUDeviceContext;
 
+#ifdef PLATFORM_EMSCRIPTEN
+	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_DEPTH_SIZE, 24);
+
+	GPUDeviceContext.context = SDL_GL_CreateContext(window.window);
+	SDL_GL_MakeCurrent(window.window, GPUDeviceContext.context);
+
+	glClearColor(1.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+#endif
+
 	return GPUDeviceContext;
-}
-
-SGPUDeviceContext rdInitOpenGL_ARB(SWindow& window, const SGPUDeviceDesc& descriptor, SGPUDeviceContext& context, int GLVersion_Major, int GLVersion_Minor){
-
-	return context;
 }
 
 SGPUDeviceContext GPUDevice::InitOpenGL(SWindow& win){
 	window = win;
 	context = rdInitOpenGL(window, this->descriptor);
-	context = rdInitOpenGL_ARB(window, this->descriptor, context, 4, 0);
 	initPipelineState();
 	return context;
 }
@@ -38,8 +50,8 @@ bool GPUDevice::InitContextOnWindow(SWindow& win){
 		rpdesc.depthStencil.stencilStoreOp = ELoadStoreOp::DontCare;
 	}
 
-	swapchainRenderPass = SharedPtr<CRenderPass>(__new CRenderPass(this, rpdesc));
-	swapchainFramebuffer = SharedPtr<CFramebuffer>(__new CGLSwapchainFramebuffer(this, rpdesc));
+	swapchainRenderPass = SharedPtr<CRenderPass>(__rd_new CRenderPass(this, rpdesc));
+	swapchainFramebuffer = SharedPtr<CFramebuffer>(__rd_new CGLSwapchainFramebuffer(this, rpdesc));
 	
 	rdSetupDeviceForGlobalObjects(this);
 
@@ -112,17 +124,17 @@ SharedPtr<CTexture> GPUDevice::FindSharedPtr(CGraphicObject* ptr){
 //------------------------------------------------------------------------------------
 
 SharedPtr<CPipelineState> GPUDevice::CreatePipelineState(const SPipelineStateDesc& desc){
-	auto obj = SharedPtr<CPipelineState>(__new CPipelineState(this, desc));
+	auto obj = SharedPtr<CPipelineState>(__rd_new CPipelineState(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CRenderPass> GPUDevice::CreateRenderPass(const SRenderPassDesc& desc){
-	auto obj = SharedPtr<CRenderPass>(__new CRenderPass(this, desc));
+	auto obj = SharedPtr<CRenderPass>(__rd_new CRenderPass(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CBuffer> GPUDevice::CreateBuffer(const SBufferDesc& desc){
-	auto obj = SharedPtr<CBuffer>(__new CBuffer(this, desc));
+	auto obj = SharedPtr<CBuffer>(__rd_new CBuffer(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
@@ -130,65 +142,65 @@ SharedPtr<CBuffer> rdDeviceCreateBuffer(GPUDevice* device, const SBufferDesc& de
 	return device->CreateBuffer(desc);}
 
 SharedPtr<CFramebuffer> GPUDevice::CreateFramebuffer(const SRenderPassDesc& desc, std::vector<SharedPtr<CTexture>> textures, SharedPtr<CTexture> depthStencilTexture){
-	auto obj = SharedPtr<CFramebuffer>(__new CFramebuffer(this, desc, textures, depthStencilTexture));
+	auto obj = SharedPtr<CFramebuffer>(__rd_new CFramebuffer(this, desc, textures, depthStencilTexture));
 	addTrackedObject(obj);
 	return obj;
 }
 //SharedPtr<CShaderResource> GPUDevice::CreateShaderResrouce(const SShaderResourceDesc& desc);
 SharedPtr<CSampler> GPUDevice::CreateSampler(const SSamplerDesc& desc){
-	auto obj = SharedPtr<CSampler>(__new CSampler(this, desc));
+	auto obj = SharedPtr<CSampler>(__rd_new CSampler(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CVertexBuffer> GPUDevice::CreateVertexBuffer(const SVertexFormat& desc, uint32 count, std::vector<SRawData> data){
-	auto obj = SharedPtr<CVertexBuffer>(__new CVertexBuffer(this, desc, count, data));
+	auto obj = SharedPtr<CVertexBuffer>(__rd_new CVertexBuffer(this, desc, count, data));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CIndexBuffer> GPUDevice::CreateIndexBuffer(EValueType type, uint32 count, SRawData data){
-	auto obj = SharedPtr<CIndexBuffer>(__new CIndexBuffer(this, type, count, data));
+	auto obj = SharedPtr<CIndexBuffer>(__rd_new CIndexBuffer(this, type, count, data));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CTexture> GPUDevice::CreateTexture(const STextureDesc& desc, const STextureRawData& data){
-	auto obj = SharedPtr<CTexture>(__new CTexture(this, desc, data));
+	auto obj = SharedPtr<CTexture>(__rd_new CTexture(this, desc, data));
 	addTrackedObject(obj);
 	obj->CreateView(obj);
 	return obj;
 }
 SharedPtr<CTexture> GPUDevice::CreateTexture(const STextureDesc& desc, std::string fileName){
-	auto obj = SharedPtr<CTexture>(__new CTexture(this, desc, fileName));
+	auto obj = SharedPtr<CTexture>(__rd_new CTexture(this, desc, fileName));
 	addTrackedObject(obj);
 	obj->CreateView(obj);
 	return obj;
 }
 SharedPtr<CTextureView> GPUDevice::CreateTextureView(const STextureViewDesc& desc, SharedPtr<CTexture> tx){
-	auto obj = SharedPtr<CTextureView>(__new CTextureView(this, desc, tx));
+	auto obj = SharedPtr<CTextureView>(__rd_new CTextureView(this, desc, tx));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CShaderResourceBinding> GPUDevice::CreateShaderResourceBinding(const SShaderResourceBindingDesc& desc, CShaderResource* resource){
-	auto obj = SharedPtr<CShaderResourceBinding>(__new CShaderResourceBinding(this, desc, resource));
+	auto obj = SharedPtr<CShaderResourceBinding>(__rd_new CShaderResourceBinding(this, desc, resource));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CShaderResourceSetDesc> GPUDevice::CreateShaderResourceSetDesc(const std::vector<SShaderResourceBindingDesc>& binds){
-	auto obj = SharedPtr<CShaderResourceSetDesc>(__new CShaderResourceSetDesc(this, binds));
+	auto obj = SharedPtr<CShaderResourceSetDesc>(__rd_new CShaderResourceSetDesc(this, binds));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CShaderResourceSet> GPUDevice::CreateShaderResourceSet(const CShaderResourceSetDesc* desc, const std::vector<CShaderResource*>& rers){
-	auto obj = SharedPtr<CShaderResourceSet>(__new CShaderResourceSet(this, desc, rers));
+	auto obj = SharedPtr<CShaderResourceSet>(__rd_new CShaderResourceSet(this, desc, rers));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CShaderProgram> GPUDevice::CreateShaderProgram(std::string uniquename, const std::vector<SharedPtr<CShader>> shaders){
-	auto obj = SharedPtr<CShaderProgram>(__new CShaderProgram(this, uniquename, shaders));
+	auto obj = SharedPtr<CShaderProgram>(__rd_new CShaderProgram(this, uniquename, shaders));
 	addTrackedObject(obj);
 	return obj;
 }
 SharedPtr<CShader> GPUDevice::CreateShaderModule(const SShaderDesc& desc){
-	auto obj = SharedPtr<CShader>(__new CShader(this, desc));
+	auto obj = SharedPtr<CShader>(__rd_new CShader(this, desc));
 	addTrackedObject(obj);
 	return obj;
 }

@@ -18,7 +18,7 @@ private:
 
 	void Release(){
 		if(value != nullptr)
-			__release_array(value); 
+			__rd_release_array(value); 
 		valueSizeInBytes = 0; bIsValueSet = false;
 	}
 public:
@@ -29,7 +29,7 @@ public:
 		Release();
 		if(value != nullptr) return;
 		valueSizeInBytes = sizeInBytes(type) * componentCount(size) * count;
-		if(valueSizeInBytes > 0) value = __new byte[valueSizeInBytes]; bIsValueSet = false;
+		if(valueSizeInBytes > 0) value = __rd_new byte[valueSizeInBytes]; bIsValueSet = false;
 	}
 
 	SMaterialParam(const char* n, EValueType t, EValueSize s, uint32 c = 1) :

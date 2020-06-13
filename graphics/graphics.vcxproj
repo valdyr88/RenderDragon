@@ -251,7 +251,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_WGL|x64'">
     <OutDir>$(SolutionDir)</OutDir>
-    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(EMSDK)\upstream\emscripten\system\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)</OutDir>
@@ -263,7 +263,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_WGL|x64'">
     <OutDir>$(SolutionDir)</OutDir>
-    <IncludePath>$(ProjectDir)utils\assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)utils\assimp\include;$(EMSDK)\upstream\emscripten\system\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -212,10 +212,14 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 }
 
 SMaterialDesc CMaterial::CreateMaterialDescFromXML(std::string xml){
-	rapidxml::xml_document<char>* doc = __new rapidxml::xml_document<char>();
-	char* cxml = __new char[xml.length() + 1];
+	rapidxml::xml_document<char>* doc = __rd_new rapidxml::xml_document<char>();
+	char* cxml = __rd_new char[xml.length() + 1];
 	//xml.copy(cxml, xml.length());
-	strcpy_s(cxml, xml.length()+1, xml.c_str());
+	#ifdef PLATFORM_WINDOWS
+		strcpy_s(cxml, xml.length()+1, xml.c_str());
+	#else
+		strcpy(cxml, xml.c_str());
+	#endif
 	doc->parse<0>(cxml);
 	auto m = doc->first_node("material");
 
@@ -243,7 +247,7 @@ bool CMaterial::CheckIfParamsGroupAndUBAreEqual(const SMaterialParamsGroup& mpg,
 
 SharedPtr<CMaterialInstance> CMaterial::CreateInstance(GPUDevice* dev, std::vector<SharedPtr<IUniformBuffer>> ubs, std::vector<std::string> ubnames)
 {
-	auto mi = SharedPtr<CMaterialInstance>(__new CMaterialInstance(this));
+	auto mi = SharedPtr<CMaterialInstance>(__rd_new CMaterialInstance(this));
 	this->materialInstances.add(mi);
 
 	uint added_sharedubs = 0, added_names = 0;
@@ -314,7 +318,7 @@ SharedPtr<CMaterial> CMaterialManager::CreateMaterial(const SMaterialDesc& desc)
 			return materials[i];
 		}
 	}
-	SharedPtr<CMaterial> material = SharedPtr<CMaterial>(__new CMaterial(desc));
+	SharedPtr<CMaterial> material = SharedPtr<CMaterial>(__rd_new CMaterial(desc));
 	materials.add(material);
 	return material;
 }

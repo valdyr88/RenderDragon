@@ -50,7 +50,7 @@ bool CShader::CompileShader(){
 	{
 		GLint infoLogLen = 0;
 		gl.GetShaderiv(id, GL_INFO_LOG_LENGTH, &infoLogLen);
-		char* info_chars = __new char[(size_t)infoLogLen + 1];
+		char* info_chars = __rd_new char[(size_t)infoLogLen + 1];
 		gl.GetShaderInfoLog(id, infoLogLen+1, nullptr, info_chars);
 
 		info_string.reserve((size_t)infoLogLen + 1);
@@ -58,7 +58,7 @@ bool CShader::CompileShader(){
 
 		LOG("shader compile failed: <%s> :\n%s", descriptor.name.c_str(), info_chars);
 
-		__release_array(info_chars);
+		__rd_release_array(info_chars);
 		return false;
 	}
 	return true;
@@ -88,14 +88,14 @@ std::string CShader::ReadSouceFromFile(std::string path, CShaderFileSource* incl
 		CFile file; file.Open(path, CFile::EFileMode::ReadBinary);
 		uint length = file.getSize();
 
-		char* contents = __new char[(size_t)length + 1];
+		char* contents = __rd_new char[(size_t)length + 1];
 		file.Read(length, contents);
 		contents[length] = '\0';
 		file.Close();
 
 		source += contents;
 
-		__release_array(contents);
+		__rd_release_array(contents);
 	}
 
 	source = CShaderFileSource::ParseForIncludes(source, path, includeFiles);
@@ -141,14 +141,14 @@ CShaderProgram::CShaderProgram(GPUDevice* dev, std::string uniquename, std::vect
 
 		GLint infoLogLen = 0;
 		gl.GetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLogLen);
-		char* info_chars = __new char[(size_t)infoLogLen + 1];
+		char* info_chars = __rd_new char[(size_t)infoLogLen + 1];
 		gl.GetProgramInfoLog(id, infoLogLen + 1, nullptr, info_chars);
 
 		info_string.reserve((size_t)infoLogLen + 1);
 		info_string.assign(info_chars);
 
 		LOG("shader linking failed: <%s> :\n%s", name.c_str(), info_string.c_str());
-		__release_array(info_chars);
+		__rd_release_array(info_chars);
 	}
 	CheckResourceBindings();
 }
@@ -222,7 +222,7 @@ bool CShaderProgram::CheckResourceBindings(){
 		for(int i = 0; i < numberOfBlocks; ++i){
 			GLint namelen = 0; GLint binding = 0;
 			gl.GetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &namelen);
-			char* cname = __new char[(size_t)namelen+1];
+			char* cname = __rd_new char[(size_t)namelen+1];
 			gl.GetActiveUniformBlockName(this->id, i, namelen, nullptr, cname);
 			cname[namelen] = 0;
 			gl.GetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_BINDING, &binding);
@@ -234,7 +234,7 @@ bool CShaderProgram::CheckResourceBindings(){
 			resbind.binding = binding;//gl.GetUniformLocation(this->id, cname);//(GLint)gl.GetUniformBlockIndex(this->id, cname);//
 
 			introspection.resourceBindings.emplace_back(resbind);
-			__release_array(cname);
+			__rd_release_array(cname);
 		}
 	}
 

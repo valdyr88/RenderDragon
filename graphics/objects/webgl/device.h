@@ -35,6 +35,9 @@ struct SGPUDeviceContext{
 #ifdef PLATFORM_MAC
 	//MacOS-specific graphics api context
 #endif
+#ifdef PLATFORM_EMSCRIPTEN
+	SDL_GLContext context;
+#endif
 };
 
 class GPUDevice {

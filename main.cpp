@@ -392,7 +392,7 @@ auto testMeshXML(GPUDevice* dev){
 int chipschallenge_main();
 #define LOG_TO_CONSOLE(format, ...)		{ printf_s(format "\n", __VA_ARGS__); }
 
-int main()
+int main_assimp_load()
 {
 	SGPUDeviceDesc devdesc;
 	devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;

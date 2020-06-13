@@ -4,12 +4,12 @@
 #include <list>
 #include <cstdarg>
 #include <string>
+#include "platform_defines.h"
 //#include <string.h>
 
 //shader compiler ne podrzava include ni predaju defineova, no podrzava predavanje vise char* stringova. treba napraviti dobre string funkcije za ovo!
 
 namespace str{
-
 	/*
 		void printwchar(wChar* Str1, int size, const wChar* Str2, ...)
 		{
@@ -58,10 +58,10 @@ namespace str{
 		if(source == nullptr) return nullptr;
 
 		size_t size = strleng(source);
-		Type2* outstr = __new Type2[size + 1];
+		Type2* outstr = __rd_new Type2[size + 1];
 
 		if(copystr(source, outstr, size + 1) == false){
-			__release_array(outstr); return nullptr;
+			__rd_release_array(outstr); return nullptr;
 		}
 
 		return outstr;
@@ -69,7 +69,7 @@ namespace str{
 
 	template<typename Type2> inline Type2* mkstr(size_t size)
 	{
-		Type2* outstr = __new Type2[size + 1];
+		Type2* outstr = __rd_new Type2[size + 1];
 		zero_memory(outstr, size + 1);
 
 		return outstr;
@@ -280,30 +280,44 @@ namespace str{
 	}
 
 	inline int to_int(char* string){
-		return (int)atoi(string);
+		//return (int)atoi(string);
+		return (int)std::stoi(string);
 	}
 	inline int to_int(wchar_t* string){
-		return (int)_wtoi(string);
+		//return (int)_wtoi(string);
+		return (int)std::stoi(string);
 	}
 	inline float to_float(char* string){
-		return (float)atof(string);
+		//return (float)atof(string);
+		return (float)std::stof(string);
 	}
 	inline float to_float(wchar_t* string){
-		return (float)_wtof(string);
+		//return (float)_wtof(string);
+		return (float)std::stof(string);
 	}
 	inline double to_double(char* string){
-		return atof(string);
+		//return atof(string);
+		return (double)std::stod(string);
 	}
 	inline double to_double(wchar_t* string){
-		return _wtof(string);
+		//return _wtof(string);
+		return (double)std::stod(string);
 	}
 
 
 	inline void to_string(int value, char* string, size_t string_len){
-		sprintf_s(string, string_len, "%d", value);
+		#ifdef PLATFORM_WINDOWS
+			sprintf_s(string, string_len, "%d", value);
+		#else
+			sprintf(string, "%d", value);
+		#endif
 	}
 	inline void to_string(double value, char* string, size_t string_len){
-		sprintf_s(string, string_len, "%f", value);
+		#ifdef PLATFORM_WINDOWS
+			sprintf_s(string, string_len, "%f", value);
+		#else
+			sprintf(string, "%d", value);
+		#endif
 	}
 
 	/*
@@ -399,7 +413,11 @@ namespace str{
 		va_list argList;
 		va_start(argList, format);
 
-		vsprintf_s(out_string, len_out_string, format, argList);
+		#ifdef PLATFORM_WINDOWS
+			vsprintf_s(out_string, len_out_string, format, argList);
+		#else
+			vsprintf(out_string, format, argList);
+		#endif
 
 		va_end(argList);
 
@@ -413,7 +431,11 @@ namespace str{
 		va_list argList;
 		va_start(argList, format);
 
-		_vswprintf_c(out_string, len_out_string, format, argList);
+		#ifdef PLATFORM_WINDOWS
+			_vswprintf_c(out_string, len_out_string, format, argList);
+		#else
+			vswprintf(out_string, len_out_string, format, argList);
+		#endif
 
 		va_end(argList);
 

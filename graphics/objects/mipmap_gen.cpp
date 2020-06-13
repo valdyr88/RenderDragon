@@ -39,14 +39,14 @@ SharedPtr<CVertexBuffer> rdCreateQuadVertexBufferInterleaved(GPUDevice* device)
 									 vertex(vec3( 1.0f,  1.0f, 0.01f), vec2(1.0f, 1.0f)),
 									 vertex(vec3( 1.0f, -1.0f, 0.01f), vec2(1.0f, 0.0f)) };
 
-	//auto vertexBuffer = SharedPtr<CVertexBuffer>(__new CVertexBuffer(dev, fmt, (uint)vertices.size(), { SRawData(vertices) }));
+	//auto vertexBuffer = SharedPtr<CVertexBuffer>(__rd_new CVertexBuffer(dev, fmt, (uint)vertices.size(), { SRawData(vertices) }));
 	auto vertexBuffer = device->CreateVertexBuffer(fmt, (uint)vertices.size(), { SRawData(vertices) });
 	return vertexBuffer;
 }
 SharedPtr<CIndexBuffer> rdCreateQuadIndexBuffer(GPUDevice* device)
 {
 	std::vector<uint16> data = { 0, 1, 2, 2, 3, 0 };
-	//auto indexBuffer = SharedPtr<CIndexBuffer>(__new CIndexBuffer(device, EValueType::uint16, (uint)data.size(), data));
+	//auto indexBuffer = SharedPtr<CIndexBuffer>(__rd_new CIndexBuffer(device, EValueType::uint16, (uint)data.size(), data));
 	auto indexBuffer = device->CreateIndexBuffer(EValueType::uint16, (uint)data.size(), data);
 	return indexBuffer;
 }
@@ -69,7 +69,7 @@ bool CMipMapGen::Create(const SPipelineStateDesc& pipdesc, const SRenderPassDesc
 	renderPass = device->CreateRenderPass(rpdesc);
 	pipedesc.renderPass = renderPass;
 	pipeline = device->CreatePipelineState(pipedesc);
-	//dataUB = UniquePtr<CUniformBuffer<UBLevelData>>(__new CUniformBuffer<UBLevelData>(device, "data"));
+	//dataUB = UniquePtr<CUniformBuffer<UBLevelData>>(__rd_new CUniformBuffer<UBLevelData>(device, "data"));
 	dataUB = CUniformBuffer<UBLevelData>::CreateUniformBuffer(device, "data");
 
 	if(CMipMapGen::quadVB == nullptr)

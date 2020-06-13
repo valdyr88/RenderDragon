@@ -161,7 +161,7 @@ public:
 
 	Type* operator->(){ return &data; }
 
-	virtual const char* getUBStructTypeName() const override{ return structTypeName; }
+	virtual const char* getUBStructTypeName() const override;
 	virtual const std::vector<SUniformMap>& getUBStructDesc() const override{ return Type::desc; }
 
 	static SharedPtr<CUniformBuffer<Type>> CreateUniformBuffer(GPUDevice* dev, const char* bufferName);
@@ -250,11 +250,11 @@ template<typename Type> void CUniformBuffer<Type>::Upload(){
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName){
-	return SharedPtr<CUniformBuffer<Type>>(__new CUniformBuffer<Type>(dev, bufferName, Type::desc));
+	return SharedPtr<CUniformBuffer<Type>>(__rd_new CUniformBuffer<Type>(dev, bufferName, Type::desc));
 }
 
 //template<typename Type> SharedPtr<CUniformBuffer<Type>> CUniformBuffer<Type>::CreateUniformBuffer(GPUDevice* dev, const char* bufferName, const std::vector<SUniformMap>& maps){
-//	return SharedPtr<CUniformBuffer<Type>>(__new CUniformBuffer<Type>(dev, bufferName, maps));
+//	return SharedPtr<CUniformBuffer<Type>>(__rd_new CUniformBuffer<Type>(dev, bufferName, maps));
 //}
 
 size_t internal_rdAppendRegisterUniformBufferStructureFunctionCall(void (*func)());
@@ -265,7 +265,8 @@ void internal_rdCallRegisterUniformBufferStructureFunctionCall();
 
 #define rdRegisterUniformBufferStructure(Type) \
 	template class CUniformBuffer<Type>; \
-	const char* CUniformBuffer<Type>::structTypeName = #Type; \
+	template<> const char* CUniformBuffer<Type>::structTypeName = #Type; \
+	template<> const char* CUniformBuffer<Type>::getUBStructTypeName() const { return structTypeName; } \
 namespace RD_MACRO_CONCAT(RD_MACRO_CONCAT(registerUBnamespace,__COUNTER__), __LINE__){ \
 	void internal_rdRegisterUniformBufferStructure(){ \
 		IUniformBuffer::CreateUniformBufferType[#Type] = &CUniformBuffer<Type>::CreateUniformBuffer; \

@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include <stdint.h>
+#include "..\platform_defines.h"
 
 typedef uint8_t uint8;
 typedef uint16_t uint16;
@@ -17,7 +18,13 @@ typedef float float32;
 typedef double float64;
 
 typedef unsigned int uint;
+
+#ifndef PLATFORM_EMSCRIPTEN
 typedef uint8_t byte;
+#else
+#include <cstddef>
+using byte = std::byte;
+#endif
 
 typedef char char8;
 typedef wchar_t char16;

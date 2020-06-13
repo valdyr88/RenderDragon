@@ -48,12 +48,12 @@ public:
 		return (uint)elements.size()-1;
 	}
 	uint add(Type e){
-		uint i = add(__new Type());
+		uint i = add(__rd_new Type());
 		*elements[i] = e;
 		return i;
 	}
 	Type& add(){
-		uint i = add(__new Type());
+		uint i = add(__rd_new Type());
 		return *elements[i];
 	}
 	void remove(uint i, uint count = 1){
@@ -62,7 +62,7 @@ public:
 
 		for(uint p = 0; p < count; ++p){
 			auto ptr = elements[i+p];
-			__release_ptr(ptr);
+			__rd_release_ptr(ptr);
 		}
 
 		for(; i < elements.size()-count; ++i){
@@ -91,7 +91,7 @@ public:
 
 	void clear(){
 		for(auto it = elements.begin(); it != elements.end(); ++it)
-			__release_ptr(*it);
+			__rd_release_ptr(*it);
 	}
 	~container(){
 		clear();

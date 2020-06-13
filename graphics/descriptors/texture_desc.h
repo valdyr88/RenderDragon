@@ -121,12 +121,12 @@ struct STextureRawData{
 	STextureRawData(uint w, uint h, uint d, uint sides, bool hasMips = true){
 		numMips = (hasMips)? rdCalcNumberOfMips(w, h, d) : 1;
 		numSlices = numMips*sides;
-		slices = __new STextureSliceRawData[numSlices];
+		slices = __rd_new STextureSliceRawData[numSlices];
 	}
 	STextureRawData(){}
 
 	~STextureRawData(){
-		__release_array(slices);
+		__rd_release_array(slices);
 	}
 };
 

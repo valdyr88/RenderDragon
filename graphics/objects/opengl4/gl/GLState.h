@@ -485,16 +485,16 @@ public:
 	forceinline GLState_prefix_func const char* GetErrorString(){
 		return GetStringFromError(GetError());
 	}
-	forceinline GLState_prefix_func void LogErrors(const char* FunctionName = NULL){
+	forceinline GLState_prefix_func void LogErrors(const char* FunctionName = nullptr){
 		#ifdef GLState_LogFunctionCalls
-			if(FunctionName != NULL)
+			if(FunctionName != nullptr)
 				LOG( "%s%s\n"), FunctionName, "()") );
 		#endif
 		EGLError error = EGLError::EGL_NO_ERROR;
 
 		for(uint i = 0; i < ConsolePrintErrors_PreliminaryNofChecks; ++i){
 			error = (EGLError)GetError();
-			if(FunctionName != NULL && error != EGLError::EGL_NO_ERROR){ LOG( "%s%s", FunctionName, "()"); }
+			if(FunctionName != nullptr && error != EGLError::EGL_NO_ERROR){ LOG( "%s%s", FunctionName, "()"); }
 			if(error != EGLError::EGL_NO_ERROR){ break; }
 		}
 

@@ -15,6 +15,8 @@
 #ifdef PLATFORM_MAC
 #endif
 #ifdef PLATFORM_EMSCRIPTEN
+	#include "emscripten\emscripten.h"
+	#include "SDL\SDL.h"
 #endif
 
 struct SWindow{
@@ -42,7 +44,8 @@ struct SWindow{
 #endif
 #ifdef PLATFORM_EMSCRIPTEN
 	//Emscripten-specific canvas handler
-	uint flags = 0x00000000;
+	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
+	SDL_Window* window = nullptr;
 #endif
 	std::string name = "";
 
@@ -54,6 +57,8 @@ struct SWindow{
 	void CreateProgramWindow(const char* name, int W, int H, int startX, int startY, uint style, bool showWindow);
 
 	bool SwapBackbuffer();
+
+	void Release();
 
 	SWindow();
 	~SWindow();
@@ -133,7 +138,7 @@ inline void sleep_s(uint time){
 	std::this_thread::sleep_for(std::chrono::seconds(time)); }
 inline void sleep_ms(uint time){
 	std::this_thread::sleep_for(std::chrono::milliseconds(time)); }
-inline void sleep_µs(uint time){
+inline void sleep_mics(uint time){
 	std::this_thread::sleep_for(std::chrono::microseconds(time)); }
 
 //---------------------------------------------------------------------------------------
