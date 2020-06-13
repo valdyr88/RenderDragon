@@ -400,7 +400,7 @@ int main(){
 	globalState.bIsInit = false;
 
 #ifdef PLATFORM_EMSCRIPTEN
-	emscripten_set_main_loop_arg(emsc_one_iter, (void*)&globalState, -1, 0);
+	emscripten_set_main_loop_arg(emsc_one_iter, (void*)&globalState, 2, 0);
 #else
 	while(true){
 		one_iter(getTime_s(), &globalState);
