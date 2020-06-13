@@ -18,7 +18,7 @@ protected:
 	SShaderResourceBindingDesc descriptor;
 	CShaderResource* resource;
 
-	CShaderResourceBinding() = default;
+	CShaderResourceBinding() = delete;
 
 public:
 	CShaderResourceBinding(GPUDevice* dev, const SShaderResourceBindingDesc& desc, CShaderResource* res)

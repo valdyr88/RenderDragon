@@ -17,6 +17,10 @@
 #ifdef PLATFORM_EMSCRIPTEN
 	#include "emscripten\emscripten.h"
 	#include "SDL\SDL.h"
+#ifdef EGL_GL_context
+	#include "EGL\egl.h"
+#endif
+
 #endif
 
 struct SWindow{
@@ -44,7 +48,7 @@ struct SWindow{
 #endif
 #ifdef PLATFORM_EMSCRIPTEN
 	//Emscripten-specific canvas handler
-	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
+	uint flags = SDL_WindowFlags::SDL_WINDOW_OPENGL | SDL_WindowFlags::SDL_WINDOW_SHOWN;
 	SDL_Window* window = nullptr;
 #endif
 	std::string name = "";

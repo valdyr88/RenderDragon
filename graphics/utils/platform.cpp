@@ -269,7 +269,7 @@ bool ListenForMessage(SWindow* window)
 void SWindow::CreateProgramWindow(const char* c_name, int W, int H, int startX, int startY, uint style, bool showWindow){
 	
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
-		LOG_ERR("SDL can't be initialized!"); return;
+		LOG_ERR("SDL can't be initialized: %s", SDL_GetError()); return;
 	}
 	this->window = SDL_CreateWindow(c_name, startX, startY, W, H, style);
 	width = W; height = H; posX = startX; posY = startY;
@@ -278,7 +278,10 @@ void SWindow::CreateProgramWindow(const char* c_name, int W, int H, int startX, 
 
 bool SWindow::SwapBackbuffer(){
 	//SDL_GL_SwapBuffers();
-	SDL_GL_SwapWindow(this->window);
+	#ifdef SDL_GL_context
+		SDL_GL_SwapWindow(this->window);
+	#endif
+	return true;
 }
 
 void SWindow::Release(){

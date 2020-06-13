@@ -3,6 +3,8 @@
 
 #if defined(__EMSCRIPTEN__)
 	#define PLATFORM_EMSCRIPTEN
+	#define EGL_GL_context
+	//#define SDL_GL_context
 
 //PLATFORM_EMSCRIPTEN
 #elif defined(__WIN32__) || defined(_WIN32) || defined(_WIN64)

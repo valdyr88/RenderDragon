@@ -170,6 +170,8 @@ SMaterialDesc CMaterial::CreateMaterialDescFromXML(void* xmlobject){
 								int ivalues[4]; str::strtonum<int, 4>(value, ',', ivalues);
 								param.setAs<ivec4>(ivec4(ivalues[0], ivalues[1], ivalues[2], ivalues[3])); }
 								break;
+							default:
+								break;
 						}
 					}
 				}

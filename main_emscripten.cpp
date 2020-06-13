@@ -298,7 +298,7 @@ iter_rtn_type one_iter(double in_time, void* in_userData)
 		auto source = TestIncludes("data/Shaders/simple.ps.glsl");
 		source = globalDefines->InsertInto(source);
 
-		printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
+		printContentsToFile("data/Shaders/simple.ps.glsl.processed.wasm.glsl", source.c_str(), (uint)source.length());
 
 		auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
 		vsSource = globalDefines->InsertInto(vsSource);
@@ -397,6 +397,7 @@ SGlobalState globalState;
 int main(){
 	globalState.width = 512;
 	globalState.height = 288;
+	globalState.bIsInit = false;
 
 #ifdef PLATFORM_EMSCRIPTEN
 	emscripten_set_main_loop_arg(emsc_one_iter, (void*)&globalState, -1, 0);

@@ -12,7 +12,7 @@
 
 struct SMaterialParam : public SUniformMap{
 private:
-	void* value = nullptr;
+	byte* value = nullptr;
 	uint valueSizeInBytes = 0;
 	bool bIsValueSet = false;
 

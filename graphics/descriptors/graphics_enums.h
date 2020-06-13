@@ -145,8 +145,10 @@ inline uint8 count(const ETextureFormat& format){
 		case ETextureFormat::RG:return 2;
 		case ETextureFormat::RGB:return 3;
 		case ETextureFormat::RGBA:return 4;
+		case ETextureFormat::RGBE:return 4;
 		case ETextureFormat::Depth:return 1;
 		case ETextureFormat::DepthStencil:return 2;
+		default: break;
 	}
 	return 0;
 }

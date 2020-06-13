@@ -36,7 +36,18 @@ struct SGPUDeviceContext{
 	//MacOS-specific graphics api context
 #endif
 #ifdef PLATFORM_EMSCRIPTEN
+
+#ifdef SDL_GL_context
 	SDL_GLContext context;
+#endif
+	
+#ifdef EGL_GL_context
+	EGLContext context = nullptr;
+	EGLDisplay display = nullptr;
+	EGLSurface surface = nullptr;
+	EGLConfig  config = nullptr;
+#endif
+
 #endif
 };
 
@@ -86,12 +97,15 @@ protected:
 	void bindFramebuffer(CFramebuffer* framebuffer);
 
 	void initPipelineState();
+	
+	void Release();
 
 public:
 
 	GPUDevice(const SGPUDeviceDesc& desc) : descriptor(desc){
 		descriptor.api = EGraphicsAPI::OpenGL4;
 	}
+	~GPUDevice();
 
 	const auto& getDescriptor(){ return descriptor; }
 

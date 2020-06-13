@@ -12,13 +12,38 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 	SGPUDeviceContext GPUDeviceContext;
 
 #ifdef PLATFORM_EMSCRIPTEN
+
+#ifdef SDL_GL_context
 	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GLattr::SDL_GL_DEPTH_SIZE, 24);
 
 	GPUDeviceContext.context = SDL_GL_CreateContext(window.window);
-	SDL_GL_MakeCurrent(window.window, GPUDeviceContext.context);
+	//SDL_GL_MakeCurrent(window.window, GPUDeviceContext.context);
+#endif
+
+#ifdef EGL_GL_context
+	EGLint majorv = 0, minorv = 0;
+	GPUDeviceContext.display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+	eglInitialize(GPUDeviceContext.display, &majorv, &minorv);
+	{
+		EGLint gl_attrib_list[] = { EGL_BIND_TO_TEXTURE_RGBA, EGL_TRUE,
+									EGL_RED_SIZE, 8,
+									EGL_GREEN_SIZE, 8,
+									EGL_BLUE_SIZE, 8,
+									EGL_NONE };
+		EGLint numconf = 0;
+		eglChooseConfig(GPUDeviceContext.display, gl_attrib_list, &GPUDeviceContext.config, 1, &numconf);
+	}
+	EGLint gl_attrib_list[] = { EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE };
+	
+	GPUDeviceContext.surface = eglCreateWindowSurface(GPUDeviceContext.display, GPUDeviceContext.config, 0, nullptr);
+	GPUDeviceContext.context = eglCreateContext(GPUDeviceContext.display, GPUDeviceContext.config, nullptr, gl_attrib_list);
+	if(eglMakeCurrent(GPUDeviceContext.display, GPUDeviceContext.surface, nullptr, GPUDeviceContext.context) == false){
+		LOG_ERR("Can't create GL context through EGL!"); }
+
+#endif
 
 	glClearColor(1.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -26,13 +51,30 @@ SGPUDeviceContext rdInitOpenGL(const SWindow& window, const SGPUDeviceDesc& desc
 
 	return GPUDeviceContext;
 }
-
 SGPUDeviceContext GPUDevice::InitOpenGL(SWindow& win){
 	window = win;
 	context = rdInitOpenGL(window, this->descriptor);
+	gl.FetchFunctionPointers();
 	initPipelineState();
 	return context;
 }
+
+void GPUDevice::Release(){
+
+#ifdef PLATFORM_EMSCRIPTEN
+#ifdef SDL_GL_context
+	SDL_GL_DeleteContext(context.context); context.context = nullptr;
+#endif
+#ifdef EGL_GL_context
+	eglMakeCurrent(context.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+	eglDestroyContext(context.display, context.context); context.context = nullptr;
+	eglDestroySurface(context.display, context.surface); context.surface = nullptr;
+	eglTerminate(context.display); context.display = nullptr;
+#endif
+
+#endif
+}
+
 
 bool GPUDevice::InitContextOnWindow(SWindow& win){
 	context = this->InitOpenGL(win);
@@ -60,6 +102,11 @@ bool GPUDevice::InitContextOnWindow(SWindow& win){
 
 UniquePtr<GPUDevice> GPUDevice::CreateGPUDevice(const SGPUDeviceDesc& desc){
 	return NewUnique<GPUDevice>(desc);
+}
+
+
+GPUDevice::~GPUDevice(){
+	Release();
 }
 
 //------------------------------------------------------------------------------------
@@ -563,7 +610,13 @@ void GPUDevice::bindFramebuffer(CFramebuffer* framebuffer){
 
 bool GPUDevice::PresentFrame(){
 	gl.Flush();
-	window.SwapBackbuffer();
+	#ifdef EGL_SDL_context
+		window.SwapBackbuffer();
+	#endif
+	#ifdef EGL_GL_context
+		eglSwapBuffers(context.display, context.surface);
+	#endif
+
 	return true;
 }
 //------------------------------------------------------------------------------------

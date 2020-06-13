@@ -304,16 +304,16 @@ bool CShaderProgram::setTexture(uint set, uint binding, CTextureView* tx){
 
 bool CShaderProgram::setUniformBuffer(std::string name, IUniformBuffer* ub){
 	uint set = 0, binding = 0;
-	auto& setbindpair = this->resourceBindingPoints[name];
-	if(&setbindpair != nullptr)
-		return setUniformBuffer(setbindpair.first, setbindpair.second, ub);
+	auto setbindpair = &this->resourceBindingPoints[name];
+	if(setbindpair != nullptr)
+		return setUniformBuffer(setbindpair->first, setbindpair->second, ub);
 	return false;
 }
 bool CShaderProgram::setTexture(std::string name, CTextureView* tx){
 	uint set = 0, binding = 0;
-	auto& setbindpair = this->resourceBindingPoints[name];
-	if(&setbindpair != nullptr)
-		return setTexture(setbindpair.first, setbindpair.second, tx);
+	auto setbindpair = &this->resourceBindingPoints[name];
+	if(setbindpair != nullptr)
+		return setTexture(setbindpair->first, setbindpair->second, tx);
 	return false;
 }
 

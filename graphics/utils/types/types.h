@@ -84,6 +84,7 @@ inline uint sizeInBytes(EValueType t){
 		case EValueType::float64: return 8;
 		case EValueType::char8: return 1;
 		case EValueType::char16: return 2;
+		default: break;
 	}
 	return 0;
 }
@@ -95,6 +96,7 @@ inline bool isFloatType(EValueType t){
 		case EValueType::float24:
 		case EValueType::float32:
 		case EValueType::float64: return true;
+		default: break;
 	}
 	return false;
 }
@@ -110,6 +112,7 @@ inline bool isIntType(EValueType t){
 		case EValueType::uint24:
 		case EValueType::uint32:
 		case EValueType::uint64: return true;
+		default: break;
 	}
 	return false;
 }
@@ -118,6 +121,7 @@ inline bool isCharType(EValueType t){
 	{
 		case EValueType::char8:
 		case EValueType::char16: return true;
+		default: break;
 	}
 	return false; 
 }
@@ -140,6 +144,7 @@ inline const char* tostring(EValueType t){
 		case EValueType::float64: return "float64";
 		case EValueType::char8: return "char8";
 		case EValueType::char16: return "char16";
+		default: break;
 	}
 	return "none";
 }
@@ -206,6 +211,7 @@ inline uint count(EValueSize s){
 		case EValueSize::mat3x4:return 12;
 		case EValueSize::mat4x2:return 8;
 		case EValueSize::mat2x4:return 8;
+		default: break;
 	}
 	return 0;
 }
@@ -227,6 +233,7 @@ inline const char* tostring(EValueSize v){
 		case EValueSize::mat3x4:return "mat3x4";
 		case EValueSize::mat4x2:return "mat4x2";
 		case EValueSize::mat2x4:return "mat2x4";
+		default: break;
 	}
 	return "none";
 }
@@ -259,6 +266,7 @@ inline EValueSize toEValueSizeVec(uint count){
 		case 2: return EValueSize::vec2;
 		case 3: return EValueSize::vec3;
 		case 4: return EValueSize::vec4;
+		default: break;
 	}
 	return EValueSize::scalar;
 }
@@ -271,6 +279,7 @@ inline EValueSize toEValueSizeMat(uint count, bool colmajor = false){
 		case 9: return EValueSize::mat3x3;
 		case 12: return (colmajor)? EValueSize::mat4x3 : EValueSize::mat3x4;
 		case 16: return EValueSize::mat4x4;
+		default: break;
 	}
 	return EValueSize::scalar;
 }

@@ -60,4 +60,4 @@ namespace stdex
 }
 #define WeakPtrEx stdex::weak_ptrex
 
-#endif POINTERS_H
+#endif //POINTERS_H

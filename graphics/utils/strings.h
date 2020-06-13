@@ -27,8 +27,8 @@ namespace str{
 		}
 	*/
 
-	template<typename Type> inline size_t strleng(const Type* str){ if(str == nullptr) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i); return i; }
-	inline size_t cstrleng(const char* str){ if(str == nullptr) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i); return i; }
+	template<typename Type> inline size_t strleng(const Type* str){ if(str == nullptr) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i){}; return i; }
+	inline size_t cstrleng(const char* str){ if(str == nullptr) return 0; size_t i = 0; for(i = 0; str[i] != 0; ++i){}; return i; }
 
 	template<typename Type> inline ::std::string to_std_string(Type* str){
 
@@ -316,7 +316,7 @@ namespace str{
 		#ifdef PLATFORM_WINDOWS
 			sprintf_s(string, string_len, "%f", value);
 		#else
-			sprintf(string, "%d", value);
+			sprintf(string, "%f", value);
 		#endif
 	}
 
@@ -474,7 +474,7 @@ namespace str{
 	}
 
 	template<typename Type1, typename Type2> inline size_t strleng(const Type1* str, Type2* delimiters){
-		size_t i = 0; for(i = 0; str[i] != nullptr && string_contains_char(delimiters, str[i]) == false; ++i); return i;
+		size_t i = 0; for(i = 0; str[i] != nullptr && string_contains_char(delimiters, str[i]) == false; ++i){}; return i;
 	}
 
 	template<typename Type1, typename Type2> inline void get_file_extension(const Type1* path, Type2* dest_str, size_t dest_leng){
@@ -500,7 +500,7 @@ namespace str{
 		for(uint i = 0; i < C && str != nullptr; ++i){
 			char* str2 = str;
 
-			for(str2; *str2 != 0 && *str2 != separator; ++str2);
+			for(; *str2 != 0 && *str2 != separator; ++str2);
 			if(*str2 == separator){ *str2 = 0; ++str2; }
 			else if(*str2 == 0) str2 = nullptr;
 

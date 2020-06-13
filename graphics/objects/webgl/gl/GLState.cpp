@@ -2,6 +2,10 @@
 
 #include "GLState.h"
 
+#ifdef EGL_GL_context
+#include "EGL\egl.h"
+#endif
+
 #ifdef GLState_Static_Class
 
 int CGLState::MATRIX_MODE = -1;
@@ -45,6 +49,14 @@ GLState_prefix_func void CGLState::Init(){
 	for(uint i = 0; i < RD_MAX_TEXTURE_BINDINGS; ++i) bound_textures[i] = -1;
 
 	bIsInit = true;
+}
+
+GLState_prefix_func void CGLState::FetchFunctionPointers(){
+#ifdef EGL_GL_context
+	pglTexStorage2D = (PFNGLTEXSTORAGE2DPROC)eglGetProcAddress("glTexStorage2D");
+	pglTexStorage3D = (PFNGLTEXSTORAGE3DPROC)eglGetProcAddress("glTexStorage3D");
+	pglGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)eglGetProcAddress("glGenVertexArrays");
+#endif
 }
 
 #define getProcessAddress(x) wglGetProcAddress(x)//GetProcAddress(hModuleOpenGL,x)//

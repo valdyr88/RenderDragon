@@ -77,6 +77,10 @@ private:
 		~GLStateOnFuctionReturn(){ if(_pFunction){ _pFunction(pState, FunctionName); } }
 	};
 
+	PFNGLTEXSTORAGE2DPROC pglTexStorage2D = nullptr;
+	PFNGLTEXSTORAGE3DPROC pglTexStorage3D = nullptr;
+	PFNGLGENVERTEXARRAYSPROC pglGenVertexArrays = nullptr;
+
 #define GLState_LogErrorOnFunctionCall
 	//#define GLState_LogFunctionCalls
 #define ConsolePrintErrors_PreliminaryNofChecks 4
@@ -106,7 +110,7 @@ public:
 	enum EGLTextureTargets{
 		EGL_TEXTURE_NONE = -1,
 		//EGL_TEXTURE_1D = GL_TEXTURE_1D,
-		EGL_TEXTURE_2D = GL_TEXTURE_2D,
+		EGL_TEXTURE_2D_ = GL_TEXTURE_2D,
 		EGL_TEXTURE_3D = GL_TEXTURE_3D,
 		//EGL_TEXTURE_RECTANGLE = GL_TEXTURE_RECTANGLE,
 		//EGL_TEXTURE_BUFFER = GL_TEXTURE_BUFFER,// 	Texture data buffer, definirano u EGLBufferBindingTarget
@@ -455,6 +459,8 @@ public:
 	}
 	
 	GLState_prefix_func void Init();
+
+	GLState_prefix_func void FetchFunctionPointers();
 
 	forceinline GLState_prefix_func GLenum GetError(){
 		return glGetError();
@@ -1070,9 +1076,10 @@ public:
 		 auto rtn = glBindTexGenParameterEXT(unit,coord,value); GLS_OFR return rtn;
 	}*/
 	forceinline GLState_prefix_func void BindTexture(GLenum target, GLuint texture){
-		if((ACTIVE_TEXTURE_ID != (GLuint)-1) && (ACTIVE_TEXTURE_ID - GL_TEXTURE0 < RD_MAX_TEXTURE_BINDINGS))
-			if(bound_textures[ACTIVE_TEXTURE_ID - GL_TEXTURE0] == texture) return;
-			else bound_textures[ACTIVE_TEXTURE_ID - GL_TEXTURE0] = texture;
+		if((ACTIVE_TEXTURE_ID != (GLuint)-1) && (ACTIVE_TEXTURE_ID - GL_TEXTURE0 < RD_MAX_TEXTURE_BINDINGS)){
+			if(bound_textures[ACTIVE_TEXTURE_ID - GL_TEXTURE0] == texture){ return; }
+			else{ bound_textures[ACTIVE_TEXTURE_ID - GL_TEXTURE0] = texture; }
+		}
 		glBindTexture(target,texture); GLS_OFR return;
 	}
 	/*forceinline GLState_prefix_func void BindTextures(GLenum first, GLsizei count, GLuint* textures){
@@ -1090,12 +1097,14 @@ public:
 	/*forceinline GLState_prefix_func void TexStorage1D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width){
 		 glTexStorage1D(target,levels,internalformat,width); GLS_OFR return;
 	}*/
+
 	forceinline GLState_prefix_func void TexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height){
-		 glTexStorage2D(target,levels,internalformat,width,height); GLS_OFR return;
+		 pglTexStorage2D(target,levels,internalformat,width,height); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void TexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth){
-		 glTexStorage3D(target,levels,internalformat,width,height,depth); GLS_OFR return;
+		 pglTexStorage3D(target,levels,internalformat,width,height,depth); GLS_OFR return;
 	}
+
 	/*forceinline GLState_prefix_func void TexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels){
 		glTexSubImage1D(target, level, xoffset, width, format, type, pixels); GLS_OFR return;
 	}*/
@@ -1148,7 +1157,7 @@ public:
 		glGenFramebuffers(n, framebuffers); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void GenVertexArrays(GLsizei n, GLuint* arrays){
-		glGenVertexArrays(n,arrays); GLS_OFR return;
+		pglGenVertexArrays(n,arrays); GLS_OFR return;
 	}
 	forceinline GLState_prefix_func void BindVertexArray(GLuint array){
 		glBindVertexArray(array); bound_vertex_array = array; GLS_OFR return;
