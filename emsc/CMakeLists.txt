@@ -12,6 +12,8 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 set(MAIN_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/emsc_out)
 
+add_definitions(-D_DEBUG)
+
 include(${CMAKE_SOURCE_DIR}/../graphics/graphics.cmake)
 
 set(CPP_ROOT ${CMAKE_SOURCE_DIR}/)

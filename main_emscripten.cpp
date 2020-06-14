@@ -240,6 +240,8 @@ iter_rtn_type one_iter(double in_time, void* in_userData)
 	{
 		gs.bIsInit = true;
 
+		LOG("Init of global state");
+
 		SGPUDeviceDesc devdesc;
 		devdesc.swapchain.depthFormat = ETextureFormat::DepthStencil;
 		devdesc.swapchain.width = gs.width;
@@ -350,10 +352,12 @@ iter_rtn_type one_iter(double in_time, void* in_userData)
 		CMipMapGen mipmap(device.get(), mipshader, txfmt);
 
 		mipmap.Generate(texture);
+		LOG("End init of global state");
 	}
 	
 	//one iter
 	{
+		LOG("Main loop");
 		PlatfromLoopUpdate();
 		auto shader = pipeline->getShaderProgram();
 		auto txView = materialInstance->getTexture(0);

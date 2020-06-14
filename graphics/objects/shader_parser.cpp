@@ -65,6 +65,9 @@ std::string CShaderFileSource::ParseForIncludes(std::string source, std::string 
 
 std::string getFileStringContents(const char* fileName){
 	CFile file; file.Open(fileName, CFile::EFileMode::ReadBinary);
+	if(file.isOpen() == false){
+		LOG_ERR("Can't open file <%s>", fileName); return ""; }
+
 	uint length = file.getSize();
 
 	char* contents = __rd_new char[(size_t)length+1];
