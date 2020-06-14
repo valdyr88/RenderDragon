@@ -157,7 +157,7 @@ bool CTexture::Create(const STextureRawData& ptr){
 					//gl.TexStorage2D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, 1);
 					for(uint i = 0; i < ptr.numMips; ++i){
 						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage2D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, 1, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexImage2D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, 1, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
 						//gl.TexSubImage2D(target, i, 0, 0, dim.x, 1, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
@@ -165,7 +165,7 @@ bool CTexture::Create(const STextureRawData& ptr){
 					//gl.TexStorage2D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height);
 					for(uint i = 0; i < ptr.numMips; ++i){
 						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage2D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexImage2D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
 						//gl.TexSubImage2D(target, i, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
@@ -173,7 +173,7 @@ bool CTexture::Create(const STextureRawData& ptr){
 					//gl.TexStorage3D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height, descriptor.depth);
 					for(uint i = 0; i < ptr.numMips; ++i){
 						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage3D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, dim.z, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexImage3D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, dim.z, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
 						//gl.TexSubImage3D(target, i, 0, 0, 0, dim.x, dim.y, dim.z, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
@@ -186,7 +186,7 @@ bool CTexture::Create(const STextureRawData& ptr){
 						for(uint side = 0; side < 6; ++side){
 							for(uint mip = 0; mip < ptr.numMips; ++mip){
 								ivec3 dim = rdCalcMipDimension(mip, descriptor.width, descriptor.height, descriptor.depth);
-								gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+								gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
 								//gl.TexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
 								++i;
 							}
