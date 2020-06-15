@@ -1,9 +1,8 @@
 #version 430
-
 #global_defines
 
-#include "Shaders/include/functions.glsl"
-#include "Shaders/include/defines.glsl"
+#include "include/functions.glsl"
+#include "include/defines.glsl"
 
 layout(std140, binding = 2) uniform LightData{
 	vec3 position;
@@ -13,10 +12,10 @@ layout(std140, binding = 2) uniform LightData{
 
 layout(binding = 0) uniform sampler2D tx;
 
-in vec2 UV;
-in vec3 Normal;
+layout(location = 0) in vec2 UV;
+layout(location = 1) in vec3 Normal;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 void main(){
 	vec2 d = light.position.xy - UV.xy;

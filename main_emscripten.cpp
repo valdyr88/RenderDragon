@@ -297,15 +297,19 @@ iter_rtn_type one_iter(double in_time, void* in_userData)
 
 		*globalDefines += defines2;
 
-		auto source = TestIncludes("data/Shaders/simple.ps.glsl");
-		source = globalDefines->InsertInto(source);
+		//auto source = TestIncludes("data/Shaders/simple.ps.glsl");
+		//auto source = transfSPIRVtoGLSL("data/Shaders/simple.ps.spv", 300, true);
+		//source = globalDefines->InsertInto(source);
+		auto source = CShader::ReadSouceFromFile("data/Shaders/simple.ps.glsl", globalDefines);
 
 		printContentsToFile("data/Shaders/simple.ps.glsl.processed.wasm.glsl", source.c_str(), (uint)source.length());
 
-		auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
-		vsSource = globalDefines->InsertInto(vsSource);
+		//auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
+		//auto vsSource = transfSPIRVtoGLSL("data/Shaders/simple.vnt.vs.spv", 300, true);
+		//vsSource = globalDefines->InsertInto(vsSource);
+		auto vsSource = CShader::ReadSouceFromFile("data/Shaders/simple.vnt.vs.glsl", globalDefines);
 
-		SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple_shading.ps.glsl", source, { {
+		SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple.ps.glsl", source, { {
 				{0, 0, "tx", EShaderResourceType::Texture, EShaderStage::FragmentShader},
 				{0, 2, "light", EShaderResourceType::UniformBuffer, EShaderStage::FragmentShader}
 			} });

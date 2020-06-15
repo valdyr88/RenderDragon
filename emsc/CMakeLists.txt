@@ -15,6 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/emsc_out)
 add_definitions(-D_DEBUG)
 
 include(${CMAKE_SOURCE_DIR}/../graphics/graphics.cmake)
+include(${CMAKE_SOURCE_DIR}/../graphics/utils/spirv-cross/spirv_cross.cmake)
 
 set(CPP_ROOT ${CMAKE_SOURCE_DIR}/)
 set(SOURCES ${CPP_ROOT}/)
@@ -28,6 +29,7 @@ add_executable(
     ${CPP_HEADERS}
     ${CPP_SOURCES}
 	${GRAPHICS_SOURCE_FILES}
+	${SPIRV_CROSS_SOURCE_FILES}
 )
 
 set_target_properties(

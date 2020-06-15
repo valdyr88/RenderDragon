@@ -16,9 +16,9 @@ layout(std140, binding = 1) uniform LevelData{
 } data;
 
 
-in vec2 UV;
+layout(location = 0) in vec2 UV;
 
-out type FragColor;
+layout(location = 0) out type FragColor;
 
 /*
 

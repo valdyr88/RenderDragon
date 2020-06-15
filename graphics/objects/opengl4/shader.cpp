@@ -84,6 +84,7 @@ void CShader::Release(){
 std::string CShader::ReadSouceFromFile(std::string path, CShaderFileSource* includeFiles, CShaderDefines* shaderDefines){
 
 	std::string source = "";
+	if(isSPRIVfile(path) == false)
 	{
 		CFile file; file.Open(path, CFile::EFileMode::ReadBinary);
 		uint length = file.getSize();
@@ -97,6 +98,8 @@ std::string CShader::ReadSouceFromFile(std::string path, CShaderFileSource* incl
 
 		__rd_release_array(contents);
 	}
+	else{
+		source = transfSPIRVtoGLSL(path, 430, false); }
 
 	source = CShaderFileSource::ParseForIncludes(source, path, includeFiles);
 

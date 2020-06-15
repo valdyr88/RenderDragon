@@ -510,5 +510,26 @@ namespace str{
 			str = str2;
 		}
 	}
+
+	inline std::list<std::string> split(std::string str, std::string delimiter){
+		std::list<std::string> out;
+		size_t pos = 0;
+
+		while(true){
+			size_t prevpos = pos;
+			pos = str.find(delimiter, pos);
+
+			if(pos == std::string::npos){
+				out.emplace_back(str.substr(prevpos));
+				break;
+			}
+
+			std::string sub = str.substr(prevpos, pos-prevpos);
+			out.emplace_back(sub);
+
+			pos += delimiter.size();
+		}
+		return out;
+	}
 };
 #endif //STRINGS_H

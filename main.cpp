@@ -320,8 +320,13 @@ SharedPtr<CShaderProgram> CreateMipmapShader(GPUDevice* device, SVertexFormat ve
 	
 	auto source = CShader::ReadSouceFromFile("graphics/shaders/mipmap_gen/downsamplers.ps.glsl", &defines);
 	auto vsSource = CShader::ReadSouceFromFile("graphics/shaders/simple.vnt.vs.glsl", &defines);
-
+	
 	printContentsToFile("graphics/shaders/mipmap_gen/downsamplers.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
+	
+	auto source300es = transfGLSLtoGLSL(source, 300, true);
+	printContentsToFile("graphics/shaders/mipmap_gen/downsamplers.ps.v300es.glsl", source300es.c_str(), (uint)source300es.length());
+		 source300es = transfGLSLtoGLSL(vsSource, 300, true);
+	printContentsToFile("graphics/shaders/mipmap_gen/simple.vnt.vs.v300es.glsl", source300es.c_str(), (uint)source300es.length());
 
 	SShaderDesc fsdesc(EShaderStage::FragmentShader, "downsamplers.ps.glsl", source, 
 							{ {
@@ -653,11 +658,13 @@ int main_mipmapgen()
 	*globalDefines += defines2;
 
 	auto source = TestIncludes("data/Shaders/simple.ps.glsl");
+	//auto source = transfSPIRVtoGLSL("data/Shaders/simple.ps.spv",430,false);
 	source = globalDefines->InsertInto(source);
 
 	printContentsToFile("data/Shaders/simple.ps.glsl.processed.glsl", source.c_str(), (uint)source.length());
 
 	auto vsSource = TestIncludes("data/Shaders/simple.vnt.vs.glsl");
+	//auto vsSource = transfSPIRVtoGLSL("data/Shaders/simple.vnt.vs.spv",430,false);
 	vsSource = globalDefines->InsertInto(vsSource);
 	
 	SShaderDesc fsdesc(EShaderStage::FragmentShader, "simple_shading.ps.glsl", source, { {
@@ -751,5 +758,6 @@ int main_mipmapgen()
 //---------------------------------------------------------------------------------
 
 int main(){
-	return main_assimp_load();
+	//return main_assimp_load();
+	return main_mipmapgen();
 }

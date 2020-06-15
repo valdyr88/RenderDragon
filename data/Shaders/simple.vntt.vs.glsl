@@ -16,14 +16,14 @@ layout(std140, row_major, binding = 0) uniform TransformMatrices{
 	mat4 normal;
 } transform;
 
-out vec3 WorldPosition;
-out vec3 Normal;
-out vec3 Tangent;
-out vec3 Bitangent;
-out vec3 ViewDir;
-out vec3 ViewPosition;
-out vec2 UV;
-flat out uint Flags;
+layout(location = 0) out vec3 WorldPosition;
+layout(location = 1) out vec3 Normal;
+layout(location = 2) out vec3 Tangent;
+layout(location = 3) out vec3 Bitangent;
+layout(location = 4) out vec2 UV;
+layout(location = 5) out vec3 ViewDir;
+layout(location = 6) out vec3 ViewPosition;
+layout(location = 7) flat out uint Flags;
 
 void main(){
 	vec4 wPosition = vec4(vertex,1.0) * transform.world;

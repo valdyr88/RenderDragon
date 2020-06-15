@@ -14,16 +14,16 @@ layout(binding = 1) uniform sampler2D txDiffuse;
 layout(binding = 2) uniform sampler2D txNormal;
 layout(binding = 3) uniform sampler2D txAoRS;
 
-in vec3 WorldPosition;
-in vec3 Normal;
-in vec3 Tangent;
-in vec3 Bitangent;
-in vec2 UV;
-in vec3 ViewDir;
-in vec3 ViewPosition;
-flat in uint Flags;
+layout(location = 0) in vec3 WorldPosition;
+layout(location = 1) in vec3 Normal;
+layout(location = 2) in vec3 Tangent;
+layout(location = 3) in vec3 Bitangent;
+layout(location = 4) in vec2 UV;
+layout(location = 5) in vec3 ViewDir;
+layout(location = 6) in vec3 ViewPosition;
+layout(location = 7) flat in uint Flags;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 float D_my(float r, float dotNL){
 	r = (1.0f-r);

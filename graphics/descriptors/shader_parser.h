@@ -52,8 +52,9 @@ struct SMacroDefine{
 
 class CShaderDefines{
 	stdex::container<SMacroDefine> macros;
-	static std::string globalMacrosKeyword;
 public:
+	static std::string globalMacrosKeyword;
+
 	CShaderDefines() = default;
 
 	CShaderDefines(const CShaderDefines& other){
@@ -105,5 +106,11 @@ typedef CSingleton<CShaderDefines> ShaderGlobalDefines;
 bool printContentsToFile(const char* fileName, const char* contents, uint length);
 std::string getFileStringContents(const char* fileName);
 std::string TestIncludes(const char* fileName);
+
+inline bool isSPRIVfile(std::string fileName, std::string suffix = ".spv"){ return fileName.compare(fileName.size() - suffix.size(), suffix.size(), suffix) == 0;  }
+std::string transfSPIRVtoGLSL(byte* spirvData, sizetype len, uint version, bool es = false);
+std::string transfSPIRVtoGLSL(std::string fileName, uint version, bool es = false);
+
+std::string transfGLSLtoGLSL(std::string source, uint version, bool es = false);
 
 #endif //SHADER_PARSER_H
