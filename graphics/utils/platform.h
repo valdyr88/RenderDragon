@@ -15,10 +15,10 @@
 #ifdef PLATFORM_MAC
 #endif
 #ifdef PLATFORM_EMSCRIPTEN
-	#include "emscripten\emscripten.h"
-	#include "SDL\SDL.h"
+	#include "emscripten/emscripten.h"
+	#include "SDL/SDL.h"
 #ifdef EGL_GL_context
-	#include "EGL\egl.h"
+	#include "EGL/egl.h"
 #endif
 
 #endif
@@ -95,29 +95,29 @@ public:
 	bool ReadFormatted(const char* format, ...);
 	bool WriteFormatted(const char* format, ...);
 
-	bool Read(uint size, byte* out_data, uint* out_size = nullptr);
-	bool Write(byte* data, uint size);
+	bool Read(sizetype size, byte* out_data, sizetype* out_size = nullptr);
+	bool Write(byte* data, sizetype size);
 
 	template<typename type>
-	bool Read(uint count, type* out_data, uint* out_count = nullptr);
+	bool Read(sizetype count, type* out_data, sizetype* out_count = nullptr);
 	template<typename type>
-	bool Write(type* data, uint count);
+	bool Write(type* data, sizetype count);
 
 	bool isEOF();
-	uint getSize();
-	uint getRemaining();
-	uint getPosition();
+	sizetype getSize();
+	sizetype getRemaining();
+	sizetype getPosition();
 	bool isOpen(){ return file != nullptr; }
 
 	void Close();
 protected:
 	FILE* file = nullptr;
 	EFileMode mode = EFileMode::ReadBinary;
-	uint size = 0;
+	sizetype size = 0;
 };
 
 template<typename type>
-bool CFile::Read(uint count, type* out_data, uint* out_count){
+bool CFile::Read(sizetype count, type* out_data, sizetype* out_count){
 	byte* ptr = (byte*)out_data;
 	bool r = this->Read(count*sizeof(type), ptr, out_count);
 	if(out_count != nullptr) *out_count /= sizeof(type);
@@ -125,7 +125,7 @@ bool CFile::Read(uint count, type* out_data, uint* out_count){
 }
 
 template<typename type>
-bool CFile::Write(type* data, uint count){
+bool CFile::Write(type* data, sizetype count){
 	return Write((byte*)data, count*sizeof(type));
 }
 //---------------------------------------------------------------------------------------

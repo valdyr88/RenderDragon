@@ -595,6 +595,7 @@ int main_assimp_load()
 	return 0;
 }
 
+
 int main_mipmapgen()
 {
 	SGPUDeviceDesc devdesc;
@@ -737,8 +738,6 @@ int main_mipmapgen()
 			//ToDo: napravit provjeru shader sourcea i resourceSetDesc. postoje li svi resoursi u shaderu, ili shader ima neke koji nema resourceSetDesc i obratno?
 			shader->setUniformBuffer("light", &ub);
 			shader->setTexture("tx", txView);
-			//shader->setTexture(0, 0, &txView);
-			//shader->setUniformBuffer(0, 2, &ub);
 
 			device->BindVertexBuffer(vertexBuffer.get());
 			device->BindIndexBuffer(indexBuffer.get());

@@ -8,18 +8,18 @@
 
 //ToDo: loading of different images with stb image library
 
-template <typename type> type* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
+template <typename type> type* stbi_load_from_memory_t(byte* in_image_data, sizetype in_size, int* out_width, int* out_height, int* out_components){
 	return nullptr;}
-template <> uint8* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
+template <> uint8* stbi_load_from_memory_t(byte* in_image_data, sizetype in_size, int* out_width, int* out_height, int* out_components){
 	return stbi_load_from_memory(in_image_data, in_size, out_width, out_height, out_components, *out_components); }
-template <> uint16* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
+template <> uint16* stbi_load_from_memory_t(byte* in_image_data, sizetype in_size, int* out_width, int* out_height, int* out_components){
 	return stbi_load_16_from_memory(in_image_data, in_size, out_width, out_height, out_components, *out_components); }
-template <> float* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
+template <> float* stbi_load_from_memory_t(byte* in_image_data, sizetype in_size, int* out_width, int* out_height, int* out_components){
 	return stbi_loadf_from_memory(in_image_data, in_size, out_width, out_height, out_components, *out_components);
 }
 
 template <typename type>
-bool rdLoadImageData(byte* in_image_data, uint in_size, type** out_image_data, uint* out_size, uint* out_width, uint* out_height, uint* out_components){
+bool rdLoadImageData(byte* in_image_data, sizetype in_size, type** out_image_data, sizetype* out_size, uint* out_width, uint* out_height, uint* out_components){
 	if(in_image_data == nullptr || in_size == 0) return false;
 	if(out_image_data == nullptr || out_size == nullptr || out_width == nullptr || out_height == nullptr || out_components == nullptr) return false;
 
@@ -28,7 +28,7 @@ bool rdLoadImageData(byte* in_image_data, uint in_size, type** out_image_data, u
 	int width = 0, height = 0, components = *out_components;
 	*out_image_data = stbi_load_from_memory_t<type>(in_image_data, in_size, &width, &height, &components);
 	*out_width = (uint)width; *out_height = (uint)height; *out_components = (uint)components;
-	*out_size = (uint)(width*height*components*sizeof(type));
+	*out_size = (sizetype)(width*height*components*sizeof(type));
 	return true;
 }
 
@@ -77,12 +77,13 @@ bool CTexture::ApplySampler(const CSampler* sampler){
 bool CTexture::Create(std::string& fileName){
 	CFile file(fileName, CFile::EFileMode::ReadBinary);
 
-	uint size = 0;
+	sizetype size = 0;
 	byte* data = __rd_new byte[file.getSize()];
 	file.Read(file.getSize(), data, &size);
 
 	byte* image_data = nullptr;
-	uint image_size = 0, width = 0, height = 0, components = 0;
+	sizetype image_size = 0;
+	uint width = 0, height = 0, components = 0;
 
 	switch(descriptor.valueType)
 	{

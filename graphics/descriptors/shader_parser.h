@@ -103,7 +103,7 @@ public:
 };
 typedef CSingleton<CShaderDefines> ShaderGlobalDefines;
 
-bool printContentsToFile(const char* fileName, const char* contents, uint length);
+bool printContentsToFile(const char* fileName, const char* contents, sizetype length);
 std::string getFileStringContents(const char* fileName);
 std::string TestIncludes(const char* fileName);
 

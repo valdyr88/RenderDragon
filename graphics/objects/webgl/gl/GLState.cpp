@@ -3,7 +3,7 @@
 #include "GLState.h"
 
 #ifdef EGL_GL_context
-#include "EGL\egl.h"
+#include "EGL/egl.h"
 #endif
 
 #ifdef GLState_Static_Class

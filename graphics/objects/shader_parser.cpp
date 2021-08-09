@@ -74,9 +74,9 @@ std::string getFileStringContents(const char* fileName){
 	if(file.isOpen() == false){
 		LOG_ERR("Can't open file <%s>", fileName); return ""; }
 
-	uint length = file.getSize();
+	sizetype length = file.getSize();
 
-	char* contents = __rd_new char[(size_t)length+1];
+	char* contents = __rd_new char[(sizetype)length+1];
 	file.Read(length, contents);
 	contents[length] = '\0';
 
@@ -88,7 +88,7 @@ std::string getFileStringContents(const char* fileName){
 	return rtn;
 }
 
-bool printContentsToFile(const char* fileName, const char* contents, uint length){
+bool printContentsToFile(const char* fileName, const char* contents, sizetype length){
 	CFile file; file.Open(fileName, CFile::EFileMode::WriteBinary);
 	if(file.isOpen() == false) return false;
 	file.Write(contents,length);
@@ -135,7 +135,7 @@ std::string transfSPIRVtoGLSL(std::string fileName, uint version, bool es){
 	CFile file; file.Open(fileName, CFile::EFileMode::ReadBinary);
 	if(file.isOpen() == false){
 		LOG_ERR("Can't open file <%s>", fileName.c_str()); return ""; }
-	uint size = file.getSize();
+	sizetype size = file.getSize();
 	
 	std::vector<byte> data; data.resize(size);
 	file.Read<byte>(size, data.data());

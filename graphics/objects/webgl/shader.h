@@ -75,6 +75,7 @@ protected:
 			uint set = 0;
 			uint binding = 0;
 			std::string name;
+			sizetype size = 0;
 		};
 		std::vector<SResourceBinding> resourceBindings;
 	} introspection;
@@ -87,6 +88,8 @@ protected:
 	bool CheckLinkStatus();
 	bool LinkProgram();
 	bool CheckResourceBindings();
+
+	void CheckUniformBuffer(uint set, uint binding, IUniformBuffer* ub);
 public:
 
 	CShaderProgram(GPUDevice* dev, std::string uniquename, std::vector<SharedPtr<CShader>> shaders);

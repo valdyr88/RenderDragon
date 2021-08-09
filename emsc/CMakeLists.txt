@@ -26,7 +26,7 @@ file(GLOB_RECURSE CPP_SOURCES ${MAIN_SOURCE_DIR}/main_emscripten.cpp)
 add_executable(
     render-dragon-test
     ${EMSCRIPTEN_INCLUDE_DIR}
-    ${CPP_HEADERS}
+    # ${CPP_HEADERS}
     ${CPP_SOURCES}
 	${GRAPHICS_SOURCE_FILES}
 	${SPIRV_CROSS_SOURCE_FILES}

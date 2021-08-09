@@ -4,14 +4,15 @@
 #include "texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "..\..\utils\stb\stb_image.h"
+//#include "stb/stb_image.c"
+#include "../../utils/stb/stb_image.h"
 
 //ToDo: loading of different images with stb image library
 
 template <typename type> type* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
 	return nullptr;}
-template <> uint8* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
-	return stbi_load_from_memory((const stbi_uc*)in_image_data, in_size, out_width, out_height, out_components, *out_components); }
+template <> byte* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
+	return (byte*)stbi_load_from_memory((const stbi_uc*)in_image_data, in_size, out_width, out_height, out_components, *out_components); }
 template <> uint16* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
 	return stbi_load_16_from_memory((const stbi_uc*)in_image_data, in_size, out_width, out_height, out_components, *out_components); }
 template <> float* stbi_load_from_memory_t(byte* in_image_data, uint in_size, int* out_width, int* out_height, int* out_components){
@@ -29,6 +30,8 @@ bool rdLoadImageData(byte* in_image_data, uint in_size, type** out_image_data, u
 	*out_image_data = stbi_load_from_memory_t<type>(in_image_data, in_size, &width, &height, &components);
 	*out_width = (uint)width; *out_height = (uint)height; *out_components = (uint)components;
 	*out_size = (uint)(width*height*components*sizeof(type));
+
+	LOG("rdLoadImageData(): w,h = %d, %d, components = %d, file_size = %d, out_size = %d", width, height, components, in_size, *out_size);
 	return true;
 }
 
@@ -76,6 +79,7 @@ bool CTexture::ApplySampler(const CSampler* sampler){
 //ToDo: za Web/wasm ovo treba imat delayed loading, dok se file ne ucita. Pozvat CFile::DelayedOpen()
 bool CTexture::Create(std::string& fileName){
 	CFile file(fileName, CFile::EFileMode::ReadBinary);
+	LOG("CTexture::Create() file: <%s>", fileName.c_str());
 
 	uint size = 0;
 	byte* data = __rd_new byte[file.getSize()];
@@ -92,6 +96,7 @@ bool CTexture::Create(std::string& fileName){
 			rdLoadImageData<byte>(data, size, &image_data, &image_size, &width, &height, &components);
 			descriptor.valueType = EValueType::uint8;
 			break;
+
 		case EValueType::int16:
 		case EValueType::uint16:
 		case EValueType::uint24:
@@ -102,6 +107,7 @@ bool CTexture::Create(std::string& fileName){
 			rdLoadImageData<uint16>(data, size, (uint16**)&image_data, &image_size, &width, &height, &components);
 			descriptor.valueType = EValueType::uint16;
 			break;
+
 		case EValueType::float16:
 		case EValueType::float24:
 		case EValueType::float32:
@@ -154,31 +160,24 @@ bool CTexture::Create(const STextureRawData& ptr){
 			switch(descriptor.type)
 			{
 				case ETextureType::Texture1D:
-					//gl.TexStorage2D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, 1);
 					for(uint i = 0; i < ptr.numMips; ++i){
 						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage2D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, 1, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
-						//gl.TexSubImage2D(target, i, 0, 0, dim.x, 1, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexImage2D(target, i, glenum(descriptor.format/*, descriptor.valueType*/), dim.x, 1, 0, glenum(descriptor.format/*, isIntType(descriptor.valueType)*/), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
 				case ETextureType::Texture2D:
-					//gl.TexStorage2D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height);
 					for(uint i = 0; i < ptr.numMips; ++i){
 						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage2D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
-						//gl.TexSubImage2D(target, i, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexImage2D(target, i, glenum(descriptor.format/*, descriptor.valueType*/), dim.x, dim.y, 0, glenum(descriptor.format/*, isIntType(descriptor.valueType)*/), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
 				case ETextureType::Texture3D:
-					//gl.TexStorage3D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height, descriptor.depth);
 					for(uint i = 0; i < ptr.numMips; ++i){
 						ivec3 dim = rdCalcMipDimension(i, descriptor.width, descriptor.height, descriptor.depth);
-						gl.TexImage3D(target, i, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, dim.z, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
-						//gl.TexSubImage3D(target, i, 0, 0, 0, dim.x, dim.y, dim.z, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+						gl.TexImage3D(target, i, glenum(descriptor.format/*, descriptor.valueType*/), dim.x, dim.y, dim.z, 0, glenum(descriptor.format/*, isIntType(descriptor.valueType)*/), glenum(descriptor.valueType), ptr.slices[i].data);
 					}
 					break;
 				case ETextureType::TextureCube:
-					//gl.TexStorage2D(target, numMips, glenumTypeless(descriptor.format, descriptor.valueType), descriptor.width, descriptor.height);
 					if(ptr.numSlices / ptr.numMips != 6){
 						LOG_ERR("wrong number of sides for cubemap (%d)!", ptr.numSlices / ptr.numMips); }
 					else{
@@ -186,8 +185,7 @@ bool CTexture::Create(const STextureRawData& ptr){
 						for(uint side = 0; side < 6; ++side){
 							for(uint mip = 0; mip < ptr.numMips; ++mip){
 								ivec3 dim = rdCalcMipDimension(mip, descriptor.width, descriptor.height, descriptor.depth);
-								gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, glenum(descriptor.format, descriptor.valueType), dim.x, dim.y, 0, glenum(descriptor.format, isIntType(descriptor.valueType)), glenum(descriptor.valueType), ptr.slices[i].data);
-								//gl.TexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, 0, 0, dim.x, dim.y, glenum(descriptor.format), glenum(descriptor.valueType), ptr.slices[i].data);
+								gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, mip, glenum(descriptor.format/*, descriptor.valueType*/), dim.x, dim.y, 0, glenum(descriptor.format/*, isIntType(descriptor.valueType)*/), glenum(descriptor.valueType), ptr.slices[i].data);
 								++i;
 							}
 						}

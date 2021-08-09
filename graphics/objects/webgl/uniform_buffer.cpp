@@ -6,6 +6,7 @@
 
 bool IUniformBuffer::CreateBuffer(uint32 size){
 	if(this->device == nullptr) return false;
+	LOG("IUniformBUffer::CreateBuffer() size = %d, type = %s", size, this->getUBStructTypeName());
 
 	auto& gl = this->device->gl;
 

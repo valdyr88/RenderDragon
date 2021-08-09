@@ -81,14 +81,14 @@ UniquePtr<CIndexBuffer> CreateIndexBuffer(GPUDevice* dev)
 }
 
 struct LightData{
-	vec3 position;
+	vec4 position;
 	float intensity;
 	float time;
 
 	static std::vector<SUniformMap> desc;
 };
 std::vector<SUniformMap> LightData::desc = {
-	{"position", EValueType::float32, EValueSize::vec3 },
+	{"position", EValueType::float32, EValueSize::vec4 },
 	{"intensity", EValueType::float32, EValueSize::scalar },
 	{"time", EValueType::float32, EValueSize::scalar },
 };
@@ -162,7 +162,7 @@ auto testXML(GPUDevice* dev){
 													 "\t\r\n \
 														\t <material id = \"hull_surface\" shader=\"deferred_BcNAoRSMt\">\r\n \
 														\t\t<paramgroup ubstruct=\"LightData\">\r\n \
-														\t\t\t<param name=\"position\" value=\"1.0,2.0,3.0\" type=\"vec3\"></param>\r\n \
+														\t\t\t<param name=\"position\" value=\"1.0,2.0,3.0,0.0\" type=\"vec4\"></param>\r\n \
 														\t\t\t<param name=\"intensity\" value=\"1.0\" type=\"float\"></param>\r\n \
 														\t\t\t<param name=\"time\" value=\"1.0\" type=\"float\"></param>\r\n \
 														\t\t</paramgroup>\r\n \
@@ -373,7 +373,7 @@ iter_rtn_type one_iter(double in_time, void* in_userData)
 
 			angle = 10.0f * time;
 
-			ub->position = vec3(0.5f,0.5f,0.1f) + 0.1f*vec3(sinf(angle), cosf(angle),0.0f);
+			ub->position = vec4(vec3(0.5f,0.5f,0.1f) + 0.1f*vec3(sinf(angle), cosf(angle),0.0f), 1.0f);
 			ub->intensity = 0.01f*(cosf(angle) * 0.5f + 0.5f);
 			ub->time = time;
 			ub.Upload();

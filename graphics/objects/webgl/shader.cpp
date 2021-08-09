@@ -208,7 +208,8 @@ bool CShaderProgram::Recompile(){
 	return this->LinkProgram();
 }
 
-bool CShaderProgram::CheckResourceBindings(){
+bool CShaderProgram::CheckResourceBindings()
+{
 	if(this->device == nullptr) return false;
 	auto& gl = device->gl;
 	bool hasError = false;
@@ -220,32 +221,41 @@ bool CShaderProgram::CheckResourceBindings(){
 	else if(this->shader[getStageNumber(EShaderStage::ComputeShader)] != nullptr) name = this->shader[getStageNumber(EShaderStage::ComputeShader)]->descriptor.name;
 	else if(this->shader[getStageNumber(EShaderStage::VertexShader)] != nullptr) name = this->shader[getStageNumber(EShaderStage::VertexShader)]->descriptor.name;
 
+	//get uniform buffer binding infos
 	{
 		GLint numberOfBlocks = 0;
 		gl.GetProgramiv(this->id, GL_ACTIVE_UNIFORM_BLOCKS, &numberOfBlocks);
 
-		for(int i = 0; i < numberOfBlocks; ++i){
-			GLint namelen = 0; GLint binding = 0;
+		for(int i = 0; i < numberOfBlocks; ++i)
+		{
+			GLint namelen = 0; GLint binding = 0; GLint size = 0;
 			gl.GetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &namelen);
-			char* cname = __rd_new char[(size_t)namelen+1];
+			char* cname = __rd_new char[(size_t)namelen + 1];
 			gl.GetActiveUniformBlockName(this->id, i, namelen, nullptr, cname);
 			cname[namelen] = 0;
 			gl.GetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_BINDING, &binding);
+			gl.GetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
 
-			SShaderProgramIntrospection::SResourceBinding resbind;
-			resbind.name = cname;
-			resbind.type = EShaderResourceType::UniformBuffer;
-			resbind.set = 0;
-			resbind.binding = binding;//gl.GetUniformLocation(this->id, cname);//(GLint)gl.GetUniformBlockIndex(this->id, cname);//
+			if(size != 0)
+			{
+				SShaderProgramIntrospection::SResourceBinding resbind;
+				resbind.name = cname;
+				resbind.type = EShaderResourceType::UniformBuffer;
+				resbind.set = 0;
+				resbind.binding = binding;//gl.GetUniformLocation(this->id, cname);//(GLint)gl.GetUniformBlockIndex(this->id, cname);//
+				resbind.size = size;
 
-			introspection.resourceBindings.emplace_back(resbind);
+				introspection.resourceBindings.emplace_back(resbind);
+			}
+
 			__rd_release_array(cname);
 		}
 	}
 
+	//get other resource info, by checking the description
 	for(auto rsdit = resourceSetDescs.begin(); rsdit != resourceSetDescs.end(); ++rsdit){
-		for(auto it = (*rsdit)->bindingDescs.begin(); it != (*rsdit)->bindingDescs.end(); ++it){
-
+		for(auto it = (*rsdit)->bindingDescs.begin(); it != (*rsdit)->bindingDescs.end(); ++it)
+		{
 			GLint binding = -1;
 			switch(it->type)
 			{
@@ -278,15 +288,32 @@ bool CShaderProgram::CheckResourceBindings(){
 					break;
 			}
 
-			//add to introspection if it's not UniformBuffer (we have that already)
 			if(binding != -1)
 			{
-				SShaderProgramIntrospection::SResourceBinding resbind;
-				resbind.name = it->name;
-				resbind.type = it->type;
-				resbind.set = 0;
-				resbind.binding = binding;
-				introspection.resourceBindings.emplace_back(resbind);
+				//add to introspection if it's not UniformBuffer (we have that already)
+				if(it->type != EShaderResourceType::UniformBuffer)
+				{
+					SShaderProgramIntrospection::SResourceBinding resbind;
+					resbind.name = it->name;
+					resbind.type = it->type;
+					resbind.set = 0;
+					resbind.binding = binding;
+					resbind.size = 0;
+					introspection.resourceBindings.emplace_back(resbind);
+				}
+				//if it's UniformBuffer then move current name to type, and assign new name
+				else
+				{
+					for(auto ub = introspection.resourceBindings.begin(); ub != introspection.resourceBindings.end(); ++ub)
+					{
+						if(ub->type == EShaderResourceType::UniformBuffer &&
+						   ub->binding == binding && ub->name != it->name)
+						{
+							ub->ubstructname = ub->name;
+							ub->name = it->name;
+						}
+					}
+				}
 			}
 
 			if(binding != it->bindPoint){
@@ -295,11 +322,45 @@ bool CShaderProgram::CheckResourceBindings(){
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	LOG("shader introspection, shader name = <%s>", this->name.c_str());
+	for(auto& b : introspection.resourceBindings){
+		const char* type = "";
+		switch(b.type){
+			case EShaderResourceType::Texture: type = "Texture"; break;
+			case EShaderResourceType::Sampler: type = "Sampler"; break;
+			case EShaderResourceType::CombinedTexSampler: type = "CombinedTexSampler"; break;
+			case EShaderResourceType::UniformBuffer: type = "UniformBuffer"; break;
+		}
+		LOG("\t name = <%s>, type = <%s>, binding = <%d>, size = <%d>", b.name.c_str(), type, b.binding, b.size);
+	}
+#endif
+
 	return !hasError;
+}
+
+void CShaderProgram::CheckUniformBuffer(uint set, uint binding, IUniformBuffer* ub){
+	for(auto& b : introspection.resourceBindings){
+		if(b.binding == binding)
+			if(b.name != ub->name){
+				LOG_WARN("ub binding <%d> with name <%s> is different than shader resource's name <%s>", binding, ub->name.c_str(), b.name.c_str()); }
+		if(b.name == ub->name){
+			if(b.binding != binding){
+				LOG_WARN("ub binding <%d> with name <%s> is different than shader resource's binding <%d>", binding, ub->name.c_str(), b.binding); }
+			if(b.size != ub->buffer->getDescriptor().size){
+				LOG_WARN("ub binding <%d> with name <%s> has different size <%d> than shader resource's size <%d>", binding, ub->name.c_str(), (uint)ub->buffer->getDescriptor().size, b.size); }
+			if(b.type != EShaderResourceType::UniformBuffer){
+				LOG_WARN("ub binding <%d> with name <%s> has different type from shader resource's type", binding, ub->name.c_str()); }
+		}
+	}
 }
 
 bool CShaderProgram::setUniformBuffer(uint set, uint binding, IUniformBuffer* ub){
 	if(ub == nullptr) return false;
+	#ifdef _DEBUG
+		this->CheckUniformBuffer(set, binding, ub);
+	#endif
 	return ub->Bind(this, set, binding);
 }
 bool CShaderProgram::setTexture(uint set, uint binding, CTextureView* tx){

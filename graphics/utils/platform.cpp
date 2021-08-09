@@ -347,17 +347,17 @@ bool CFile::WriteFormatted(const char* format, ...){
 	return false;
 }
 
-bool CFile::Read(uint size, byte* out_data, uint* out_size){
+bool CFile::Read(sizetype size, byte* out_data, sizetype* out_size){
 	if(this->file == nullptr) return false;
 	#ifdef PLATFORM_WINDOWS
-		uint read = (uint)fread_s(out_data, size, 1, size, this->file);
+		sizetype read = (sizetype)fread_s(out_data, size, 1, size, this->file);
 	#else
-		uint read = (uint)fread(out_data, 1, size, this->file);
+		sizetype read = (sizetype)fread(out_data, 1, size, this->file);
 	#endif
 	if(out_size != nullptr) *out_size = read;
 	return read == size;
 }
-bool CFile::Write(byte* data, uint size){
+bool CFile::Write(byte* data, sizetype size){
 	if(this->file == nullptr) return false;
 	return fwrite(data, size, 1, this->file) != 0;
 }
@@ -367,7 +367,7 @@ bool CFile::isEOF(){
 	return feof(this->file) != 0;
 }
 
-uint CFile::getSize(){
+sizetype CFile::getSize(){
 	if(this->file == nullptr) return 0;
 	if(size != 0) return size;
 
@@ -378,11 +378,11 @@ uint CFile::getSize(){
 
 	return size;
 }
-uint CFile::getPosition(){
+sizetype CFile::getPosition(){
 	if(this->file == nullptr) return 0;
 	return ftell(this->file);
 }
-uint CFile::getRemaining(){
+sizetype CFile::getRemaining(){
 	if(this->file == nullptr) return 0;
 	auto pos = this->getPosition();
 	return size - pos;

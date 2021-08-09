@@ -2,9 +2,9 @@
 
 #global_defines
 
-#include "data/Shaders/include/functions.glsl"
-#include "data/Shaders/include/defines.glsl"
-#include "data/Shaders/include/pbr.glsl"
+#include "include/functions.glsl"
+#include "include/defines.glsl"
+#include "include/pbr.glsl"
 
 layout(std140, binding = 4) uniform ubLight{
 	SLight light;
