@@ -51,7 +51,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main_TiberianSunSharedMemory.cpp" />
+    <ClCompile Include="neuralNet.cpp" />
+    <ClCompile Include="sharedmem\shared_memory.cpp" />
+    <ClCompile Include="sharedmem\shared_structs.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="neuralNet.h" />
+    <ClInclude Include="sharedmem\buildingTypeNames.h" />
+    <ClInclude Include="sharedmem\buildingTypeValues.h" />
+    <ClInclude Include="sharedmem\defines.h" />
+    <ClInclude Include="sharedmem\setup.h" />
+    <ClInclude Include="sharedmem\shared_memory.h" />
+    <ClInclude Include="sharedmem\shared_structs.h" />
+    <ClInclude Include="sharedmem\types.h" />
+    <ClInclude Include="sharedmem\unitTypeNames.h" />
+    <ClInclude Include="sharedmem\unitTypeValues.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -63,78 +78,78 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL4|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_WGL|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL4|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_WGL|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL4|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_WGL|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL4|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_WGL|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -265,11 +280,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>RD_API_BASE;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RD_API_BASE;RD_DEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(LIBTORCH_PATH)\libtorch\include;$(LIBTORCH_PATH)\libtorch\include\torch\csrc\api\include;$(CUDA_PATH)\include;$(NVTOOLSEXT_PATH)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>graphics.lib;assimp-vc141-mtd.lib;IrrXMLd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(LIBTORCH_PATH)\libtorch\lib\caffe2_nvrtc.lib;$(LIBTORCH_PATH)\libtorch\lib\c10.lib;$(LIBTORCH_PATH)\libtorch\lib\c10_cuda.lib;$(LIBTORCH_PATH)\libtorch\lib\kineto.lib;$(LIBTORCH_PATH)\libtorch\lib\torch.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cpu.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cuda.lib;$(CUDA_PATH)\lib\x64\cublas.lib;$(CUDA_PATH)\lib\x64\cudart.lib;$(CUDA_PATH)\lib\x64\cudnn.lib;$(CUDA_PATH)\lib\x64\cufft.lib;$(CUDA_PATH)\lib\x64\curand.lib;$(NVTOOLSEXT_PATH)\lib\x64\nvToolsExt64_1.lib;-INCLUDE:?warp_size@cuda@at@@YAHXZ;graphics.lib;assimp-vc141-mtd.lib;IrrXMLd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL4|x64'">
@@ -278,11 +295,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>RD_API_OPENGL4;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RD_API_OPENGL4;RD_DEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(LIBTORCH_PATH)\libtorchd\include;$(LIBTORCH_PATH)\libtorchd\include\torch\csrc\api\include;$(CUDA_PATH)\include;$(NVTOOLSEXT_PATH)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mtd.lib;IrrXMLd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(LIBTORCH_PATH)\libtorchd\lib\caffe2_nvrtc.lib;$(LIBTORCH_PATH)\libtorchd\lib\c10.lib;$(LIBTORCH_PATH)\libtorchd\lib\c10_cuda.lib;$(LIBTORCH_PATH)\libtorchd\lib\kineto.lib;$(LIBTORCH_PATH)\libtorchd\lib\torch.lib;$(LIBTORCH_PATH)\libtorchd\lib\torch_cpu.lib;$(LIBTORCH_PATH)\libtorchd\lib\torch_cuda.lib;$(CUDA_PATH)\lib\x64\cublas.lib;$(CUDA_PATH)\lib\x64\cudart.lib;$(CUDA_PATH)\lib\x64\cudnn.lib;$(CUDA_PATH)\lib\x64\cufft.lib;$(CUDA_PATH)\lib\x64\curand.lib;$(NVTOOLSEXT_PATH)\lib\x64\nvToolsExt64_1.lib;-INCLUDE:?warp_size@cuda@at@@YAHXZ;glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mtd.lib;IrrXMLd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_WGL|x64'">
@@ -291,11 +310,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>RD_API_WEBGL;__EMSCRIPTEN__;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RD_API_WEBGL;RD_DEBUG;__EMSCRIPTEN__;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(LIBTORCH_PATH)\libtorch\include;$(LIBTORCH_PATH)\libtorch\include\torch\csrc\api\include;$(CUDA_PATH)\include;$(NVTOOLSEXT_PATH)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mtd.lib;IrrXMLd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(LIBTORCH_PATH)\libtorch\lib\caffe2_nvrtc.lib;$(LIBTORCH_PATH)\libtorch\lib\c10.lib;$(LIBTORCH_PATH)\libtorch\lib\c10_cuda.lib;$(LIBTORCH_PATH)\libtorch\lib\kineto.lib;$(LIBTORCH_PATH)\libtorch\lib\torch.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cpu.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cuda.lib;$(CUDA_PATH)\lib\x64\cublas.lib;$(CUDA_PATH)\lib\x64\cudart.lib;$(CUDA_PATH)\lib\x64\cudnn.lib;$(CUDA_PATH)\lib\x64\cufft.lib;$(CUDA_PATH)\lib\x64\curand.lib;$(NVTOOLSEXT_PATH)\lib\x64\nvToolsExt64_1.lib;-INCLUDE:?warp_size@cuda@at@@YAHXZ;glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mtd.lib;IrrXMLd.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -358,12 +379,14 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>RD_API_BASE;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(LIBTORCH_PATH)\libtorch\include;$(LIBTORCH_PATH)\libtorch\include\torch\csrc\api\include;$(CUDA_PATH)\include;$(NVTOOLSEXT_PATH)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>graphics.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(LIBTORCH_PATH)\libtorch\lib\caffe2_nvrtc.lib;$(LIBTORCH_PATH)\libtorch\lib\c10.lib;$(LIBTORCH_PATH)\libtorch\lib\c10_cuda.lib;$(LIBTORCH_PATH)\libtorch\lib\kineto.lib;$(LIBTORCH_PATH)\libtorch\lib\torch.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cpu.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cuda.lib;$(CUDA_PATH)\lib\x64\cublas.lib;$(CUDA_PATH)\lib\x64\cudart.lib;$(CUDA_PATH)\lib\x64\cudnn.lib;$(CUDA_PATH)\lib\x64\cufft.lib;$(CUDA_PATH)\lib\x64\curand.lib;$(NVTOOLSEXT_PATH)\lib\x64\nvToolsExt64_1.lib;-INCLUDE:?warp_size@cuda@at@@YAHXZ;graphics.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL4|x64'">
@@ -375,12 +398,14 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>RD_API_OPENGL4;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(LIBTORCH_PATH)\libtorch\include;$(LIBTORCH_PATH)\libtorch\include\torch\csrc\api\include;$(CUDA_PATH)\include;$(NVTOOLSEXT_PATH)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mt.lib;IrrXML.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(LIBTORCH_PATH)\libtorch\lib\caffe2_nvrtc.lib;$(LIBTORCH_PATH)\libtorch\lib\c10.lib;$(LIBTORCH_PATH)\libtorch\lib\c10_cuda.lib;$(LIBTORCH_PATH)\libtorch\lib\kineto.lib;$(LIBTORCH_PATH)\libtorch\lib\torch.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cpu.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cuda.lib;$(CUDA_PATH)\lib\x64\cublas.lib;$(CUDA_PATH)\lib\x64\cudart.lib;$(CUDA_PATH)\lib\x64\cudnn.lib;$(CUDA_PATH)\lib\x64\cufft.lib;$(CUDA_PATH)\lib\x64\curand.lib;$(NVTOOLSEXT_PATH)\lib\x64\nvToolsExt64_1.lib;-INCLUDE:?warp_size@cuda@at@@YAHXZ;glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mt.lib;IrrXML.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_WGL|x64'">
@@ -392,12 +417,14 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>RD_API_WEBGL;__EMSCRIPTEN__;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(LIBTORCH_PATH)\libtorch\include;$(LIBTORCH_PATH)\libtorch\include\torch\csrc\api\include;$(CUDA_PATH)\include;$(NVTOOLSEXT_PATH)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mt.lib;IrrXML.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(LIBTORCH_PATH)\libtorch\lib\caffe2_nvrtc.lib;$(LIBTORCH_PATH)\libtorch\lib\c10.lib;$(LIBTORCH_PATH)\libtorch\lib\c10_cuda.lib;$(LIBTORCH_PATH)\libtorch\lib\kineto.lib;$(LIBTORCH_PATH)\libtorch\lib\torch.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cpu.lib;$(LIBTORCH_PATH)\libtorch\lib\torch_cuda.lib;$(CUDA_PATH)\lib\x64\cublas.lib;$(CUDA_PATH)\lib\x64\cudart.lib;$(CUDA_PATH)\lib\x64\cudnn.lib;$(CUDA_PATH)\lib\x64\cufft.lib;$(CUDA_PATH)\lib\x64\curand.lib;$(NVTOOLSEXT_PATH)\lib\x64\nvToolsExt64_1.lib;-INCLUDE:?warp_size@cuda@at@@YAHXZ;glew32s.lib;opengl32.lib;graphics.lib;assimp-vc141-mt.lib;IrrXML.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -8,6 +8,7 @@ layout(std140, binding = 2) uniform LightData{
 	vec3 position;
 	float intensity;
 	float time;
+	uint channelMask;
 } light;
 
 layout(binding = 0) uniform sampler2D tx;

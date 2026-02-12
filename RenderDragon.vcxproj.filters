@@ -13,10 +13,54 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\sharedmem">
+      <UniqueIdentifier>{a3d5c893-b419-4ab0-bc8a-e017b6f44642}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="main_TiberianSunSharedMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sharedmem\shared_memory.cpp">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClCompile>
+    <ClCompile Include="sharedmem\shared_structs.cpp">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClCompile>
+    <ClCompile Include="neuralNet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sharedmem\buildingTypeNames.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\defines.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\setup.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\shared_memory.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\shared_structs.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\types.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\unitTypeNames.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="neuralNet.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\buildingTypeValues.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedmem\unitTypeValues.h">
+      <Filter>Source Files\sharedmem</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

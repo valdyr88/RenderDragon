@@ -152,6 +152,21 @@ inline uint8 count(const ETextureFormat& format){
 	}
 	return 0;
 }
+inline const char* tostring(const ETextureFormat& format)
+{
+	switch(format)
+	{
+		case ETextureFormat::R: return "R";
+		case ETextureFormat::RG:return "RG";
+		case ETextureFormat::RGB:return "RGB";
+		case ETextureFormat::RGBA:return "RGBA";
+		case ETextureFormat::RGBE:return "RGBE";
+		case ETextureFormat::Depth:return "Depth";
+		case ETextureFormat::DepthStencil:return "DepthStencil";
+		default: break;
+	}
+	return "None";
+}
 
 enum class ETypedTextureFormat {
 

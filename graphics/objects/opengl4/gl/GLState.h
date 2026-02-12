@@ -1684,7 +1684,7 @@ inline GLenum glenum(const ETextureFormat& v){
 	switch(v)
 	{
 		case ETextureFormat::None: return (GLenum)GL_NONE;
-		case ETextureFormat::R: return (GLenum)GL_R;
+		case ETextureFormat::R: return (GLenum)GL_RED;
 		case ETextureFormat::RG: return (GLenum)GL_RG;
 		case ETextureFormat::RGB: return (GLenum)GL_RGB;
 		case ETextureFormat::RGBA: return (GLenum)GL_RGBA;

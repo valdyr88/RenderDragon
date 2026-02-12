@@ -314,6 +314,16 @@ bool CTextureView::Create(){
 	if(this->texture == nullptr) return false;
 	auto& gl = this->device->gl;
 
+	if(CTexture* texture = getActualTexture())
+	{
+		const STextureDesc& txDesc = texture->getDescriptor();
+		if(descriptor.format != txDesc.format)
+			LOG_WARN("texture <%s> format %s different from view format %s!", txDesc.name.c_str(), tostring(txDesc.format), tostring(descriptor.format));
+		if(descriptor.valueType != txDesc.valueType)
+			LOG_WARN("texture <%s> valueType %s different from view valueType %s!", txDesc.name.c_str(), tostring(txDesc.valueType), tostring(descriptor.valueType));
+		//__debugbreak();
+	}
+
 	uint32 numMipLevels = (this->texture->descriptor.bGenMipmaps == false)? 1 
 						: glm::min(this->descriptor.numMipLevels, rdCalcNumberOfMips(this->descriptor.width, this->descriptor.height, this->descriptor.depth));
 	uint32 numLayers = (this->texture->descriptor.type != ETextureType::TextureCube)? 1 : 6; //glm::min(this->descriptor.numLayers, 1U);
